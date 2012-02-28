@@ -21,8 +21,13 @@ class Group extends Omeka_Record
         //check if current user has permission to add a member. only the owner can
         //use an Acl_Assertion class?
         $rel = $this->newRelation($user, SIOC, 'has_member');
-        $rel->user_id = current_user()->id;
-        $rel->save();
+        if($rel) {
+            $rel->user_id = current_user()->id;
+            $rel->save();
+            return true;
+        }
+        return false;
+
     }
 
     public function removeMember($user)
@@ -38,8 +43,13 @@ class Group extends Omeka_Record
             $item = get_db()->getTable('Item')->find($item);
         }
         $rel = $this->newRelation($item, DCTERMS, 'references');
-        $rel->user_id = current_user()->id;
-        $rel->save();
+        if($rel) {
+            $rel->user_id = current_user()->id;
+            $rel->save();
+            return true;
+        }
+        return false;
+
     }
 
     public function removeItem($item)
@@ -73,6 +83,18 @@ class Group extends Omeka_Record
         return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
     }
 
+    public function hasItem($item)
+    {
+        if(is_numeric($item)) {
+            $itemId = $item;
+        } else {
+            $itemId = $item->id;
+        }
+        $params = $this->buildProps('Item', DCTERMS, 'references');
+        $params['object_id'] = $itemId;
+        return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
+    }
+
     public function getItemCount()
     {
         $params = $this->buildProps('Item', DCTERMS, 'references');
@@ -94,8 +116,14 @@ class Group extends Omeka_Record
 
     public function newRelation($object, $prefix, $localpart, $public = true)
     {
-        $rel = new RecordRelationsRelation();
         $props = $this->buildProps($object, $prefix, $localpart);
+        //first, see if the relation already exists
+        $record = get_db()->getTable('RecordRelationsRelation')->findOne($props);
+        if($record) {
+            return false;
+        }
+
+        $rel = new RecordRelationsRelation();
         $props['public'] = $public;
         $rel->setProps($props);
         return $rel;

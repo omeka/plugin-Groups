@@ -13,8 +13,9 @@ Omeka.Groups = {
 
     },
 
-    addItemResponse: function(response) {
-        alert(response);
+    addItemResponse: function(response, a, b) {
+        var responseJson = JSON.parse(response);
+        //notify on the item somehow
     }
 
 };

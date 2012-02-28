@@ -45,9 +45,14 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $html = "<div id='groups-item-add'><p>Add to group(s)</p><ul>";
         $groups = groups_groups_for_user();
         foreach($groups as $group) {
-            $html .= "<li id='groups-id-{$group->id}' class='groups-item-add'>{$group->title}</li>";
-        }
 
+            //check if item is already in the Group.
+            //$itemId = Omeka_Context::getInstance()->getRequest()->getParam('id');
+            $item = get_current_item();
+            if(!$group->hasItem($item)) {
+                $html .= "<li id='groups-id-{$group->id}' class='groups-item-add'>{$group->title}</li>";
+            }
+        }
         $html .= "</ul></div>";
         echo $html;
     }

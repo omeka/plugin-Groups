@@ -18,6 +18,14 @@ class GroupTable extends Omeka_Db_Table
         if(isset($params['user'])) {
             $this->filterByMembership($select, $params['user']);
         }
+
+        if(isset($params['hasItem'])) {
+            $this->filterByHasItem($select, $params['hasItem']);
+        }
+
+        if(isset($params['lacksItem'])) {
+            $this->filterByHasItem($select, $params['hasItem'], true);
+        }
     }
 
     public function __construct($targetModel, $db)
@@ -55,6 +63,12 @@ class GroupTable extends Omeka_Db_Table
     public function filterByMembership($select, $user)
     {
 
+        if(is_numeric($user)) {
+            $userId = $user;
+        } else {
+            $userId = $user->id;
+        }
+
         $db = $this->getDb();
         $prop = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
 
@@ -62,7 +76,30 @@ class GroupTable extends Omeka_Db_Table
         $select->where("rr.subject_record_type = 'Group'");
         $select->where("rr.property_id = " . $prop->id);
         $select->where("rr.object_record_type = 'User'");
-        $select->where("rr.object_id = " . $user->id);
+        $select->where("rr.object_id = " . $userId);
+    }
+
+    public function filterByHasItem($select, $item, $negate = false)
+    {
+        if(is_numeric($item)) {
+            $itemId = $item;
+        } else {
+            $itemId = $item->id;
+        }
+        $db = $this->getDb();
+        $pred = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
+        if($negate) {
+            $joinCondition = 'g.id != rr.object_id';
+        } else {
+            $joinCondition = 'g.id = rr.object_id';
+        }
+
+        $select->join(array('rr'=>$db->RecordRelationsRelation), $joinCondition , array());
+        $select->where("rr.subject_record_type = 'Group'");
+        $select->where("rr.property_id = " . $pred->id);
+        $select->where("rr.object_record_type = 'Item'");
+        $select->where("rr.object_id = " . $itemId);
+
 
     }
 

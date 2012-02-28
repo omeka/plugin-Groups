@@ -51,12 +51,14 @@ class Groups_GroupController extends Omeka_Controller_Action
         $groupId = $_POST['groupId'];
 
         $group = $this->getTable()->find($groupId);
-        $group->addItem($itemId);
-
-
-        $response = json_encode($response);
+        if($group->addItem($itemId)) {
+            $responseJson['itemId'] = $itemId;
+            $responseJson['groupId'] = $groupId;
+        } else {
+            $responseJson['status'] = 'fail';
+        }
+        $response = json_encode($responseJson);
         $this->_helper->json($response);
-
     }
 
 }

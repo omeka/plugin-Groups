@@ -79,15 +79,7 @@ function groups_groups_for_user($user = null)
         $user = current_user();
     }
     $db = get_db();
-    $pred = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-    $params = array(
-        'object_id' => $user->id,
-        'object_record_type' => 'User',
-        'property_id' => $pred->id,
-        'subject_record_type' => 'Group',
-        'isPublic' => true
-    );
-    return $db->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
+    return $db->getTable('Group')->findBy(array('user'=>$user));
 }
 
 
