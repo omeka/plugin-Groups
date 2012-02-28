@@ -10,6 +10,14 @@ class GroupTable extends Omeka_Db_Table
         if (isset($params['tags'])) {
             $this->filterByTags($select, $params['tags']);
         }
+
+        if(isset($params['visibility'])) {
+            $this->filterByVisibility($select, $params['visibility']);
+        }
+
+        if(isset($params['user'])) {
+            $this->filterByMembership($select, $params['user']);
+        }
     }
 
     public function __construct($targetModel, $db)
@@ -39,59 +47,23 @@ class GroupTable extends Omeka_Db_Table
         }
     }
 
-    public function findUsersForGroup($group)
+    public function filterByVisibility($select, $visibility)
     {
-        $predId = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-        $params = array(
-            'object_record_type' => 'User',
-            'property_id' => $predId,
-            'subject_record_type' => 'Group',
-            'subject_id' => $group->id,
-            'isPublic' => true
-        );
-        return $this->relationTable->findObjectRecordsByParams($params);
+        $select->where("g.visibility = ? ", $visibility);
+    }
+
+    public function filterByMembership($select, $user)
+    {
+
+        $db = $this->getDb();
+        $prop = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
+
+        $select->join(array('rr'=>$db->RecordRelationsRelation), 'g.id = rr.object_id', array());
+        $select->where("rr.subject_record_type = 'Group'");
+        $select->where("rr.property_id = " . $prop->id);
+        $select->where("rr.object_record_type = 'User'");
+        $select->where("rr.object_id = " . $user->id);
 
     }
 
-    public function findItemsForGroup($group)
-    {
-        $predId = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
-        $params = array(
-            'object_record_type' => 'Item',
-            'property_id' => $predId,
-            'subject_id' => $group->id,
-            'subject_record_type' => 'Group',
-            'isPublic' => true
-        );
-        return $this->relationTable->findObjectRecordsByParams($params);
-
-    }
-
-
-
-    public function findGroupsForUser($user)
-    {
-        $predId = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-        $params = array(
-            'object_id' => $user->id,
-            'object_record_type' => 'User',
-            'property_id' => $predId,
-            'subject_record_type' => 'Group',
-            'isPublic' => true
-        );
-        return $this->relationTable->findSubjectRecordsByParams($params);
-    }
-
-    public function findGroupsForItem($item)
-    {
-        $predId = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
-        $params = array(
-            'object_id' => $item->id,
-            'object_record_type' => 'Item',
-            'property_id' => $predId,
-            'subject_record_type' => 'Group',
-            'isPublic' => true
-        );
-        return $this->relationTable->findSubjectRecordsByParams($params);
-    }
 }

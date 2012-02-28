@@ -11,9 +11,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         } else {
             $this->_modelClass = 'Group';
         }
-
     }
-
 
     public function addAction()
     {
@@ -26,6 +24,7 @@ class Groups_GroupController extends Omeka_Controller_Action
             $currUser = current_user();
             $_POST['owner_id'] = $currUser->id;
             $group->saveForm($_POST);
+            $group->addMember($currUser);
         }
     }
 
@@ -33,4 +32,31 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
 
     }
+
+    public function myGroupsAction()
+    {
+        $params = array(
+            'user' => current_user()
+        );
+        $groups = $this->getTable()->findBy($params);
+        $this->view->groups = $groups;
+
+
+    }
+
+    public function addItemToGroupAction()
+    {
+        $responseJson = array();
+        $itemId = $_POST['itemId'];
+        $groupId = $_POST['groupId'];
+
+        $group = $this->getTable()->find($groupId);
+        $group->addItem($itemId);
+
+
+        $response = json_encode($response);
+        $this->_helper->json($response);
+
+    }
+
 }
