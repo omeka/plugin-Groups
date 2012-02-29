@@ -20,7 +20,7 @@ function groups_tags_for_group($group = null)
     if(!$group) {
         $group = groups_get_current_group();
     }
-    $tags = $group->getTags();
+    $tags = $group->Tags;
     $html = "<ul class='tags'>";
     foreach($tags as $tag) {
         $html .= "<li>{$tag->name}</li>";

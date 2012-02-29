@@ -99,8 +99,6 @@ class GroupTable extends Omeka_Db_Table
         $select->where("rr.property_id = " . $pred->id);
         $select->where("rr.object_record_type = 'Item'");
         $select->where("rr.object_id = " . $itemId);
-
-
     }
 
 }

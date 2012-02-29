@@ -1,6 +1,6 @@
 <?php
 
-class Group extends Omeka_Record
+class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 {
     public $id;
     public $title;
@@ -67,16 +67,6 @@ class Group extends Omeka_Record
         $rel->save();
     }
 
-    public function getTags()
-    {
-        $db = get_db();
-        $params = array(
-            'record' => $group->id,
-            'type' => 'Group'
-        );
-        return $db->getTable('Tag')->findBy($params);
-    }
-
     public function getItems()
     {
         $params = $this->buildParams('Item', DCTERMS, 'references');
@@ -113,6 +103,12 @@ class Group extends Omeka_Record
         return get_db()->getTable('RecordRelationsRelation')->count($params);
     }
 
+    public function hasMember($user)
+    {
+        $params = $this->buildProps('User', SIOC, 'has_member');
+        $params['object_record_id'] = $user->id;
+        return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
+    }
 
     public function newRelation($object, $prefix, $localpart, $public = true)
     {
@@ -152,5 +148,10 @@ class Group extends Omeka_Record
             $params['object_record_type'] = get_class($record);
         }
         return $params;
+    }
+
+    public function getResourceId()
+    {
+        return 'Groups_Group';
     }
 }

@@ -30,7 +30,18 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     public function editAction()
     {
+        require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
+        $form = new GroupForm();
+        $this->view->form = $form;
+        $group = $this->findById();
 
+        $form->setDefaults($group->toArray());
+        $this->view->form = $form;
+
+        if(!empty($_POST)) {
+            $currUser = current_user();
+            $group->saveForm($_POST);
+        }
     }
 
     public function myGroupsAction()

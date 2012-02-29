@@ -6,6 +6,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'install',
         'uninstall',
         'define_acl',
+        'define_routes',
         'public_append_to_items_show',
         'public_theme_header'
     );
@@ -59,14 +60,37 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
     public function hookDefineAcl($acl)
     {
-        $priviledges = array('add', 'browse', 'editSelf', 'index', 'show');
-        if (version_compare(OMEKA_VERSION, '2.0-dev', '>=')) {
-            $acl->addResource('Groups_Group');
-            $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', $priviledges );
-        } else {
-            $acl->loadResourceList(
-                array('Groups_Group' => $priviledges)
-            );
-        }
+        require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
+        $acl->addResource('Groups_Group');
+
+        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', array('add', 'editSelf') );
+        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
+
+        $privileges = array('addItem',
+                            'removeItem',
+                            'items',
+                            'join',
+                            'joinOthers'
+                            );
+        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', $privileges, new GroupsAclAssertion);
+
+        $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
+
     }
+
+    public function hookDefineRoutes($router)
+    {
+        $router->addRoute(
+            'groups-group-route',
+            new Zend_Controller_Router_Route(
+                'groups/:action/:id',
+                array(
+                    'module'        => 'groups',
+                    'controller'    => 'group',
+                    'action'        => 'browse'
+                    )
+            )
+        );
+    }
+
 }
