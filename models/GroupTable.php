@@ -4,6 +4,19 @@ class GroupTable extends Omeka_Db_Table
 {
     protected $_alias = 'g';
 
+    public function getSelect()
+    {
+        $select = new Omeka_Db_Select($this->getDb()->getAdapter());
+        $alias = $this->getTableAlias();
+        $select->from(array($alias=>$this->getTableName()), "$alias.*");
+        $acl = Omeka_Context::getInstance()->acl;
+        if ($acl) {
+            new GroupPermissions($select, $acl);
+        }
+
+        return $select;
+    }
+
     public function applySearchFilters($select, $params)
     {
            // filter based on tags
@@ -72,7 +85,7 @@ class GroupTable extends Omeka_Db_Table
         $db = $this->getDb();
         $prop = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
 
-        $select->join(array('rr'=>$db->RecordRelationsRelation), 'g.id = rr.object_id', array());
+        $select->join(array('rr'=>$db->RecordRelationsRelation), 'g.id = rr.subject_id', array());
         $select->where("rr.subject_record_type = 'Group'");
         $select->where("rr.property_id = " . $prop->id);
         $select->where("rr.object_record_type = 'User'");
@@ -89,9 +102,9 @@ class GroupTable extends Omeka_Db_Table
         $db = $this->getDb();
         $pred = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
         if($negate) {
-            $joinCondition = 'g.id != rr.object_id';
+            $joinCondition = 'g.id != rr.subject_id';
         } else {
-            $joinCondition = 'g.id = rr.object_id';
+            $joinCondition = 'g.id = rr.subject_id';
         }
 
         $select->join(array('rr'=>$db->RecordRelationsRelation), $joinCondition , array());
@@ -99,6 +112,7 @@ class GroupTable extends Omeka_Db_Table
         $select->where("rr.property_id = " . $pred->id);
         $select->where("rr.object_record_type = 'Item'");
         $select->where("rr.object_id = " . $itemId);
+
     }
 
 }

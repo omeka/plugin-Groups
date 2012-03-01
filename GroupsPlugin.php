@@ -26,19 +26,24 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   KEY `owner_id` (`owner_id`)
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
                 ";
-        $db->exec($sql);
+        $db->query($sql);
+
+        $blocks = unserialize(get_option('blocks'));
+        $blocks[] = 'GroupsItemBlock';
+        set_option('blocks', serialize($blocks));
     }
 
     public function hookUninstall()
     {
         $db = get_db();
         $sql = "DROP TABLE IF EXISTS `$db->Group`;";
-        $db->exec($sql);
+        $db->query($sql);
     }
 
     public function hookPublicThemeHeader()
     {
         queue_js('groups');
+        queue_css('groups');
     }
 
     public function hookPublicAppendToItemsShow()
@@ -62,7 +67,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     {
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
-
+        $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', array('add', 'editSelf') );
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
 
@@ -73,9 +78,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'joinOthers'
                             );
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', $privileges, new GroupsAclAssertion);
-
-        $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
-
     }
 
     public function hookDefineRoutes($router)
@@ -87,7 +89,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 array(
                     'module'        => 'groups',
                     'controller'    => 'group',
-                    'action'        => 'browse'
+                    'action'        => 'browse',
+                    'id'			=> ''
                     )
             )
         );

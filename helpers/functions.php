@@ -83,19 +83,30 @@ function groups_groups_for_user($user = null)
 }
 
 
-function groups_groups_for_item($item)
+function groups_groups_for_item($item = null)
 {
     if(!$item) {
-        $item = current_item();
+        $item = get_current_item();
     }
     $db = get_db();
-    $pred = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
     $params = array(
-        'object_id' => $item->id,
-        'object_record_type' => 'Item',
-        'property_id' => $pred->id,
-        'subject_record_type' => 'Group',
-        'isPublic' => true
+        'hasItem'=>$item
     );
-    return $db->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
+    $groups = $db->getTable('Group')->findBy($params);
+
+    //need to filter out permissions to view items in the group
+    //if you can't see the items in the group, you shouldn't see a link to the group from an item
+    //can't see a way to do it via filters on the sql
+    $currentUser = current_user();
+    $acl = Omeka_Context::getInstance()->acl;
+    $assertion = new GroupsAclAssertion;
+    foreach($groups as $index=>$group) {
+
+        if(! $assertion->assert($acl, $currentUser, $group, 'items')) {
+            unset($groups[$index]);
+        }
+    }
+    return $groups;
+
+
 }

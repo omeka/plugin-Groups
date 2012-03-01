@@ -105,9 +105,16 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function hasMember($user)
     {
+        if(!$user->id) {
+            return false;
+        }
         $params = $this->buildProps('User', SIOC, 'has_member');
-        $params['object_record_id'] = $user->id;
-        return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
+        $params['object_id'] = $user->id;
+        $rels = get_db()->getTable('RecordRelationsRelation')->count($params);
+        if($rels == 0) {
+            return false;
+        }
+        return true;
     }
 
     public function newRelation($object, $prefix, $localpart, $public = true)

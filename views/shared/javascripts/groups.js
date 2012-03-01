@@ -5,12 +5,12 @@ if(typeof Omeka === 'undefined') {
 Omeka.Groups = {
 
     addItemToGroup: function() {
-        var id = this.id;
-        var groupId  = id.substr(-1, 1);
-        var itemId = window.document.URL.substr(-1, 1);
-        jQuery.post('/commons/groups/group/add-item-to-group', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
 
-
+        splitId = this.id.split('-');
+        splitUrl = window.document.URL.split('/');
+        groupId = splitId[splitId.length - 1];
+        itemId = splitUrl[splitUrl.length - 1];
+        jQuery.post('/commons/groups/add-item-to-group', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
     },
 
     addItemResponse: function(response, a, b) {
