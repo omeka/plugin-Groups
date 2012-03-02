@@ -4,19 +4,6 @@ class GroupTable extends Omeka_Db_Table
 {
     protected $_alias = 'g';
 
-    public function getSelect()
-    {
-        $select = new Omeka_Db_Select($this->getDb()->getAdapter());
-        $alias = $this->getTableAlias();
-        $select->from(array($alias=>$this->getTableName()), "$alias.*");
-        $acl = Omeka_Context::getInstance()->acl;
-        if ($acl) {
-            new GroupPermissions($select, $acl);
-        }
-
-        return $select;
-    }
-
     public function applySearchFilters($select, $params)
     {
            // filter based on tags

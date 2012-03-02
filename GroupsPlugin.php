@@ -7,7 +7,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'uninstall',
         'define_acl',
         'define_routes',
-        'public_append_to_items_show',
+       // 'public_append_to_items_show',
         'public_theme_header'
     );
 
@@ -30,6 +30,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
         $blocks = unserialize(get_option('blocks'));
         $blocks[] = 'GroupsItemBlock';
+        $blocks[] = 'GroupsAddItemBlock';
         set_option('blocks', serialize($blocks));
     }
 
@@ -51,9 +52,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $html = "<div id='groups-item-add'><p>Add to group(s)</p><ul>";
         $groups = groups_groups_for_user();
         foreach($groups as $group) {
-
             //check if item is already in the Group.
-            //$itemId = Omeka_Context::getInstance()->getRequest()->getParam('id');
             $item = get_current_item();
             if(!$group->hasItem($item)) {
                 $html .= "<li id='groups-id-{$group->id}' class='groups-item-add'>{$group->title}</li>";

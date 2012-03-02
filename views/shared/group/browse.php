@@ -7,7 +7,7 @@ head(array());
 <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>
 <div>
 <?php $group = groups_get_current_group(); ?>
-<h2><a href="<?php echo uri('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title; ?></a></h2>
+<h2><a href="<?php echo uri('groups/show/' . $group->id); ?>"><?php echo $group->title; ?></a></h2>
 <?php echo groups_tags_for_group($group); ?>
 <p id='groups-member-count'>Members: <?php echo groups_member_count($group); ?></p>
 <p id='groups-item-count'>Items: <?php echo groups_item_count($group); ?></p>
