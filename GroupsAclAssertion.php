@@ -26,6 +26,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
     private $memberPrivileges = array(
                 'addItem',
                 'items',
+                'quit'
                 );
 
     public function assert(Zend_Acl $acl,
@@ -33,6 +34,10 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
     {
+_log(get_class($role));
+_log(get_class($resource));
+_log(print_r($resource, true));
+
         //owner can do anything in the list of privileges passed
         if($resource->owner_id == $role->id) {
             if($privilege == 'join') {
@@ -45,7 +50,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             $isMember = $resource->hasMember($role);
             $arrayName = $isMember ? "memberPrivileges" : $resource->visibility . "Privileges";
             return in_array($privilege, $this->$arrayName);
-
         }
         return false;
 

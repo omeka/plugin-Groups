@@ -11,6 +11,39 @@ class Groups_GroupController extends Omeka_Controller_Action
         } else {
             $this->_modelClass = 'Group';
         }
+
+        $ajaxContext = $this->_helper->getHelper('AjaxContext');
+        $ajaxContext->addActionContext('join', 'json')
+                    ->initContext();
+
+
+    }
+
+    public function joinAction()
+    {
+        $user =  current_user();
+        $group = $this->findById();
+        $group->addMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
+    }
+
+
+    public function quitAction()
+    {
+        $user =  current_user();
+        $group = $this->findById();
+        $group->removeMember($user);
+    }
+
+    public function joinOthersAction()
+    {
+
+    }
+
+    public function removeMemberAction()
+    {
+
     }
 
     public function addAction()
@@ -55,7 +88,7 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     }
 
-    public function addItemToGroupAction()
+    public function addItemAction()
     {
         $responseJson = array();
         $itemId = $_POST['itemId'];

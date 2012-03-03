@@ -10,13 +10,24 @@ Omeka.Groups = {
         splitUrl = window.document.URL.split('/');
         groupId = splitId[splitId.length - 1];
         itemId = splitUrl[splitUrl.length - 1];
-        jQuery.post('/commons/groups/add-item-to-group', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
+        jQuery.post('/commons/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
     },
 
     addItemResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
         //notify on the item somehow
+    },
+
+    join: function() {
+        splitId = this.id.split('-');
+        groupId = splitId[splitId.length - 1];
+        jQuery.post('/commons/groups/join/' + groupId, {'groupId': groupId}, Omeka.Groups.joinResponse);
+    },
+
+    joinResponse: function(response, a, b) {
+        var responseJson = JSON.parse(response);
     }
+
 
 };
 

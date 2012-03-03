@@ -110,3 +110,14 @@ function groups_groups_for_item($item = null)
 
 
 }
+
+function groups_join_button($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+
+    return "";
+
+
+}
