@@ -24,7 +24,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
 
     private $memberPrivileges = array(
-                'addItem',
+                'add-item',
                 'items',
                 'quit'
                 );
@@ -34,10 +34,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
     {
-_log(get_class($role));
-_log(get_class($resource));
-_log(print_r($resource, true));
-
         //owner can do anything in the list of privileges passed
         if($resource->owner_id == $role->id) {
             if($privilege == 'join') {
@@ -46,11 +42,21 @@ _log(print_r($resource, true));
             return true;
         }
 
+        //sometimes we get a Group for the resource, sometimes just the Zend_Acl_Resource_Interface
+        //AJAX requests like addItem pass up a groupId to check permissions on, so dig that up if it is set
+        if($privilege == 'add-item' && isset($_POST['groupId'])) {
+            $resource = get_db()->getTable('Group')->find($_POST['groupId']);
+        }
+
         if(get_class($resource) == 'Group') {
             $isMember = $resource->hasMember($role);
             $arrayName = $isMember ? "memberPrivileges" : $resource->visibility . "Privileges";
+
             return in_array($privilege, $this->$arrayName);
+        } else {
+
         }
+
         return false;
 
     }

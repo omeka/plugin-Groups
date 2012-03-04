@@ -55,12 +55,12 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', array('add', 'editSelf') );
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
 
-        $privileges = array('addItem',
-                            'removeItem',
+        $privileges = array('add-item',
+                            'remove-item',
                             'items',
                             'join',
-                            'joinOthers',
-                            'removeMember',
+                            'join-others',
+                            'remove-member',
                             'quit'
                             );
         $acl->allow(array('researcher', 'contributor'), 'Groups_Group', $privileges, new GroupsAclAssertion);
