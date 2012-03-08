@@ -34,12 +34,25 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
     {
+        //if I'm passing in a groupId, dig that up to check permissions against that group
+        //otherwise all that it checks against is the general 'Groups_Group' resource
+
+        if(isset($_POST['groupId'])) {
+            $resource = get_db()->getTable('Group')->find($_POST['groupId']);
+        }
+
         //owner can do anything in the list of privileges passed
         if($resource->owner_id == $role->id) {
-            if($privilege == 'join') {
-                return false;
+            switch($privilege) {
+                case 'join':
+                case 'quit':
+                    return false;
+                break;
+                default:
+
+                    return true;
+                break;
             }
-            return true;
         }
 
         //sometimes we get a Group for the resource, sometimes just the Zend_Acl_Resource_Interface
@@ -51,7 +64,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if(get_class($resource) == 'Group') {
             $isMember = $resource->hasMember($role);
             $arrayName = $isMember ? "memberPrivileges" : $resource->visibility . "Privileges";
-
             return in_array($privilege, $this->$arrayName);
         } else {
 

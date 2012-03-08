@@ -31,6 +31,28 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $blocks[] = 'GroupsItemBlock';
         $blocks[] = 'GroupsAddItemBlock';
         set_option('blocks', serialize($blocks));
+
+        $omekaMemberProps = array(
+            array(
+                'name' => 'Omeka',
+                'namespace_prefix' => 'omeka',
+                'namespace_uri' => OMEKA,
+                'properties' => array(
+                    array(
+                        'local_part' => 'has_pending_member',
+                        'label' => 'Membership pending',
+                        'description' => 'A user has requested membership to a group'
+                    ),
+                    array(
+                        'local_part' => 'has_invited_member',
+                        'label' => 'Has invited member',
+                        'description' => 'The group owner has invited someone to join'
+                    )
+                )
+            )
+        );
+
+        record_relations_install_properties($omekaMemberProps);
     }
 
     public function hookUninstall()
@@ -51,9 +73,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     {
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
+
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
-        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', array('add', 'editSelf') );
-        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
+        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', array('add', 'editSelf') );
+        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
 
         $privileges = array('add-item',
                             'remove-item',
@@ -61,9 +84,12 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'join',
                             'join-others',
                             'remove-member',
+                            'approve-request',
                             'quit'
                             );
-        $acl->allow(array('researcher', 'contributor'), 'Groups_Group', $privileges, new GroupsAclAssertion);
+
+        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', $privileges, new GroupsAclAssertion);
+
     }
 
     public function hookDefineRoutes($router)

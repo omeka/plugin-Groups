@@ -18,16 +18,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function addMember($user)
     {
-        //check if current user has permission to add a member. only the owner can
-        //use an Acl_Assertion class?
         $rel = $this->newRelation($user, SIOC, 'has_member');
-        if($rel) {
-            $rel->user_id = current_user()->id;
-            $rel->save();
-            return true;
-        }
-        return false;
-
+        $rel->user_id = $user->id;
+        $rel->save();
     }
 
     public function removeMember($user)
@@ -35,6 +28,23 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $params = $this->buildProps($user, SIOC, 'has_member');
         $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);
         $rel->delete();
+    }
+
+    public function addPendingMember($user)
+    {
+        $rel = $this->newRelation($user, OMEKA, 'has_pending_member');
+        $rel->user_id = $user->id;
+        $rel->save();
+    }
+
+    public function approveMember($user)
+    {
+
+        $params = $this->buildProps($user, OMEKA, 'has_pending_member');
+        $params['object_id'] = $user->id;
+        $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);
+        $rel->delete();
+        $this->addMember($user);
     }
 
     public function addItem($item)
@@ -117,6 +127,27 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return true;
     }
 
+    public function hasPendingMember($user)
+    {
+        if(!$user->id) {
+            return false;
+        }
+        $params = $this->buildProps('User', OMEKA, 'has_pending_member');
+        $params['object_id'] = $user->id;
+        $rels = get_db()->getTable('RecordRelationsRelation')->count($params);
+        if($rels == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public function memberRequests()
+    {
+        $params = $this->buildProps('User', OMEKA, 'has_pending_member');
+        $users = get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
+        return $users;
+    }
+
     public function newRelation($object, $prefix, $localpart, $public = true)
     {
         $props = $this->buildProps($object, $prefix, $localpart);
@@ -130,6 +161,21 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $props['public'] = $public;
         $rel->setProps($props);
         return $rel;
+    }
+
+    public function sendNewMemberEmail($user)
+    {
+
+    }
+
+    public function sendMemberQuitEmail($user)
+    {
+
+    }
+
+    public function sendNewItemEmail($item)
+    {
+
     }
 
     protected function afterSaveForm($post)

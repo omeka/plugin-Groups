@@ -21,14 +21,42 @@ Omeka.Groups = {
     join: function() {
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
-        jQuery.post('/commons/groups/join/' + groupId, {'groupId': groupId}, Omeka.Groups.joinResponse);
+        jQuery.post(Omeka.webRoot + '/groups/join/' + groupId, null, Omeka.Groups.joinResponse);
     },
 
     joinResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
+        window.location.reload(true);
+    },
+
+    quit: function() {
+        splitId = this.id.split('-');
+        groupId = splitId[splitId.length - 1];
+        jQuery.post(Omeka.webRoot + '/groups/quit/' + groupId, null, Omeka.Groups.quitResponse);
+    },
+
+    quitResponse: function(response, a, b) {
+        var responseJson = JSON.parse(response);
+        window.location.reload(true);
+    },
+
+    request: function() {
+        splitId = this.id.split('-');
+        groupId = splitId[splitId.length - 1];
+        jQuery.post(Omeka.webRoot + '/groups/request/' + groupId, null, Omeka.Groups.requestResponse);
+    },
+
+    requestResponse: function(response, a, b) {
+        var responseJson = JSON.parse(response);
+    },
+
+    approveRequest: function() {
+        splitId = this.parentNode.id.split('-');
+        userId = groupId = splitId[splitId.length - 1];
+        splitUrl = window.document.URL.split('/');
+        groupId = splitUrl[splitUrl.length - 1];
+        jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.requestResponse);
     }
-
-
 };
 
 jQuery(document).ready(function() {

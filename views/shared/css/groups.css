@@ -1,3 +1,11 @@
+.groups-button { cursor: pointer; }
+
 li.groups-item-add { cursor: pointer; }
 
 .groups-join-button { cursor: pointer; }
+
+
+.groups-quit-button { cursor: pointer; }
+
+.groups-pending-request-view { margin-left: 6px; }
+.groups-pending-request-approve { margin-left: 6px; }

@@ -11,7 +11,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         } else {
             $this->_modelClass = 'Group';
         }
-
+//@TODO: check if I really need to muck about with the contexts
         $ajaxContext = $this->_helper->getHelper('AjaxContext');
         $ajaxContext->addActionContext('join', 'json')
                     ->initContext();
@@ -34,15 +34,48 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user =  current_user();
         $group = $this->findById();
         $group->removeMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
     }
 
-    public function joinOthersAction()
+    public function requestAction()
     {
+        $user =  current_user();
+        $group = $this->findById();
+        $group->addPendingMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
 
     }
+
+    public function joinOthersAction($user)
+    {
+        $group= $this->findById();
+        $group->addMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
+    }
+
+
+    public function approveRequestAction()
+    {
+        $userId = $_POST['userId'];
+        $groupId = $_POST['groupId'];
+        $user = $this->getTable('User')->find($userId);
+        $group = $this->getTable()->find($groupId);
+        $group->approveMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
+
+    }
+
 
     public function removeMemberAction()
     {
+        $group= $this->findById();
+        $group->removeMember($user);
+        $response = json_encode('ok');
+        $this->_helper->json($response);
 
     }
 
@@ -58,7 +91,9 @@ class Groups_GroupController extends Omeka_Controller_Action
             $_POST['owner_id'] = $currUser->id;
             $group->saveForm($_POST);
             $group->addMember($currUser);
+            $this->redirect->gotoUrl('/groups/show/' . $group->id );
         }
+
     }
 
     public function editAction()
@@ -74,6 +109,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         if(!empty($_POST)) {
             $currUser = current_user();
             $group->saveForm($_POST);
+            $this->redirect->gotoUrl('/groups/show/' . $group->id );
         }
     }
 
@@ -84,8 +120,6 @@ class Groups_GroupController extends Omeka_Controller_Action
         );
         $groups = $this->getTable()->findBy($params);
         $this->view->groups = $groups;
-
-
     }
 
     public function addItemAction()

@@ -8,6 +8,7 @@ head(array());
     <?php if(has_permission($group, 'edit')):?>
         <a href="<?php echo record_uri($group, 'edit'); ?>">Edit</a>
     <?php endif; ?>
+    <div class='groups-description'><?php echo $group->description; ?></div>
     <?php echo groups_tags_for_group($group); ?>
     <p id='groups-member-count'>Members: <?php echo groups_member_count($group); ?></p>
     <p id='groups-item-count'>Items: <?php echo groups_item_count($group); ?></p>
