@@ -10,6 +10,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'public_theme_header'
     );
 
+    protected $_filters = array(
+        'define_action_contexts'
+    );
+
 
     public function hookInstall()
     {
@@ -108,4 +112,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         );
     }
 
+    public function filterDefineActionContexts($contexts)
+    {
+        $contexts['show'] = array('xml', 'json', 'atom');
+        return $contexts;
+    }
 }

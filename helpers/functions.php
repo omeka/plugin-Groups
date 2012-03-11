@@ -77,6 +77,10 @@ function groups_groups_for_user($user = null)
 {
     if(!$user) {
         $user = current_user();
+
+    }
+    if(!$user) {
+        return array();
     }
     $db = get_db();
     return $db->getTable('Group')->findBy(array('user'=>$user));
@@ -118,6 +122,13 @@ function groups_join_button($group = null)
     }
 
     return "";
+}
 
-
+function groups_link_to_group($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    $link = "<a href='". uri('groups/show/' . $group->id) ."' >{$group->title}</a>";
+    return $link;
 }

@@ -1,23 +1,63 @@
 <?php
 
+
+class GroupsMyGroupsBlock extends Blocks_Block_Abstract
+{
+    const name = "Groups My Groups Block";
+    const description = "List of current user's groups";
+    const plugin = "Groups";
+
+    public function __construct($request = null, $blockConfig = null)
+    {
+        parent::__construct($request, $blockConfig);
+        $this->groups = groups_groups_for_user();
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->groups);
+    }
+
+    public function render()
+    {
+        $html = "<ul class='groups-my-groups'>";
+        foreach($this->groups as $group) {
+            $html .= "<li>" . groups_link_to_group($group) . "</li>";
+        }
+
+        $html .= "</ul>";
+        return $html;
+    }
+}
+
 class GroupsMembersBlock extends Blocks_Block_Abstract
 {
     const name = "Groups Members Block";
     const description = "List of group members";
     const plugin = "Groups";
 
+    public function __construct($request = null, $blockConfig = null)
+    {
+        parent::__construct($request, $blockConfig);
+        $this->group = groups_get_current_group();
+        $this->members = groups_members_for_group($this->group);
+    }
+
     public function isEmpty()
     {
-        $group = groups_get_current_group();
-        $this->members = groups_members_for_group($group);
         return empty($this->members);
     }
 
     public function render()
     {
+        $group = groups_get_current_group();
         $html = "<ul class='groups-members'>";
         foreach($this->members as $user) {
-            $html .= "<li>" . $user->name . "</li>";
+            $html .= "<li>" . $user->name;
+            if($user->id == $group->owner_id) {
+                $html .= " *";
+            }
+            $html .= "</li>";
         }
         $html .= "</ul>";
         return $html;
@@ -133,9 +173,14 @@ class GroupsAddItemBlock extends Blocks_Block_Abstract
     const plugin = "Groups";
 
 
+    public function __construct($request = null, $blockConfig = null)
+    {
+        parent::__construct($request, $blockConfig);
+        $this->buildHtml();
+    }
+
     public function isEmpty()
     {
-        $this->buildHtml();
         return $this->isEmpty;
     }
 
@@ -176,10 +221,7 @@ class GroupsItemBlock extends Blocks_Block_Abstract
     }
     public function isEmpty()
     {
-        if(count($this->groups) == 0) {
-            return true;
-        }
-        return false;
+        return empty($this->groups);
     }
 
     public function render()
@@ -187,7 +229,7 @@ class GroupsItemBlock extends Blocks_Block_Abstract
 
         foreach($this->groups as $group) {
             $html .= "<div class='groups-group-block'>";
-            $html .= "<h2><a href='". uri('groups/show/' . $group->id) ."' >{$group->title}</a></h2>";
+            $html .= "<h2>" . groups_link_to_group($group) . "</h2>";
             $html .= "<p>" . $group->description . "</p>";
             $html .= "</div>";
         }

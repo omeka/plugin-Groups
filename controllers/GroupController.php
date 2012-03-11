@@ -19,6 +19,28 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     }
 
+    public function showAction()
+    {
+        //unfortunate duplication of parent because I want the group record later
+        $varName = strtolower($this->_helper->db->getDefaultModelName());
+
+        $record = $this->findById();
+
+        Zend_Registry::set($varName, $record);
+
+        fire_plugin_hook('show_' . strtolower(get_class($record)), $record);
+
+        $this->view->assign(array($varName => $record));
+        //end unfortunate duplication
+        //now do something useful with it
+
+        //stuff the items in so they are available to output formats
+        if(has_permission($record, 'items')) {
+            $items = groups_items_for_group();
+            $this->view->assign(array('items'=>$items));
+        }
+    }
+
     public function joinAction()
     {
         $user =  current_user();
