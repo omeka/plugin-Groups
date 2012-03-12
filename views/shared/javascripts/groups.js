@@ -48,6 +48,10 @@ Omeka.Groups = {
 
     requestResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
+        if(responseJson.status === 'ok') {
+            html = "<p class='groups-pending'>Membership request is pending</p>";
+            jQuery('.groups-request-button').replaceWith(html);
+        }
     },
 
     approveRequest: function() {
@@ -56,6 +60,7 @@ Omeka.Groups = {
         splitUrl = window.document.URL.split('/');
         groupId = splitUrl[splitUrl.length - 1];
         jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.requestResponse);
+        window.location.reload(true);
     }
 };
 

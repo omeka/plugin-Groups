@@ -114,7 +114,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
     public function filterDefineActionContexts($contexts)
     {
-        $contexts['show'] = array('xml', 'json', 'atom');
+        $contexts['show'] = array('rss2', 'atom');
         return $contexts;
     }
 }

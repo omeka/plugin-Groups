@@ -4,6 +4,8 @@
 class Groups_GroupController extends Omeka_Controller_Action
 {
 
+    protected $_browseRecordsPerPage = 10;
+
     public function init()
     {
         if (version_compare(OMEKA_VERSION, '2.0-dev', '>=')) {
@@ -18,6 +20,8 @@ class Groups_GroupController extends Omeka_Controller_Action
 
 
     }
+
+
 
     public function showAction()
     {
@@ -56,7 +60,8 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user =  current_user();
         $group = $this->findById();
         $group->removeMember($user);
-        $response = json_encode('ok');
+        $responseArray = array('status'=>'ok');
+        $response = json_encode($responseArray);
         $this->_helper->json($response);
     }
 
@@ -65,7 +70,8 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user =  current_user();
         $group = $this->findById();
         $group->addPendingMember($user);
-        $response = json_encode('ok');
+        $responseArray = array('status'=>'ok');
+        $response = json_encode($responseArray);
         $this->_helper->json($response);
 
     }

@@ -1,5 +1,5 @@
 <?php
-head(array());
+head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 ?>
 
 
@@ -8,9 +8,11 @@ head(array());
 <p><a href='<?php echo uri('/groups/add'); ?>'>Add a group</a></p>
 <?php endif; ?>
 
-
+<div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
+<div style="clear:left;"></div>
+<h2>Groups</h2>
 <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>
-<div>
+<div class="hentry">
 <?php $group = groups_get_current_group(); ?>
 <h2><a href="<?php echo uri('groups/show/' . $group->id); ?>"><?php echo $group->title; ?></a></h2>
 <div class='groups-description'><?php echo $group->description; ?></div>
