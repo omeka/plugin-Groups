@@ -32,10 +32,13 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 ";
         $db->query($sql);
 
-        $blocks = unserialize(get_option('blocks'));
-        $blocks[] = 'GroupsItemBlock';
-        $blocks[] = 'GroupsAddItemBlock';
-        set_option('blocks', serialize($blocks));
+        $blocksArray = array(
+            'GroupsItemBlock',
+            'GroupsAddItemBlock',
+            'GroupsManageBlock',
+            'GroupsMyGroupsBlock'
+        );
+        blocks_register_blocks($blocksArray);
 
         $omekaMemberProps = array(
             array(
@@ -65,6 +68,15 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $db = get_db();
         $sql = "DROP TABLE IF EXISTS `$db->Group`;";
         $db->query($sql);
+
+        $blocksArray = array(
+            'GroupsItemBlock',
+            'GroupsAddItemBlock',
+            'GroupsManageBlock',
+            'GroupsMyGroupsBlock'
+        );
+        blocks_unregister_blocks($blocksArray);
+
     }
 
     public function hookPublicThemeHeader()

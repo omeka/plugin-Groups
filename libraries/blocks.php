@@ -64,7 +64,7 @@ class GroupsMembersBlock extends Blocks_Block_Abstract
     }
 }
 
-class GroupsJoinBlock extends Blocks_Block_Abstract
+class GroupsManageBlock extends Blocks_Block_Abstract
 {
     const name = "Groups Manage Block";
     const description = "Links to manage membership";
@@ -77,16 +77,19 @@ class GroupsJoinBlock extends Blocks_Block_Abstract
 
     public function render()
     {
-
         $group = groups_get_current_group();
         $currUser = current_user();
         $isOwner = $group->isOwnedBy($currUser);
         if($group->hasMember($currUser) ) {
             if($isOwner) {
-                $html = "<p>Pending Membership Requests</p>";
-                $html .= "<ul class='groups-pending-requests'>";
-                $html .= $this->listPendingRequests($group);
-                $html .= "</ul>";
+                if(count($group->memberRequests() === 0)) {
+                    $html = "<p>No pending membership requests</p>";
+                } else {
+                    $html = "<p>Pending Membership Requests</p>";
+                    $html .= "<ul class='groups-pending-requests'>";
+                    $html .= $this->listPendingRequests($group);
+                    $html .= "</ul>";
+                }
             } else {
                 $html = "<p class='groups-quit-button groups-button' id='groups-id-{$group->id}'>Leave</p>";
                 $html .= "<script type='text/javascript'>";
