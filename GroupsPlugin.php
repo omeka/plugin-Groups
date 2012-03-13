@@ -26,7 +26,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   `visibility` tinytext COLLATE utf8_unicode_ci NOT NULL,
                   `owner_id` int(10) unsigned NOT NULL,
                   PRIMARY KEY (`id`),
-                  KEY `owner_id` (`owner_id`)
+                  KEY `owner_id` (`owner_id`),
+                  FULLTEXT KEY (`title`,`description`)
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
                 ";
         $db->query($sql);

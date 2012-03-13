@@ -1,4 +1,5 @@
 <?php
+require_once GROUPS_PLUGIN_DIR . '/forms/GroupsSearchForm.php';
 head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 ?>
 
@@ -7,6 +8,9 @@ head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 <?php if(has_permission('Groups_Group', 'add')): ?>
 <p><a href='<?php echo uri('/groups/add'); ?>'>Add a group</a></p>
 <?php endif; ?>
+
+<?php echo new GroupsSearchForm(); ?>
+
 
 <div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
 <div style="clear:left;"></div>

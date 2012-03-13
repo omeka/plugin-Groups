@@ -17,11 +17,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $ajaxContext = $this->_helper->getHelper('AjaxContext');
         $ajaxContext->addActionContext('join', 'json')
                     ->initContext();
-
-
     }
-
-
 
     public function showAction()
     {

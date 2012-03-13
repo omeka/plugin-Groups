@@ -6,7 +6,11 @@ class GroupTable extends Omeka_Db_Table
 
     public function applySearchFilters($select, $params)
     {
-           // filter based on tags
+
+        if(isset($params['groupsSearch']) && !empty($params['groupsSearch'])) {
+            $this->filterBySearch($select, $params['groupsSearch']);
+        }
+
         if (isset($params['tags'])) {
             $this->filterByTags($select, $params['tags']);
         }
@@ -26,6 +30,8 @@ class GroupTable extends Omeka_Db_Table
         if(isset($params['lacksItem'])) {
             $this->filterByHasItem($select, $params['hasItem'], true);
         }
+
+
     }
 
     public function __construct($targetModel, $db)
@@ -45,14 +51,12 @@ class GroupTable extends Omeka_Db_Table
 
         //copied from ItemTable::filterByTags
         foreach ($tags as $tagName) {
-
             $subSelect = new Omeka_Db_Select;
             $subSelect->from(array('tg'=>$db->Taggings), array('id'=>'tg.relation_id'))
                 ->joinInner(array('t'=>$db->Tag), 't.id = tg.tag_id', array())
                 ->where('t.name = ? AND tg.`type` = "Group"', trim($tagName));
-
-            $select->where('g.id IN (' . (string) $subSelect . ')');
         }
+        $select->where('g.id IN (' . (string) $subSelect . ')');
     }
 
     public function filterByVisibility($select, $visibility)
@@ -100,6 +104,25 @@ class GroupTable extends Omeka_Db_Table
         $select->where("rr.object_record_type = 'Item'");
         $select->where("rr.object_id = " . $itemId);
 
+    }
+
+    public function filterBySearch($select, $terms)
+    {
+        $db = get_db();
+        $quotedTerms = $db->quote($terms);
+
+        $select->where("MATCH (description, title) AGAINST ($quotedTerms)");
+
+        //$tagsSelect = $this->getSelectForFindBy(array('tags'=>$terms));
+        //copied from ItemTable::filterByTags
+        $tags = explode(get_option('tag_delimiter'), $terms);
+        foreach ($tags as $tagName) {
+            $subSelect = new Omeka_Db_Select;
+            $subSelect->from(array('tg'=>$db->Taggings), array('id'=>'tg.relation_id'))
+                ->joinInner(array('t'=>$db->Tag), 't.id = tg.tag_id', array())
+                ->where('t.name = ? AND tg.`type` = "Group"', trim($tagName));
+        }
+        $select->orWhere('g.id IN (' . (string) $subSelect . ')');
     }
 
 }
