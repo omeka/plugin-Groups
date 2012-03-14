@@ -36,7 +36,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'GroupsItemBlock',
             'GroupsAddItemBlock',
             'GroupsManageBlock',
-            'GroupsMyGroupsBlock'
+            'GroupsMyGroupsBlock',
+            'GroupsMembersBlock'
         );
         blocks_register_blocks($blocksArray);
 
@@ -73,10 +74,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'GroupsItemBlock',
             'GroupsAddItemBlock',
             'GroupsManageBlock',
-            'GroupsMyGroupsBlock'
+            'GroupsMyGroupsBlock',
+            'GroupsMembersBlock'
         );
         blocks_unregister_blocks($blocksArray);
-
     }
 
     public function hookPublicThemeHeader()
