@@ -92,9 +92,16 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
 
+        $roles = array('researcher', 'contributor', 'admin', 'super');
+
+        if($acl->hasRole('guest')) {
+            $roles[] = 'guest';
+        }
+
+
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
-        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', array('add', 'editSelf') );
-        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
+        $acl->allow($roles, 'Groups_Group', array('add', 'editSelf') );
+        $acl->allow($roles, 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
 
         $privileges = array('add-item',
                             'remove-item',
@@ -106,7 +113,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'quit'
                             );
 
-        $acl->allow(array('researcher', 'contributor', 'admin', 'super'), 'Groups_Group', $privileges, new GroupsAclAssertion);
+        $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
+
 
     }
 
