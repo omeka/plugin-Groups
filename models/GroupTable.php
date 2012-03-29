@@ -31,6 +31,7 @@ class GroupTable extends Omeka_Db_Table
             $this->filterByHasItem($select, $params['hasItem'], true);
         }
 
+        fire_plugin_hook('comments_filter_comments', $select);
 
     }
 

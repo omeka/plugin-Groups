@@ -7,13 +7,24 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'uninstall',
         'define_acl',
         'define_routes',
-        'public_theme_header'
+        'public_theme_header',
+        'commenting_append_to_form',
+        'after_save_comment',
+        'comment_browse_sql'
     );
 
     protected $_filters = array(
         'define_action_contexts'
     );
-
+/*
+    public function setUp()
+    {
+        parent::setUp();
+        if(plugin_is_active('Commenting')) {
+            $this->_hooks[] = 'after_save_comment';
+        }
+    }
+*/
 
     public function hookInstall()
     {
@@ -62,6 +73,27 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         );
 
         record_relations_install_properties($omekaMemberProps);
+        //@TODO: make this into the OMEKA namespace
+        $commonsProps = array(
+              array(
+                    'name' => 'Commons',
+                    'description' => 'Commons relations',
+                    'namespace_prefix' => 'commons',
+                    'namespace_uri' => 'http://ns.omeka-commons.org/',
+                    'properties' => array(
+                        array(
+                            'local_part' => 'ownsComment',
+                            'label' => 'Owns Comment',
+                            'description' => 'The object Comment is associated with the subject Group'
+                        ),                    )
+                )
+
+          );
+
+        record_relations_install_properties($commonsProps);
+
+
+
     }
 
     public function hookUninstall()
@@ -132,6 +164,108 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                     )
             )
         );
+    }
+
+    public function hookAfterSaveComment($comment)
+    {
+        //build relations between comment and groups
+
+        //unfortunate process of going through all the keys looking for 'groups_{id}'
+        //Zend doesn't like form element names with []
+        $groupIds = array();
+        $public = false;
+        foreach($_POST as $key=>$value) {
+            $splitKey = explode('_', $key);
+            if ( ($splitKey[0] == 'groups') && $value == 1) {
+                if($splitKey[1] == 'public') {
+                    $public = true;
+                } else {
+                    $groupIds[] = $splitKey[1];
+                }
+            }
+        }
+        $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+        //need a public checkbox. if checked relations are also public -- not restricted to group
+        $options = array(
+            'subject_record_type' => 'Group',
+//        	'subject_id' => this changes around in the loop below
+            'object_record_type' => 'Comment',
+            'object_id' => $comment->id,
+            'public' => $public,
+            'property_id' => $ownsComment->id // need a property: commons:hasComment? or something from sioc?
+
+        );
+        foreach($groupIds as $id) {
+              $options['subject_id'] = $id;
+              $rel = new RecordRelationsRelation;
+              $rel->setProps($options);
+              $rel->save();
+        }
+    }
+
+    /**
+     * Filter the comment select to only return comment if:
+     * 1) the comment is not owned by any group
+     * 2) if it is owned by a group, the current user is a member
+     * 3) it has been marked as public, but also part of a group
+     * This allows for filtering the conversation to what is part of a group
+     */
+
+    public function hookCommentBrowseSql($select, $params)
+    {
+
+
+        $user = current_user();
+        if($user) {
+            $userId = $user->id;
+        } else {
+            $userId = 0;
+        }
+
+        $filter = true;
+        if(has_permission('Commenting_Comment', 'updateapproved') || has_permission('Commenting_Comment', 'updatespam')) {
+            $filter = false;
+        }
+
+        if($user->id == 1) {
+            $filter = false;
+        }
+
+        if($filter) {
+            $db = get_db();
+            $select->join(array('rr'=>$db->RecordRelationsRelation),
+                            'rr.object_id = ct.id AND rr.object_record_type = "Comment" AND rr.subject_record_type = "Group"',
+                            array('rr.subject_id')
+                            );
+
+            $select->join(array('rrr'=>$db->RecordRelationsRelation),
+                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = 4 AND rrr.object_record_type = "User"',
+                            array()
+                            );
+            $select->where('rr.public = 1');
+            $select->orWhere('rrr.object_id = ' . $userId);
+        }
+    }
+
+    public function hookCommentingAppendToForm($form)
+    {
+        $groups = get_db()->getTable('Group')->findBy(array('user' => current_user()));
+        $elements = array();
+        foreach($groups as $group) {
+            $name = 'groups_' . $group->id;
+            $label = $group->title;
+            $form->addElement('checkbox', $name, array('label'=>$label));
+            $elements[] = $name;
+        }
+        if(!empty($elements)) {
+            $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions'"));
+            $form->addElement('checkbox', 'groups_public', array(
+                'label' => 'Also make the comment public?',
+                'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
+                ));
+        }
+
+
     }
 
     public function filterDefineActionContexts($contexts)
