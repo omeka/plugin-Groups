@@ -10,11 +10,14 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'public_theme_header',
         'commenting_append_to_form',
         'after_save_comment',
-        'comment_browse_sql'
+        'comment_browse_sql',
+
     );
 
     protected $_filters = array(
-        'define_action_contexts'
+        'define_action_contexts',
+        'commenting_append_to_comment',
+        'commenting_prepend_to_comments'
     );
 /*
     public function setUp()
@@ -184,8 +187,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 }
             }
         }
+
         $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
-        //need a public checkbox. if checked relations are also public -- not restricted to group
         $options = array(
             'subject_record_type' => 'Group',
 //        	'subject_id' => this changes around in the loop below
@@ -214,6 +217,13 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     public function hookCommentBrowseSql($select, $params)
     {
 
+        $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+        //first, just get a connection to the relation and attach the subject_id (group_id)
+        $db = get_db();
+        $select->join(array('rr'=>$db->RecordRelationsRelation),
+                        'rr.object_id = ct.id AND rr.object_record_type = "Comment" AND rr.subject_record_type = "Group"',
+                        'rr.subject_id'
+                        );
 
         $user = current_user();
         if($user) {
@@ -232,15 +242,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
 
         if($filter) {
-            $db = get_db();
-            $select->join(array('rr'=>$db->RecordRelationsRelation),
-                            'rr.object_id = ct.id AND rr.object_record_type = "Comment" AND rr.subject_record_type = "Group"',
-                            array('rr.subject_id')
-                            );
-
             $select->join(array('rrr'=>$db->RecordRelationsRelation),
-                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = 4 AND rrr.object_record_type = "User"',
-                            array()
+                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = ' . $ownsComment->id .' AND rrr.object_record_type = "User"',
+                            'rr.subject_id'
                             );
             $select->where('rr.public = 1');
             $select->orWhere('rrr.object_id = ' . $userId);
@@ -264,8 +268,20 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
                 ));
         }
+    }
 
+    public function filterCommentingAppendToComment($html, $comment)
+    {
+        $group = get_db()->getTable('Group')->find($comment->subject_id);
+        $html .= "<p>" . $group->title .  "</p>";
+        return $html;
+    }
 
+    public function filterCommentingPrependToComments($html, $model, $id)
+    {
+        $html .= "<p>Figure out how to filter comments by group here.</p>";
+        $html .= "<p>Need to figure out what groups are represented by the comments, or just show all the user's groups?'</p>";
+        return $html;
     }
 
     public function filterDefineActionContexts($contexts)
