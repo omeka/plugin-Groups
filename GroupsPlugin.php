@@ -95,8 +95,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
         record_relations_install_properties($commonsProps);
 
-
-
     }
 
     public function hookUninstall()
@@ -113,6 +111,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'GroupsMembersBlock'
         );
         blocks_unregister_blocks($blocksArray);
+        record_relations_delete_relations(array('subject_record_type'=>'Group'));
     }
 
     public function hookPublicThemeHeader()
