@@ -216,7 +216,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
     public function hookCommentBrowseSql($select, $params)
     {
-
+        $select->distinct();
         $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
         //first, just get a connection to the relation and attach the subject_id (group_id)
         $db = get_db();
@@ -238,17 +238,21 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
 
         if($user->id == 1) {
-            $filter = false;
+            $filter = true;
         }
 
         if($filter) {
+            $has_member = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
+
             $select->join(array('rrr'=>$db->RecordRelationsRelation),
-                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = ' . $ownsComment->id .' AND rrr.object_record_type = "User"',
-                            'rr.subject_id'
+                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = ' . $has_member->id .' AND rrr.object_record_type = "User"',
+                            array()
                             );
             $select->where('rr.public = 1');
             $select->orWhere('rrr.object_id = ' . $userId);
+
         }
+_log($select);
     }
 
     public function hookCommentingAppendToForm($form)
@@ -280,11 +284,22 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         return $html;
     }
 
-    public function filterCommentingPrependToComments($html, $model, $id)
+    public function filterCommentingPrependToComments($html, $comments)
     {
-        $html .= "<p>Figure out how to filter comments by group here.</p>";
-        $html .= "<p>Need to figure out what groups are represented by the comments, or just show all the user's groups?'</p>";
-        return $html;
+        $user = current_user();
+        if($user && ( count($comments) != 0 )) {
+            $groups = get_db()->getTable('Group')->findBy(array('user' => $user));
+            $html = "<div id='groups-comment-filter'>";
+            $html .= "<p>Filter comments by groups</p>";
+            $html .= "<ul id='groups-group-list'>";
+            foreach($groups as $group) {
+                $html .= "<li class='groups-group'>" . $group->title . "</li>";
+            }
+            $html .= "</ul>";
+            $html .= "</div>";
+            return $html;
+        }
+
     }
 
     public function filterDefineActionContexts($contexts)
