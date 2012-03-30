@@ -253,20 +253,23 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
     public function hookCommentingAppendToForm($form)
     {
-        $groups = get_db()->getTable('Group')->findBy(array('user' => current_user()));
-        $elements = array();
-        foreach($groups as $group) {
-            $name = 'groups_' . $group->id;
-            $label = $group->title;
-            $form->addElement('checkbox', $name, array('label'=>$label));
-            $elements[] = $name;
-        }
-        if(!empty($elements)) {
-            $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions'"));
-            $form->addElement('checkbox', 'groups_public', array(
-                'label' => 'Also make the comment public?',
-                'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
-                ));
+        $user = current_user();
+        if($user) {
+            $groups = get_db()->getTable('Group')->findBy(array('user' => $user));
+            $elements = array();
+            foreach($groups as $group) {
+                $name = 'groups_' . $group->id;
+                $label = $group->title;
+                $form->addElement('checkbox', $name, array('label'=>$label));
+                $elements[] = $name;
+            }
+            if(!empty($elements)) {
+                $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions'"));
+                $form->addElement('checkbox', 'groups_public', array(
+                    'label' => 'Also make the comment public?',
+                    'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
+                    ));
+            }
         }
     }
 
