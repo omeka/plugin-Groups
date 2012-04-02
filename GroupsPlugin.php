@@ -11,23 +11,25 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'commenting_append_to_form',
         'after_save_comment',
         'comment_browse_sql'
-
     );
 
     protected $_filters = array(
-        'define_action_contexts',
-        'commenting_append_to_comment',
-        'commenting_prepend_to_comments'
+        'define_action_contexts'
     );
-/*
+
     public function setUp()
     {
-        parent::setUp();
+
         if(plugin_is_active('Commenting')) {
             $this->_hooks[] = 'after_save_comment';
+            $this->_hooks[] = 'comment_browse_sql';
+            $this->_hooks[] = 'commenting_append_to_form';
+            $this->_filters[] = 'commenting_append_to_comment';
+            $this->_filters[] = 'commenting_prepend_to_comments';
         }
+        parent::setUp();
     }
-*/
+
 
     public function hookInstall()
     {

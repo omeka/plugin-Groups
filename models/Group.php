@@ -55,7 +55,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $rel = $this->newRelation($item, DCTERMS, 'references');
         if($rel) {
             $rel->user_id = current_user()->id;
-         //   $rel->save();
+            $rel->save();
             return true;
         }
         return false;

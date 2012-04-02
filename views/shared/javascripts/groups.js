@@ -15,7 +15,6 @@ Omeka.Groups = {
 
     addItemResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
-        alert(responseJson.groupId);
         if(responseJson.groupId) {
             jQuery('li#groups-id-' + responseJson.groupId).html('Successfully added');
         }
