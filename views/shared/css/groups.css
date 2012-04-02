@@ -16,3 +16,9 @@ ul#groups-group-list li {
     list-style: none;
     display: inline;
 }
+
+li.groups-comment-group {
+    list-style: none;
+    display: inline;
+    padding-left: 6px;
+}

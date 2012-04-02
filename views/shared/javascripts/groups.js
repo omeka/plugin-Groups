@@ -7,7 +7,7 @@ Omeka.Groups = {
     addItemToGroup: function() {
 
         splitId = this.id.split('-');
-        splitUrl = window.document.URL.split('/');
+        splitUrl = window.location.pathname.split('/');
         groupId = splitId[splitId.length - 1];
         itemId = splitUrl[splitUrl.length - 1];
         jQuery.post('/commons/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
@@ -15,7 +15,10 @@ Omeka.Groups = {
 
     addItemResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
-        //notify on the item somehow
+        alert(responseJson.groupId);
+        if(responseJson.groupId) {
+            jQuery('li#groups-id-' + responseJson.groupId).html('Successfully added');
+        }
     },
 
     join: function() {

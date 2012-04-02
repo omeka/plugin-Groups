@@ -287,7 +287,6 @@ _log($select);
 
     public function filterCommentingPrependToComments($html, $comments)
     {
-
         $user = current_user();
         if($user && ( count($comments) > 1 )) {
             $groups = array();
@@ -309,7 +308,6 @@ _log($select);
             $html .= "</div>";
             return $html;
         }
-
     }
 
     public function filterDefineActionContexts($contexts)
