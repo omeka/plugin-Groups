@@ -61,11 +61,19 @@ Omeka.Groups = {
         groupId = splitUrl[splitUrl.length - 1];
         jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.requestResponse);
         window.location.reload(true);
+    },
+
+    filterGroups: function() {
+        splitId = this.id.split('-');
+        itemId = splitId[splitId.length -1];
+        groupSelector = 'li#groups-comment-group-' + itemId;
+        jQuery(groupSelector).closest('div.comment').toggle('fast');
     }
 };
 
 jQuery(document).ready(function() {
     jQuery('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
+    jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
 });
 
 

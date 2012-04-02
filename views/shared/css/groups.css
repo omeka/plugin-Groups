@@ -9,3 +9,10 @@ li.groups-item-add { cursor: pointer; }
 
 .groups-pending-request-view { margin-left: 6px; }
 .groups-pending-request-approve { margin-left: 6px; }
+
+ul#groups-group-list li {
+    cursor: pointer;
+    padding-left: 12px;
+    list-style: none;
+    display: inline;
+}

@@ -10,7 +10,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'public_theme_header',
         'commenting_append_to_form',
         'after_save_comment',
-        'comment_browse_sql',
+        'comment_browse_sql'
 
     );
 
@@ -215,14 +215,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
     public function hookCommentBrowseSql($select, $params)
     {
-        $select->distinct();
-        $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
-        //first, just get a connection to the relation and attach the subject_id (group_id)
-        $db = get_db();
-        $select->join(array('rr'=>$db->RecordRelationsRelation),
-                        'rr.object_id = ct.id AND rr.object_record_type = "Comment" AND rr.subject_record_type = "Group"',
-                        'rr.subject_id'
-                        );
 
         $user = current_user();
         if($user) {
@@ -237,19 +229,25 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
 
         if($user->id == 1) {
-            $filter = true;
+            $filter = false;
         }
 
         if($filter) {
+            $select->distinct();
+            $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+            //first, just get a connection to the relation
+            $db = get_db();
+            $select->join(array('rr'=>$db->RecordRelationsRelation),
+                            "rr.object_id = ct.id ", array()
+                            );
+            $select->where("rr.object_record_type = 'Comment'");
             $has_member = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
 
             $select->join(array('rrr'=>$db->RecordRelationsRelation),
                             'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = ' . $has_member->id .' AND rrr.object_record_type = "User"',
                             array()
                             );
-            $select->where('rr.public = 1');
-            $select->orWhere('rrr.object_id = ' . $userId);
-
+            $select->where(' ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ')');
         }
 _log($select);
     }
@@ -278,21 +276,34 @@ _log($select);
 
     public function filterCommentingAppendToComment($html, $comment)
     {
-        $group = get_db()->getTable('Group')->find($comment->subject_id);
-        $html .= "<p>" . $group->title .  "</p>";
+        $groups = groups_groups_for_comment($comment);
+        $html .= "<div class='groups-comment-groups'><h3>Groups</h3><ul> ";
+        foreach($groups as $group) {
+            $html .= "<li class='groups-comment-group' id='groups-comment-group-{$group->id}'>" . $group->title .  "</li>";
+        }
+        $html .= "</ul>";
         return $html;
     }
 
     public function filterCommentingPrependToComments($html, $comments)
     {
+
         $user = current_user();
-        if($user && ( count($comments) != 0 )) {
-            $groups = get_db()->getTable('Group')->findBy(array('user' => $user));
-            $html = "<div id='groups-comment-filter'>";
+        if($user && ( count($comments) > 1 )) {
+            $groups = array();
+            foreach($comments as $comment) {
+                $commentGroups = groups_groups_for_comment($comment);
+                foreach($commentGroups as $g) {
+                    if(!isset($groups[$g->id])) {
+                        $groups[$g->id] = $g;
+                    }
+                }
+            }
+            $html .= "<div id='groups-comment-filter'>";
             $html .= "<p>Filter comments by groups</p>";
             $html .= "<ul id='groups-group-list'>";
             foreach($groups as $group) {
-                $html .= "<li class='groups-group'>" . $group->title . "</li>";
+                $html .= "<li class='groups-group' id='groups-group-filter-{$group->id}'>" . $group->title . "</li>";
             }
             $html .= "</ul>";
             $html .= "</div>";

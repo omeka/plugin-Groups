@@ -132,3 +132,13 @@ function groups_link_to_group($group = null)
     $link = "<a href='". uri('groups/show/' . $group->id) ."' >{$group->title}</a>";
     return $link;
 }
+
+function groups_groups_for_comment($comment)
+{
+    $params = array(
+        'subject_record_type' => 'Group',
+        'object_record_type' => 'Comment',
+        'object_id' => $comment->id
+    );
+    return get_db()->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
+}
