@@ -235,21 +235,32 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
 
         if($filter) {
+            $db = get_db();
+
+
+
             $select->distinct();
-            $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+
             //first, just get a connection to the relation
             $db = get_db();
-            $select->join(array('rr'=>$db->RecordRelationsRelation),
-                            "rr.object_id = ct.id ", array()
+            $select->joinLeft(array('rr'=>$db->RecordRelationsRelation),
+                            "rr.object_id = ct.id AND rr.object_record_type = 'Comment' ", array()
                             );
-            $select->where("rr.object_record_type = 'Comment'");
-            $has_member = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
+            //$select->where("rr.object_record_type = 'Comment'");
 
+            $has_member = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
             $select->join(array('rrr'=>$db->RecordRelationsRelation),
-                            'rr.subject_id = rrr.subject_id AND rrr.subject_record_type = "Group" AND rrr.property_id = ' . $has_member->id .' AND rrr.object_record_type = "User"',
+                            ' (  rr.subject_id = rrr.subject_id ' .
+                            'AND rrr.subject_record_type = "Group" ' .
+                            'AND rrr.property_id = ' . $has_member->id .' ' .
+                            'AND rrr.object_record_type = "User" ' .
+                            'AND ( ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ') ) ) ' .
+                            'OR ( rr.id IS NULL)',
                             array()
                             );
-            $select->where(' ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ')');
+            //$select->where(' rr.id IS NOT NULL ');
+            //$select->where(' ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ')');
+
         }
 _log($select);
     }
@@ -283,7 +294,7 @@ _log($select);
         foreach($groups as $group) {
             $html .= "<li class='groups-comment-group' id='groups-comment-group-{$group->id}'>" . $group->title .  "</li>";
         }
-        $html .= "</ul>";
+        $html .= "</ul></div>";
         return $html;
     }
 

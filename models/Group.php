@@ -163,17 +163,17 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return $rel;
     }
 
-    public function sendNewMemberEmail($user)
+    private function sendNewMemberEmail($user)
     {
 
     }
 
-    public function sendMemberQuitEmail($user)
+    private function sendMemberQuitEmail($user)
     {
 
     }
 
-    public function sendNewItemEmail($item)
+    private function sendNewItemEmail($item)
     {
 
     }
