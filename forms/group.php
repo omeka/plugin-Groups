@@ -17,8 +17,4 @@ class GroupForm extends Omeka_Form
         $this->addElement('select', 'visibility', array('label'=>'Visibility', 'multiOptions'=>$options));
         $this->addElement('submit', 'submit');
     }
-
-
-
-
 }

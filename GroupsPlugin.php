@@ -14,12 +14,12 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     );
 
     protected $_filters = array(
-        'define_action_contexts'
+        'define_action_contexts',
+        'guest_user_widgets'
     );
 
     public function setUp()
     {
-
         if(plugin_is_active('Commenting')) {
             $this->_hooks[] = 'after_save_comment';
             $this->_hooks[] = 'comment_browse_sql';
@@ -29,7 +29,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
         parent::setUp();
     }
-
 
     public function hookInstall()
     {
@@ -321,6 +320,20 @@ _log($select);
             $html .= "</div>";
             return $html;
         }
+    }
+
+    public function filterGuestUserWidgets($widgets)
+    {
+        $user = current_user();
+        $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
+        $widget = array('label' => 'Groups');
+        foreach($groups as $group) {
+            $widget['content'] .= "<h3>";
+            $widget['content'] .= groups_link_to_group($group);
+            $widget['content'] .= "</h3>";
+        }
+        $widgets[] = $widget;
+        return $widgets;
     }
 
     public function filterDefineActionContexts($contexts)
