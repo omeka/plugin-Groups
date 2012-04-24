@@ -127,7 +127,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
 
-        $roles = array('researcher', 'contributor', 'admin', 'super');
+        $roles = array(null, 'researcher', 'contributor', 'admin', 'super');
 
         if($acl->hasRole('guest')) {
             $roles[] = 'guest';
@@ -149,14 +149,12 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             );
 
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
-
-
     }
 
     public function hookDefineRoutes($router)
     {
         $router->addRoute(
-            'groups-group-route',
+            'group-browse',
             new Zend_Controller_Router_Route(
                 'groups/:action/:id',
                 array(
@@ -167,6 +165,20 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                     )
             )
         );
+
+        $router->addRoute(
+            'group-show',
+            new Zend_Controller_Router_Route(
+                'groups/:action/:id',
+                array(
+                    'module'        => 'groups',
+                    'controller'    => 'group',
+                    'action'		=> 'show',
+                    'id'			=> ''
+                    )
+            )
+        );
+
     }
 
     public function hookAfterSaveComment($comment)
@@ -235,9 +247,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
 
         if($filter) {
             $db = get_db();
-
-
-
             $select->distinct();
 
             //first, just get a connection to the relation
@@ -257,11 +266,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'OR ( rr.id IS NULL)',
                             array()
                             );
-            //$select->where(' rr.id IS NOT NULL ');
-            //$select->where(' ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ')');
 
         }
-_log($select);
     }
 
     public function hookCommentingAppendToForm($form)

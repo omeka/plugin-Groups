@@ -9,7 +9,7 @@ head(array());
         <a href="<?php echo record_uri($group, 'edit'); ?>">Edit</a>
     <?php endif; ?>
     <div class='groups-description'><?php echo $group->description; ?></div>
-    <?php echo groups_tags_for_group($group); ?>
+    <?php echo groups_tags_list_for_group($group); ?>
     <p id='groups-member-count'>Members: <?php echo groups_member_count($group); ?></p>
     <p id='groups-item-count'>Items: <?php echo groups_item_count($group); ?></p>
     <?php if(has_permission($group, 'items')): ?>

@@ -65,8 +65,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             $isMember = $resource->hasMember($role);
             $arrayName = $isMember ? "memberPrivileges" : $resource->visibility . "Privileges";
             return in_array($privilege, $this->$arrayName);
-        } else {
-
         }
 
         return false;

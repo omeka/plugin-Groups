@@ -19,6 +19,14 @@ class Groups_GroupController extends Omeka_Controller_Action
                     ->initContext();
     }
 
+    public function browseAction()
+    {
+        parent::browseAction();
+        $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
+        $this->view->tags = $tags;
+    }
+
+
     public function showAction()
     {
         //unfortunate duplication of parent because I want the group record later

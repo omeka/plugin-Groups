@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * get the current group while looping through groups
+ * @see /helpers/Function/loop_records()
+ */
+
 function groups_get_current_group()
 {
     if (!($group = __v()->group)) {
@@ -8,6 +13,12 @@ function groups_get_current_group()
     return $group;
 }
 
+/**
+ * get the current group while looping through groups
+ * @see /helpers/Function/loop_records()
+ */
+
+
 function groups_set_current_group($group)
 {
     $view = __v();
@@ -15,20 +26,44 @@ function groups_set_current_group($group)
     $view->group = $group;
 }
 
+/**
+ * get the tags on a group
+ * this is not the tags on Items in a group, just the tags on a group!
+ *
+ * @return array Tag
+ */
+
 function groups_tags_for_group($group = null)
 {
     if(!$group) {
         $group = groups_get_current_group();
     }
     $tags = $group->Tags;
+    return $tags;
+}
+
+
+/**
+ * get the tags ON a group as a flat html list
+ * this is not the tags on Items in a groups, just the tags on a group!
+ *
+ * @return string html <ul>
+ */
+
+function groups_tags_list_for_group($group = null)
+{
+    $tags = groups_tags_for_group($group);
     $html = "<ul class='tags'>";
     foreach($tags as $tag) {
         $html .= "<li>{$tag->name}</li>";
     }
     $html .= "</ul>";
     return $html;
-
 }
+
+/**
+ * get the number of items associated with a group
+ */
 
 function groups_item_count($group = null)
 {
@@ -38,6 +73,12 @@ function groups_item_count($group = null)
     return $group->getItemCount();
 }
 
+/**
+ * get the number of members in a group
+ *
+ * @return int
+ */
+
 function groups_member_count($group = null)
 {
     if(!$group) {
@@ -46,6 +87,12 @@ function groups_member_count($group = null)
     return $group->getMemberCount();
 }
 
+/**
+ * get an array of users in a group
+ *
+ * @return array Users in a group
+ */
+
 function groups_members_for_group($group = null)
 {
     if(!$group) {
@@ -53,6 +100,13 @@ function groups_members_for_group($group = null)
     }
     return $group->getMembers();
 }
+
+
+/**
+ * get the items in a group
+ *
+ * @return array Item
+ */
 
 function groups_items_for_group($group = null)
 {
@@ -72,6 +126,11 @@ function groups_items_for_group($group = null)
 
 }
 
+/**
+ * get the groups that a user is part of
+ *
+ * @return array Group
+ */
 
 function groups_groups_for_user($user = null)
 {
@@ -86,6 +145,11 @@ function groups_groups_for_user($user = null)
     return $db->getTable('Group')->findBy(array('user'=>$user));
 }
 
+/**
+ * get the groups that an Item is associated with
+ *
+ * @return array Item
+ */
 
 function groups_groups_for_item($item = null)
 {
@@ -115,14 +179,10 @@ function groups_groups_for_item($item = null)
 
 }
 
-function groups_join_button($group = null)
-{
-    if(!$group) {
-        $group = groups_get_current_group();
-    }
-
-    return "";
-}
+/**
+ * get a link to the group for display
+ * @return string
+ */
 
 function groups_link_to_group($group = null)
 {
@@ -132,6 +192,12 @@ function groups_link_to_group($group = null)
     $link = "<a href='". uri('groups/show/' . $group->id) ."' >{$group->title}</a>";
     return $link;
 }
+
+/**
+ * get the groups that a comment is associated with
+ *
+ * @return array Group
+ */
 
 function groups_groups_for_comment($comment)
 {
