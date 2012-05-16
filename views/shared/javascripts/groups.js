@@ -10,7 +10,7 @@ Omeka.Groups = {
         splitUrl = window.location.pathname.split('/');
         groupId = splitId[splitId.length - 1];
         itemId = splitUrl[splitUrl.length - 1];
-        jQuery.post('/commons/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
+        jQuery.post(Omeka.webRoot + '/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
     },
 
     addItemResponse: function(response, a, b) {
