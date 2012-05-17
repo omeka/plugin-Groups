@@ -2,7 +2,6 @@
 
 class GroupTable extends Omeka_Db_Table
 {
-    protected $_alias = 'g';
 
     public function applySearchFilters($select, $params)
     {
@@ -50,16 +49,16 @@ class GroupTable extends Omeka_Db_Table
         //copied from ItemTable::filterByTags
         foreach ($tags as $tagName) {
             $subSelect = new Omeka_Db_Select;
-            $subSelect->from(array('tg'=>$db->Taggings), array('id'=>'tg.relation_id'))
-                ->joinInner(array('t'=>$db->Tag), 't.id = tg.tag_id', array())
-                ->where('t.name = ? AND tg.`type` = "Group"', trim($tagName));
+            $subSelect->from(array('taggings'=>$db->Taggings), array('id'=>'taggings.relation_id'))
+                ->joinInner(array('tag'=>$db->Tag), 'tag.id = taggings.tag_id', array())
+                ->where('tag.name = ? AND taggings.`type` = "Group"', trim($tagName));
         }
-        $select->where('g.id IN (' . (string) $subSelect . ')');
+        $select->where('groups.id IN (' . (string) $subSelect . ')');
     }
 
     public function filterByVisibility($select, $visibility)
     {
-        $select->where("g.visibility = ? ", $visibility);
+        $select->where("groups.visibility = ? ", $visibility);
     }
 
     public function filterByMembership($select, $user)
@@ -74,11 +73,11 @@ class GroupTable extends Omeka_Db_Table
         $db = $this->getDb();
         $prop = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
 
-        $select->join(array('rr'=>$db->RecordRelationsRelation), 'g.id = rr.subject_id', array());
-        $select->where("rr.subject_record_type = 'Group'");
-        $select->where("rr.property_id = " . $prop->id);
-        $select->where("rr.object_record_type = 'User'");
-        $select->where("rr.object_id = " . $userId);
+        $select->join(array('record_relations_relations'=>$db->RecordRelationsRelation), 'groups.id = record_relations_relations.subject_id', array());
+        $select->where("record_relations_relations.subject_record_type = 'Group'");
+        $select->where("record_relations_relations.property_id = " . $prop->id);
+        $select->where("record_relations_relations.object_record_type = 'User'");
+        $select->where("record_relations_relations.object_id = " . $userId);
     }
 
     public function filterByHasItem($select, $item, $negate = false)
@@ -91,16 +90,16 @@ class GroupTable extends Omeka_Db_Table
         $db = $this->getDb();
         $pred = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(DCTERMS, 'references');
         if($negate) {
-            $joinCondition = 'g.id != rr.subject_id';
+            $joinCondition = 'groups.id != record_relations_relations.subject_id';
         } else {
-            $joinCondition = 'g.id = rr.subject_id';
+            $joinCondition = 'groups.id = record_relations_relations.subject_id';
         }
 
-        $select->join(array('rr'=>$db->RecordRelationsRelation), $joinCondition , array());
-        $select->where("rr.subject_record_type = 'Group'");
-        $select->where("rr.property_id = " . $pred->id);
-        $select->where("rr.object_record_type = 'Item'");
-        $select->where("rr.object_id = " . $itemId);
+        $select->join(array('record_relations_relations'=>$db->RecordRelationsRelation), $joinCondition , array());
+        $select->where("record_relations_relations.subject_record_type = 'Group'");
+        $select->where("record_relations_relations.property_id = " . $pred->id);
+        $select->where("record_relations_relations.object_record_type = 'Item'");
+        $select->where("record_relations_relations.object_id = " . $itemId);
 
     }
 
@@ -116,11 +115,11 @@ class GroupTable extends Omeka_Db_Table
         $tags = explode(get_option('tag_delimiter'), $terms);
         foreach ($tags as $tagName) {
             $subSelect = new Omeka_Db_Select;
-            $subSelect->from(array('tg'=>$db->Taggings), array('id'=>'tg.relation_id'))
-                ->joinInner(array('t'=>$db->Tag), 't.id = tg.tag_id', array())
-                ->where('t.name = ? AND tg.`type` = "Group"', trim($tagName));
+            $subSelect->from(array('taggings'=>$db->Taggings), array('id'=>'taggings.relation_id'))
+                ->joinInner(array('tags'=>$db->Tag), 'tags.id = taggings.tag_id', array())
+                ->where('tags.name = ? AND taggings.type = "Group"', trim($tagName));
         }
-        $select->orWhere('g.id IN (' . (string) $subSelect . ')');
+        $select->orWhere('groups.id IN (' . (string) $subSelect . ')');
     }
 
 }

@@ -52,6 +52,9 @@ function groups_tags_for_group($group = null)
 
 function groups_tags_list_for_group($group = null)
 {
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
     $tags = groups_tags_for_group($group);
     $html = "<ul class='tags'>";
     foreach($tags as $tag) {
@@ -60,6 +63,29 @@ function groups_tags_list_for_group($group = null)
     $html .= "</ul>";
     return $html;
 }
+
+/**
+ * get the tags ON a group as a string
+ * this is not the tags on Items in a groups, just the tags on a group!
+ *
+ * @return string html <ul>
+ */
+
+function groups_tags_string_for_group($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    $tags = groups_tags_for_group($group);
+    $string = "";
+    foreach($tags as $tag) {
+        $string .= "{$tag->name},";
+    }
+
+    return $string;
+}
+
+
 
 /**
  * get the number of items associated with a group

@@ -19,6 +19,11 @@ class Groups_GroupController extends Omeka_Controller_Action
                     ->initContext();
     }
 
+    public function indexAction()
+    {
+        $this->redirect->goto('groups/browse');
+    }
+
     public function browseAction()
     {
         parent::browseAction();
@@ -134,8 +139,9 @@ class Groups_GroupController extends Omeka_Controller_Action
         $form = new GroupForm();
         $this->view->form = $form;
         $group = $this->findById();
-
-        $form->setDefaults($group->toArray());
+        $defaults = $group->toArray();
+        $defaults['tags'] = groups_tags_string_for_group($group);
+        $form->setDefaults($defaults);
         $this->view->form = $form;
 
         if(!empty($_POST)) {
