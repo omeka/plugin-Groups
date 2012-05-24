@@ -89,7 +89,7 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $group= $this->findById();
         $group->addMember($user);
-        $response = json_encode('ok');
+        $response = array('status'=>'ok');
         $this->_helper->json($response);
     }
 
@@ -101,17 +101,18 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user = $this->getTable('User')->find($userId);
         $group = $this->getTable()->find($groupId);
         $group->approveMember($user);
-        $response = json_encode('ok');
+        $response = array('status'=>'ok');
         $this->_helper->json($response);
-
     }
 
 
     public function removeMemberAction()
     {
+        $userId = $this->getRequest()->getParam('user');
+        $user = get_db()->getTable('User')->find($userId);
         $group= $this->findById();
         $group->removeMember($user);
-        $response = json_encode('ok');
+        $response = array('status'=>'ok');
         $this->_helper->json($response);
 
     }

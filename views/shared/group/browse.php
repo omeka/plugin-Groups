@@ -10,7 +10,7 @@ head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 <?php endif; ?>
 
 <?php echo new GroupsSearchForm(); ?>
-<?php echo tag_cloud($this->tags, 'groups'); ?>
+<?php echo tag_cloud($this->tags, 'browse'); ?>
 
 <div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
 <div style="clear:left;"></div>
