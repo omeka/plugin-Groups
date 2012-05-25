@@ -207,7 +207,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'object_record_type' => 'Comment',
             'object_id' => $comment->id,
             'public' => $public,
-            'property_id' => $ownsComment->id // need a property: commons:hasComment? or something from sioc?
+            'property_id' => $ownsComment->id
 
         );
         foreach($groupIds as $id) {
@@ -252,17 +252,17 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             //first, just get a connection to the relation
             $db = get_db();
             $select->joinLeft(array('rr'=>$db->RecordRelationsRelation),
-                            "rr.object_id = ct.id AND rr.object_record_type = 'Comment' ", array()
+                            "rr.object_id = comments.id AND rr.object_record_type = 'Comment' ", array()
                             );
             //$select->where("rr.object_record_type = 'Comment'");
 
             $has_member = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-            $select->join(array('rrr'=>$db->RecordRelationsRelation),
-                            ' (  rr.subject_id = rrr.subject_id ' .
-                            'AND rrr.subject_record_type = "Group" ' .
-                            'AND rrr.property_id = ' . $has_member->id .' ' .
-                            'AND rrr.object_record_type = "User" ' .
-                            'AND ( ( rr.public = 1 ) OR  ( rrr.object_id = ' . $userId  . ') ) ) ' .
+            $select->join(array('record_relations_relations'=>$db->RecordRelationsRelation),
+                            ' (  rr.subject_id = record_relations_relations.subject_id ' .
+                            'AND record_relations_relations.subject_record_type = "Group" ' .
+                            'AND record_relations_relations.property_id = ' . $has_member->id .' ' .
+                            'AND record_relations_relations.object_record_type = "User" ' .
+                            'AND ( ( rr.public = 1 ) OR  ( record_relations_relations.object_id = ' . $userId  . ') ) ) ' .
                             'OR ( rr.id IS NULL)',
                             array()
                             );
