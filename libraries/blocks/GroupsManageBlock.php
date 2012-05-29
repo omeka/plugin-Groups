@@ -19,7 +19,8 @@ class GroupsManageBlock extends Blocks_Block_Abstract
         $isOwner = $group->isOwnedBy($currUser);
         if($group->hasMember($currUser) ) {
             if($isOwner) {
-                if(count($group->memberRequests() === 0)) {
+                $users = $group->memberRequests();
+                if(count($users) == 0) {
                     $html = "<p>No pending membership requests</p>";
                 } else {
                     $html = "<p>Pending Membership Requests</p>";

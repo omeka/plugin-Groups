@@ -143,6 +143,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function memberRequests()
     {
+
         $params = $this->buildProps('User', OMEKA, 'has_pending_member');
         $users = get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
         return $users;
