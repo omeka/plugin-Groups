@@ -16,10 +16,11 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 'join',
                 );
 
-    private $closedPrivileges = array();
+    private $closedPrivileges = array('request');
 
     private $publicPrivileges = array(
                 'items',
+                'request'
                 );
 
 

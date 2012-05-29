@@ -144,6 +144,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'join',
                             'join-others',
                             'remove-member',
+                            'request',
                             'approve-request',
                             'quit'
                             );
