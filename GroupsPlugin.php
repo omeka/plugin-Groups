@@ -334,6 +334,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $user = current_user();
         $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $widget = array('label' => 'Groups');
+        $widget['content'] = "<p><a href='" . uri('groups/add') . "'>Add a group</a></p>";
         foreach($groups as $group) {
             $widget['content'] .= "<h3>";
             $widget['content'] .= groups_link_to_group($group);
