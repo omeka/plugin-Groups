@@ -234,3 +234,17 @@ function groups_groups_for_comment($comment)
     );
     return get_db()->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
 }
+
+
+
+function groups_group($field, $options = array(), $group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+
+    //ignoring options for a while in anticipation of Omeka issue #187
+    return html_escape($group->$field);
+}
+
+
