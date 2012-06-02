@@ -10,19 +10,7 @@ head(array());
     <?php endif; ?>
 
     <p class='groups-type'>Type: <?php echo groups_group('visibility'); ?>
-    <?php switch(groups_group('visibility')) {
-        case 'public':
-            echo " -- Anyone may join and see all items";
-        break;
-        case 'open':
-            echo " -- Anyone can see items, but approval is required to join";
-        break;
-        case 'closed':
-            echo " -- Approval is required to join; items only visible to members";
-        break;
-
-    }
-    ?>
+    <?php echo groups_group_visibility_text(); ?>
     </p>
     <div class='groups-description'><?php echo $group->description; ?></div>
     <?php echo groups_tags_list_for_group($group); ?>

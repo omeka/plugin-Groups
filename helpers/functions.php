@@ -247,4 +247,22 @@ function groups_group($field, $options = array(), $group = null)
     return html_escape($group->$field);
 }
 
+function groups_group_visibility_text($group = null, $options=array())
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
 
+    switch(groups_group('visibility', $options, $group)) {
+        case 'public':
+            return " -- Anyone may join and see all items";
+        break;
+        case 'open':
+            return " -- Anyone can see items, but approval is required to join";
+        break;
+        case 'closed':
+            return " -- Approval is required to join; items only visible to members";
+        break;
+    }
+
+}
