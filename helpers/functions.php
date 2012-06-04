@@ -219,22 +219,6 @@ function groups_link_to_group($group = null)
     return $link;
 }
 
-/**
- * get the groups that a comment is associated with
- *
- * @return array Group
- */
-
-function groups_groups_for_comment($comment)
-{
-    $params = array(
-        'subject_record_type' => 'Group',
-        'object_record_type' => 'Comment',
-        'object_id' => $comment->id
-    );
-    return get_db()->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
-}
-
 
 
 function groups_group($field, $options = array(), $group = null)
@@ -266,3 +250,35 @@ function groups_group_visibility_text($group = null, $options=array())
     }
 
 }
+
+/**
+ * get the groups that a comment is associated with
+ *
+ * @return array Group
+ */
+
+function groups_groups_for_comment($comment)
+{
+    $params = array(
+            'subject_record_type' => 'Group',
+            'object_record_type' => 'Comment',
+            'object_id' => $comment->id
+    );
+    return get_db()->getTable('RecordRelationsRelation')->findSubjectRecordsByParams($params);
+}
+
+
+function groups_comments_for_group($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    
+    $params = array(
+            'subject_record_type' => 'Group',
+            'object_record_type' => 'Comment',
+            'subject_id' => $group->id
+    );
+    return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
+}
+
