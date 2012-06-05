@@ -35,13 +35,12 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $rel = $this->newRelation($user, OMEKA, 'has_pending_member');
         $rel->user_id = $user->id;
         $rel->save();
+        $this->sendPendingMemberEmail($user);
     }
 
     public function approveMember($user)
     {
-
-        $params = $this->buildProps($user, OMEKA, 'has_pending_member');
-        $params['object_id'] = $user->id;
+        $params = $this->buildProps($user, OMEKA, 'has_pending_member');        
         $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);
         $rel->delete();
         $this->addMember($user);
@@ -143,11 +142,11 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function memberRequests()
     {
-
         $params = $this->buildProps('User', OMEKA, 'has_pending_member');
         $users = get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
         return $users;
     }
+    
 
     private function newRelation($object, $prefix, $localpart, $public = true)
     {
@@ -155,6 +154,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         //first, see if the relation already exists
         $record = get_db()->getTable('RecordRelationsRelation')->findOne($props);
         if($record) {
+            _log('exists');
             return false;
         }
 
@@ -164,6 +164,14 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return $rel;
     }
 
+    private function sendPendingMemberEmail($user)
+    {
+        $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
+        $body .= WEB_ROOT . "/groups/show/" . $this->id;
+        $email = $this->getEmailBase();
+        $email->setBodyText($body); 
+    }
+    
     private function sendNewMemberEmail($user)
     {
 
@@ -179,6 +187,19 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     }
 
+    private function getEmailBase($to = null)
+    {
+        $mail = new Zend_Mail();
+        $from = get_option('administrator_email');
+        $mail->setFrom($from, "Omeka Commons");
+        if(!$to) {
+            $owner = $this->getOwner();
+            $mail->addTo($owner->email, $this->title . " Group Owner");            
+        }        
+        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
+        return $mail;         
+    }
+    
     protected function afterSaveForm($post)
     {
         //Add the tags after the form has been saved

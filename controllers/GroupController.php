@@ -78,8 +78,13 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $user =  current_user();
         $group = $this->findById();
-        $group->addPendingMember($user);
-        $responseArray = array('status'=>'ok');
+        try {
+            $group->addPendingMember($user);
+            $responseArray = array('status'=>'ok');
+        } catch (Exception $e) {
+            $responseArray = array('status'=>'error');
+        }
+        
         $response = json_encode($responseArray);
         $this->_helper->json($response);
 
