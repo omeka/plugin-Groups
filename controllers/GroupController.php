@@ -59,7 +59,8 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user =  current_user();
         $group = $this->findById();
         $group->addMember($user);
-        $response = json_encode('ok');
+        $responseArray = array('status'=>'ok');
+        $response = json_encode($responseArray);
         $this->_helper->json($response);
     }
 
@@ -103,10 +104,11 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $userId = $_POST['userId'];
         $groupId = $_POST['groupId'];
-        $user = $this->getTable('User')->find($userId);
-        $group = $this->getTable()->find($groupId);
+        $user = $this->getTable('User')->find($userId);        
+        $group = $this->getTable()->find($groupId);        
         $group->approveMember($user);
-        $response = array('status'=>'ok');
+        $responseArray = array('status'=>'ok');
+        $response = json_encode($responseArray);
         $this->_helper->json($response);
     }
 

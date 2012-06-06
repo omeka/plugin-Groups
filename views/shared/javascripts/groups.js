@@ -61,10 +61,17 @@ Omeka.Groups = {
         userId = groupId = splitId[splitId.length - 1];
         splitUrl = window.document.URL.split('/');
         groupId = splitUrl[splitUrl.length - 1];
-        jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.requestResponse);
-        window.location.reload(true);
+        jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.approveRequestResponse);
+        //jQuery.post(Omeka.webRoot + '/groups/approve-request/', null, Omeka.Groups.approveRequestResponse);
+        
     },
 
+    approveRequestResponse: function(response, a, b) {
+        var responseJson = JSON.parse(response);
+        alert(responseJson);
+        window.location.reload(true);
+    },
+    
     filterGroups: function() {
         splitId = this.id.split('-');
         itemId = splitId[splitId.length -1];
