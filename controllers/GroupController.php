@@ -25,10 +25,10 @@ class Groups_GroupController extends Omeka_Controller_Action
     }
 
     public function browseAction()
-    {
-        parent::browseAction();
+    {        
         $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
         $this->view->tags = $tags;
+        parent::browseAction();
     }
 
 

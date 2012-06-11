@@ -170,6 +170,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase();
         $email->setBodyText($body); 
+        $email->send();
     }
     
     private function sendNewMemberEmail($user)
