@@ -35,7 +35,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $rel = $this->newRelation($user, OMEKA, 'has_pending_member');
         $rel->user_id = $user->id;
         $rel->save();
-        $this->sendPendingMemberEmail($user);
     }
 
     public function approveMember($user)
@@ -58,13 +57,12 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             return true;
         }
         return false;
-
     }
 
     public function removeItem($item)
     {
         $params = $this->buildProps($item, DCTERMS, 'references');
-        $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);
+        $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);        
         $rel->delete();
     }
 
@@ -154,7 +152,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         //first, see if the relation already exists
         $record = get_db()->getTable('RecordRelationsRelation')->findOne($props);
         if($record) {
-            _log('exists');
             return false;
         }
 
@@ -164,7 +161,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return $rel;
     }
 
-    private function sendPendingMemberEmail($user)
+    public function sendPendingMemberEmail($user)
     {
         $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
@@ -173,27 +170,54 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $email->send();
     }
     
-    private function sendNewMemberEmail($user)
+    public function sendNewMemberEmail($user)
     {
-
+        $body = "A new member {$user->name} has joined the {$this->title} group on Omeka Commons.";
+        $body .= WEB_ROOT . "/groups/show/" . $this->id;
+        $email = $this->getEmailBase();
+        $email->setBodyText($body);
+        $email->send();        
     }
 
-    private function sendMemberQuitEmail($user)
+    public function sendMemberLeftEmail($user, $to=null)
     {
-
+        $body = "{$user->name} has left the {$this->title} group on Omeka Commons.";
+        $body .= WEB_ROOT . "/groups/show/" . $this->id;
+        $email = $this->getEmailBase($to);
+        $email->setBodyText($body);
+        $email->send();
     }
 
-    private function sendNewItemEmail($item)
+    public function sendNewItemEmail($item, $to = null)
     {
-
+        $body = "A new item been added to the {$this->title} group on Omeka Commons.";
+        $body .= item('Dublin Core', 'Title', array(), $item);
+        $body .= WEB_ROOT . "/groups/show/" . $this->id;
     }
 
+    public function sendMemberApprovedEmail($user)
+    {
+        $body = "Your request to join {$this->title} on Omeka Commons has been approved.";
+        $email = $this->getEmailBase(array($user));
+        $email->setBodyText($body);
+        $email->send();        
+    }
+    
     private function getEmailBase($to = null)
     {
         $mail = new Zend_Mail();
         $from = get_option('administrator_email');
         $mail->setFrom($from, "Omeka Commons");
-        if(!$to) {
+        if($to) {
+           //$to could be either an array of email address or an array of users
+           foreach($to as $data) {
+               if(is_string($data)) {
+                   $mail->addTo($data, $this->title . " Group Owner");
+               } else {
+                   $mail->addTo($data->email, $this->title . " Group Owner");
+               }               
+           } 
+        } else {
             $owner = $this->getOwner();
             $mail->addTo($owner->email, $this->title . " Group Owner");            
         }        
@@ -206,7 +230,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         //Add the tags after the form has been saved
         $current_user = Omeka_Context::getInstance()->getCurrentUser();
         $this->applyTagString($post['tags'], $current_user->Entity, true);
-
     }
 
     private function buildProps($record, $prefix, $localpart){

@@ -69,9 +69,13 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $user =  current_user();
         $group = $this->findById();
-        $group->removeMember($user);
+        $group->removeMember($user);        
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
+
+        //@TODO change this to looking up members who have opted in to notifications when that is built
+        $to = $this->getMembers();
+        $group->sendMemberLeftEmail();
         $this->_helper->json($response);
     }
 
@@ -85,7 +89,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         } catch (Exception $e) {
             $responseArray = array('status'=>'error');
         }
-        
+        $group->sendPendingMemberEmail();
         $response = json_encode($responseArray);
         $this->_helper->json($response);
 
@@ -109,6 +113,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $group->approveMember($user);
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
+        $group->sendMemberApprovedEmail($user);
         $this->_helper->json($response);
     }
 
@@ -181,6 +186,10 @@ class Groups_GroupController extends Omeka_Controller_Action
             $responseJson['status'] = 'fail';
         }
         $response = json_encode($responseJson);
+        
+        //@TODO change this to looking up members who have opted in to notifications when that is built
+        $to = $this->getMembers();        
+        $group->sendNewItemEmail($item, $to);        
         $this->_helper->json($response);
     }
 

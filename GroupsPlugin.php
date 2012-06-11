@@ -167,8 +167,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 )
             )
         );
-                 
-        
+                         
         $router->addRoute(
             'group-browse',
             new Zend_Controller_Router_Route(
@@ -180,10 +179,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                         'page' => '1'
                 )
             )
-        );
-        
-              
- 
+        ); 
     }    
     
     public function hookAfterSaveComment($comment)
