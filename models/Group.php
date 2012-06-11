@@ -193,6 +193,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body = "A new item been added to the {$this->title} group on Omeka Commons.";
         $body .= item('Dublin Core', 'Title', array(), $item);
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
+        $email = $this->getEmailBase($to);
+        $email->setBodyText($body);
+        $email->send();        
     }
 
     public function sendMemberApprovedEmail($user)
