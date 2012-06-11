@@ -6,6 +6,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'install',
         'uninstall',
         'define_acl',
+        'define_routes',
         'public_theme_header',
         'commenting_append_to_form',
         'after_save_comment',
@@ -151,6 +152,40 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
+    public function hookDefineRoutes($router)
+    {      
+
+        $router->addRoute(
+            'group-show',
+            new Zend_Controller_Router_Route(
+                'groups/:action/:id',
+                array(
+                        'module'        => 'groups',
+                        'controller'    => 'group',
+                        'action'		=> 'show',
+                        'id'			=> ''
+                )
+            )
+        );
+                 
+        
+        $router->addRoute(
+            'group-browse',
+            new Zend_Controller_Router_Route(
+                'groups/browse/:page',
+                array(
+                        'module'        => 'groups',
+                        'controller'    => 'group',
+                        'action'		=> 'browse',
+                        'page' => '1'
+                )
+            )
+        );
+        
+              
+ 
+    }    
+    
     public function hookAfterSaveComment($comment)
     {
         //build relations between comment and groups

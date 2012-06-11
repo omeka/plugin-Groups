@@ -215,7 +215,7 @@ function groups_link_to_group($group = null)
     if(!$group) {
         $group = groups_get_current_group();
     }
-    $link = "<a href='". uri('groups/show/' . $group->id) ."' >{$group->title}</a>";
+    $link = "<a href='".  record_uri($group, 'show') ."' >{$group->title}</a>";
     return $link;
 }
 
@@ -238,10 +238,10 @@ function groups_group_visibility_text($group = null, $options=array())
     }
 
     switch(groups_group('visibility', $options, $group)) {
-        case 'public':
+        case 'open':
             return " -- Anyone may join and see all items";
         break;
-        case 'open':
+        case 'public':
             return " -- Anyone can see items, but approval is required to join";
         break;
         case 'closed':
