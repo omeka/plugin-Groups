@@ -183,7 +183,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendMemberLeftEmail($user, $to=null)
     {
-        $body = "{$user->name} has left the {$this->title} group on Omeka Commons.";
+        $body = "{$user->name} has left the {$this->title} group on Omeka Commons. ";
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase($to);
         $email->setSubject("A member has left {$this->title} on Omeka Commons");
@@ -193,7 +193,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendNewItemEmail($item, $to = null)
     {
-        $body = "A new item been added to the {$this->title} group on Omeka Commons.";
+        $body = "A new item been added to the {$this->title} group on Omeka Commons. ";
         $body .= item('Dublin Core', 'Title', array(), $item);
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase($to);
@@ -204,7 +204,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendMemberApprovedEmail($user)
     {
-        $body = "Your request to join {$this->title} on Omeka Commons has been approved.";
+        $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
         $email = $this->getEmailBase(array($user));
         $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved");
         $email->setBodyText($body);

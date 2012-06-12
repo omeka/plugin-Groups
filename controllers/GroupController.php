@@ -89,7 +89,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         } catch (Exception $e) {
             $responseArray = array('status'=>'error');
         }
-        $group->sendPendingMemberEmail();
+        $group->sendPendingMemberEmail($user);
         $response = json_encode($responseArray);
         $this->_helper->json($response);
 
