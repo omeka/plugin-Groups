@@ -20,14 +20,16 @@ class GroupsManageBlock extends Blocks_Block_Abstract
         $html = "<p>Type: " . groups_group('visibility') . groups_group_visibility_text() . "</p>";
         if($group->hasMember($currUser) ) {
             if($isOwner) {
-                $users = $group->memberRequests();
-                if(count($users) == 0) {
-                    $html .= "<p>No pending membership requests</p>";
-                } else {
-                    $html .= "<p>Pending Membership Requests</p>";
-                    $html .= "<ul class='groups-pending-requests'>";
-                    $html .= $this->listPendingRequests($group);
-                    $html .= "</ul>";
+                if (groups_group('visibility') != 'open') {
+                    $users = $group->memberRequests();
+                    if(count($users) == 0) {
+                        $html .= "<p>No pending membership requests</p>";
+                    } else {
+                        $html .= "<p>Pending Membership Requests</p>";
+                        $html .= "<ul class='groups-pending-requests'>";
+                        $html .= $this->listPendingRequests($group);
+                        $html .= "</ul>";
+                    }
                 }
             } else {
                 $html .= "<p class='groups-quit-button groups-button' id='groups-id-{$group->id}'>Leave</p>";
