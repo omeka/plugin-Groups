@@ -74,7 +74,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $response = json_encode($responseArray);
 
         //@TODO change this to looking up members who have opted in to notifications when that is built
-        $to = $this->getMembers();
+        $to = $group->getMembers();
         $group->sendMemberLeftEmail();
         $this->_helper->json($response);
     }
@@ -188,7 +188,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $response = json_encode($responseJson);
         
         //@TODO change this to looking up members who have opted in to notifications when that is built
-        $to = $this->getMembers();        
+        $to = $group->getMembers();        
         $group->sendNewItemEmail($item, $to);        
         $this->_helper->json($response);
     }
