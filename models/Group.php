@@ -166,6 +166,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase();
+        $email->setSubject("A new member wants to join {$this->title} on Omeka Commons");
         $email->setBodyText($body); 
         $email->send();
     }
@@ -175,6 +176,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body = "A new member {$user->name} has joined the {$this->title} group on Omeka Commons.";
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase();
+        $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
         $email->setBodyText($body);
         $email->send();        
     }
@@ -184,6 +186,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body = "{$user->name} has left the {$this->title} group on Omeka Commons.";
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase($to);
+        $email->setSubject("A member has left {$this->title} on Omeka Commons");
         $email->setBodyText($body);
         $email->send();
     }
@@ -194,6 +197,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body .= item('Dublin Core', 'Title', array(), $item);
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase($to);
+        $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
         $email->setBodyText($body);
         $email->send();        
     }
@@ -202,6 +206,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     {
         $body = "Your request to join {$this->title} on Omeka Commons has been approved.";
         $email = $this->getEmailBase(array($user));
+        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved");
         $email->setBodyText($body);
         $email->send();        
     }
