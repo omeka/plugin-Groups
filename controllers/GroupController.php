@@ -179,6 +179,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $itemId = $_POST['itemId'];
         $groupId = $_POST['groupId'];
         $group = $this->getTable()->find($groupId);
+        $item = $this->getTable('Item')->find($itemId);
         if($group->addItem($itemId)) {
             $responseJson['itemId'] = $itemId;
             $responseJson['groupId'] = $groupId;
