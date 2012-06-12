@@ -75,7 +75,7 @@ class Groups_GroupController extends Omeka_Controller_Action
 
         //@TODO change this to looking up members who have opted in to notifications when that is built
         $to = $group->getMembers();
-        $group->sendMemberLeftEmail();
+        $group->sendMemberLeftEmail($user, $to);
         $this->_helper->json($response);
     }
 
