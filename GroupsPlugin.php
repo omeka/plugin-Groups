@@ -46,7 +46,26 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
                 ";
         $db->query($sql);
-
+        
+        $sql = "
+                CREATE TABLE IF NOT EXISTS `$db->GroupMembership` (
+                  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                  `group_id` int(10) unsigned NOT NULL,
+                  `user_id` int(10) unsigned NOT NULL,
+                  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+                  `is_owner` tinyint(1) NOT NULL DEFAULT '0',
+                  `is_pending` tinyint(1) NOT NULL DEFAULT '0',
+                  `notify_member_joined` tinyint(1) NOT NULL DEFAULT '1',
+                  `notify_member_left` tinyint(1) NOT NULL DEFAULT '1',
+                  `notify_item_new` tinyint(1) NOT NULL DEFAULT '1',
+                  `notify_item_deleted` int(11) NOT NULL DEFAULT '1',
+                  PRIMARY KEY (`id`),
+                  KEY `group_id` (`group_id`),
+                  KEY `user_id` (`user_id`),
+                ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;                        
+                ";
+        $db->query($sql);
+        
         $blocksArray = array(
             'GroupsItemBlock',
             'GroupsAddItemBlock',
@@ -145,10 +164,13 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'join-others',
                             'remove-member',
                             'request',
+                            'my-groups',
+                            'administration',
+                            'invitations',
                             'approve-request',
                             'quit'
                             );
-
+        
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
@@ -335,6 +357,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $widget = array('label' => 'Groups');
         $widget['content'] = "<p><a href='" . uri('groups/add') . "'>Add a group</a></p>";
+        $widget['content'] .= "<p><a href='" . uri('groups/my-groups') . "'>Manage your groups</a></p>";
         foreach($groups as $group) {
             $widget['content'] .= "<h3>";
             $widget['content'] .= groups_link_to_group($group);

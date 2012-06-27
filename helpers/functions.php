@@ -119,7 +119,7 @@ function groups_member_count($group = null)
  * @return array Users in a group
  */
 
-function groups_members_for_group($group = null)
+function groups_members_for_group($group = null, $sort = array())
 {
     if(!$group) {
         $group = groups_get_current_group();
@@ -168,7 +168,7 @@ function groups_groups_for_user($user = null)
         return array();
     }
     $db = get_db();
-    return $db->getTable('Group')->findBy(array('user'=>$user));
+    return $db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0));
 }
 
 /**
@@ -231,6 +231,32 @@ function groups_group($field, $options = array(), $group = null)
     return html_escape($group->$field);
 }
 
+function groups_get_membership($group = null, $user = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    
+    if(!$user) {
+        $user = current_user();
+    }
+    $table = get_db()->getTable('GroupMembership');
+    $select = $table->getSelectForFindBy(array('user_id'=>$user->id, 'group_id'=>$group->id));
+    return $table->fetchObject($select);
+    
+}
+
+function groups_get_memberships($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    
+    return get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$group->id));
+    
+    
+}
+
 function groups_group_visibility_text($group = null, $options=array())
 {
     if(!$group) {
@@ -250,6 +276,30 @@ function groups_group_visibility_text($group = null, $options=array())
     }
 
 }
+
+function groups_role_confirm($group = null, $membership=null, $role = 'admin')
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    
+    if(!$membership) {
+        $membership = groups_get_membership($group);
+    }
+    
+    $confirmationTable = get_db()->getTable('GroupConfirmation');
+    $select = $confirmationTable->getSelectForCount();
+    $select->where("group_id = ?", $group->id);
+    $select->where("membership_id = ?", $membership->id);
+    $select->where("type =?", $role);
+    $count =  $confirmationTable->count(array('group_id'=>$group->id,
+                                            'membership_id'=>$membership->id,
+                                            'type'=>$role            
+            ));
+    return $count;
+}
+
+/* Commenting-related functions */
 
 /**
  * get the groups that a comment is associated with
@@ -281,4 +331,5 @@ function groups_comments_for_group($group = null)
     );
     return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
 }
+
 

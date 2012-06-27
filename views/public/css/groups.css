@@ -1,3 +1,7 @@
+label.groups {
+    display: inline;
+}
+
 .groups-button { cursor: pointer; }
 
 li.groups-item-add { cursor: pointer; }
@@ -21,4 +25,24 @@ li.groups-comment-group {
     list-style: none;
     display: inline;
     padding-left: 6px;
+}
+
+div.groups-group > h3 {
+    float: left;
+    width: 90px;
+    margin-top: 0;
+}
+
+div.group-options {
+    padding-left: 90px;
+}
+
+
+div.group-membership {
+    padding-left: 90px;
+    padding-top: 20px;
+}
+
+div.groups-group {
+    border-top: 1px solid grey;
 }

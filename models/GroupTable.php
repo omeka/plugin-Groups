@@ -71,13 +71,13 @@ class GroupTable extends Omeka_Db_Table
         }
 
         $db = $this->getDb();
-        $prop = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-
-        $select->join(array('record_relations_relations'=>$db->RecordRelationsRelation), 'groups.id = record_relations_relations.subject_id', array());
-        $select->where("record_relations_relations.subject_record_type = 'Group'");
-        $select->where("record_relations_relations.property_id = " . $prop->id);
-        $select->where("record_relations_relations.object_record_type = 'User'");
-        $select->where("record_relations_relations.object_id = " . $userId);
+        $membershipAlias = $db->getTable('GroupMembership')->getTableAlias();
+        $alias = $this->getTableAlias();        
+        $select->join(array($membershipAlias=>$db->GroupMembership), 
+                        "$alias.id = $membershipAlias.group_id",
+                        array()
+                        );
+        $select->where("$membershipAlias.user_id = $userId");        
     }
 
     public function filterByHasItem($select, $item, $negate = false)
@@ -120,6 +120,6 @@ class GroupTable extends Omeka_Db_Table
                 ->where('tags.name = ? AND taggings.type = "Group"', trim($tagName));
         }
         $select->orWhere('groups.id IN (' . (string) $subSelect . ')');
-    }
+    }  
 
 }
