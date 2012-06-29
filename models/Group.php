@@ -24,6 +24,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $membership->is_pending = $pending;
         if($role) {
             $membership->$role = 1;
+        } else {
+            $membership->is_admin = 0;
+            $membership->is_owner = 0;
         }
         $membership->save();
     }
@@ -109,7 +112,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         if(!$user->id) {
             return false;
         }
-        $count = get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>0, 'user'=>$user->id));
+        $count = get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>0, 'user_id'=>$user->id));
         if($count == 0) {
             return false;
         }
@@ -165,8 +168,8 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body .= WEB_ROOT . "/groups/show/" . $this->id;
         $email = $this->getEmailBase($to);
         $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
-        $email->setBodyText($body);
-        $email->send();        
+        $email->setBodyText($body);        
+        $email->send();
     }
 
     public function sendMemberLeftEmail($user, $to=null)
@@ -198,6 +201,23 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $email->setBodyText($body);
         $email->send();        
     }
+
+    public function sendInvitationEmail($to, $message, $sender)
+    {
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
+        $mail->setFrom(get_option('administrator_email'), "Omeka Commons");
+        foreach($to as $email) {
+            $mail->addTo($email);
+        }
+        $subjectText = "An invitation to join the group '{$this->title}' in the Omeka Commons";
+        $mail->setSubject($subjectText);        
+        $body = "{$sender->name} has invited you to join the group {$this->title} in the Omeka Commons. Here's why:\n";
+        $body .= $mesage;
+        $mail->setBodyText($body);
+        $mail->send();
+        
+    }
     
     private function getEmailBase($to = null)
     {
@@ -217,7 +237,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $owner = $this->getOwner();
             $mail->addTo($owner->email, $this->title . " Group Owner");            
         }        
-        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
+        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());      
         return $mail;         
     }
     

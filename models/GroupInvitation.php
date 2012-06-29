@@ -24,6 +24,10 @@ class GroupInvitation extends Omeka_Record
     public function getSender()
     {
         return $this->getTable('User')->find($this->sender_id);
-    }
+    }    
         
+    public function beforeInsert()
+    {
+        $this->created = Zend_Date::now()->toString(self::DATE_FORMAT);
+    }
 }

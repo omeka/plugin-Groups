@@ -171,6 +171,22 @@ function groups_groups_for_user($user = null)
     return $db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0));
 }
 
+function groups_invitations_for_user($user = null)
+{
+    if(!$user) {
+        $user = current_user();
+    }
+    
+    if(!$user) {
+        return array();
+    }
+
+    $db = get_db();
+    return $db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));
+    
+}
+
+
 /**
  * get the groups that an Item is associated with
  *
@@ -240,10 +256,16 @@ function groups_get_membership($group = null, $user = null)
     if(!$user) {
         $user = current_user();
     }
-    $table = get_db()->getTable('GroupMembership');
-    $select = $table->getSelectForFindBy(array('user_id'=>$user->id, 'group_id'=>$group->id));
-    return $table->fetchObject($select);
     
+    if(is_numeric($user)) {
+        $userId = $user;
+    } else {
+        $userId = $user->id;
+    }
+    
+    $table = get_db()->getTable('GroupMembership');
+    $select = $table->getSelectForFindBy(array('user_id'=>$userId, 'group_id'=>$group->id));
+    return $table->fetchObject($select);    
 }
 
 function groups_get_memberships($group = null)

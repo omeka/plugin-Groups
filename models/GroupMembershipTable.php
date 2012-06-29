@@ -14,9 +14,7 @@ class GroupMembershipTable extends Omeka_Db_Table
             }
             if(in_array($param, $columns)) {
                 $select->where("$alias.$param = ?", $value );
-            }
-
-_log($select);            
+            }      
         }
     }
     
@@ -47,7 +45,7 @@ _log($select);
         $select = $userTable->getSelect();
         $select->join(array($alias=>$db->GroupMembership), "$userTableAlias.id = $alias.user_id", array());
         $select->where("$alias.group_id = $groupId");
-        $select->where("$alias.$notification = 1");
+        $select->where("$alias.$notification = 1");        
         return $userTable->fetchObjects($select);        
     }
 

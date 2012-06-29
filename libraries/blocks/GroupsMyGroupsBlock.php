@@ -14,17 +14,26 @@ class GroupsMyGroupsBlock extends Blocks_Block_Abstract
 
     public function isEmpty()
     {
-        return empty($this->groups);
+        return ! current_user();
     }
 
     public function render()
     {
-        $html = "<ul class='groups-my-groups'>";
-        foreach($this->groups as $group) {
-            $html .= "<li>" . groups_link_to_group($group) . "</li>";
+        $html = "<p><a href='" . uri('groups/my-groups') . "'>Manage Groups</a></p>";
+        $invitations = groups_invitations_for_user();
+        if(!empty($invitations)) {
+            $html .= "<p>You have <a href='" . public_uri('groups/my-groups') . "'>pending invitations</a></p>";
+        }
+        if(empty($this->groups)) {
+            $html .= "<p>You do not belong to any groups. Why not <a href='" . public_uri('groups/add') . "'>Create one</a>?</p>";
+        } else {
+            $html .= "<ul class='groups-my-groups'>";
+            foreach($this->groups as $group) {
+                $html .= "<li>" . groups_link_to_group($group) . "</li>";
+            }            
+            $html .= "</ul>";            
         }
 
-        $html .= "</ul>";
         return $html;
     }
 }

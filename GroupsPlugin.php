@@ -61,9 +61,34 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   `notify_item_deleted` int(11) NOT NULL DEFAULT '1',
                   PRIMARY KEY (`id`),
                   KEY `group_id` (`group_id`),
-                  KEY `user_id` (`user_id`),
+                  KEY `user_id` (`user_id`)
                 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;                        
                 ";
+        $db->query($sql);
+        
+        $sql = "
+                CREATE TABLE IF NOT EXISTS `$db->GroupConfirmation` (
+                  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                  `group_id` int(10) unsigned NOT NULL,
+                  `membership_id` int(10) unsigned NOT NULL,
+                  `type` text COLLATE utf8_unicode_ci,
+                  PRIMARY KEY (`id`)
+                  ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+                        ";
+        $db->query($sql);
+        
+        
+        $sql = "
+        CREATE TABLE IF NOT EXISTS `$db->GroupInvitation` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `group_id` int(10) unsigned NOT NULL,
+            `user_id` int(10) unsigned NOT NULL,
+            `sender_id` int(10) unsigned NOT NULL,
+            `message` text COLLATE utf8_unicode_ci,
+            `created` timestamp,
+            PRIMARY KEY (`id`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+        ";        
         $db->query($sql);
         
         $blocksArray = array(
@@ -110,7 +135,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'description' => 'The object Comment is associated with the subject Group'
                         ),                    )
                 )
-
           );
 
         record_relations_install_properties($commonsProps);
@@ -123,6 +147,15 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $sql = "DROP TABLE IF EXISTS `$db->Group`;";
         $db->query($sql);
 
+        $sql = "DROP TABLE IF EXISTS `$db->GroupInvitation`;";
+        $db->query($sql);        
+        
+        $sql = "DROP TABLE IF EXISTS `$db->GroupConfirmation`;";
+        $db->query($sql);
+
+        $sql = "DROP TABLE IF EXISTS `$db->GroupMembership`;";
+        $db->query($sql);
+                
         $blocksArray = array(
             'GroupsItemBlock',
             'GroupsAddItemBlock',
@@ -146,7 +179,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
 
-        $roles = array(null, 'researcher', 'contributor', 'admin', 'super');
+        $roles = array( 'researcher', 'contributor', 'admin', 'super');
 
         if($acl->hasRole('guest')) {
             $roles[] = 'guest';

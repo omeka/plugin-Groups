@@ -16,10 +16,10 @@ class GroupsManageBlock extends Blocks_Block_Abstract
     {
         $group = groups_get_current_group();
         $currUser = current_user();
-        $isOwner = $group->isOwnedBy($currUser);
+        
         $html = "<p>Type: " . groups_group('visibility') . groups_group_visibility_text() . "</p>";
         if($group->hasMember($currUser) ) {
-            if($isOwner) {
+            if(has_permission($group, 'approve-request')) {
                 if (groups_group('visibility') != 'open') {
                     $users = $group->memberRequests();
                     if(count($users) == 0) {
@@ -31,7 +31,8 @@ class GroupsManageBlock extends Blocks_Block_Abstract
                         $html .= "</ul>";
                     }
                 }
-            } else {
+            } 
+            if(has_permission($group, 'quit')) {
                 $html .= "<p class='groups-quit-button groups-button' id='groups-id-{$group->id}'>Leave</p>";
                 $html .= "<script type='text/javascript'>";
                 $html .= "

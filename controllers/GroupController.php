@@ -57,16 +57,16 @@ class Groups_GroupController extends Omeka_Controller_Action
     public function joinAction()
     {
         $user =  current_user();
-        $group = $this->findById();
-        $group->addMember($user);
+        $group = $this->findById();        
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
-        $to = $group->findMembersForNotification('notify_member_joined');
+        $to = $group->findMembersForNotification('notify_member_joined');        
         try {
             $group->sendNewMemberEmail($to);
-        } catch (Exception $e) {
+        } catch (Exception $e) {            
             $responseArray = array('status'=>'error');
-        }        
+        }
+        $group->addMember($user);
         $this->_helper->json($response);
     }
 
@@ -184,53 +184,65 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     public function myGroupsAction()
     {
-        
+
         $user = current_user();
         $params = array(
-            'user' => $user
-        );
-        $groups = $this->_helper->db->getTable()->findBy($params);
-        $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));
-        
-        if(!empty($_POST)) {           
+                'user' => $user
+        );     
+        if(!empty($_POST['invitations'])) {      
             foreach($_POST['invitations'] as $id=>$options) {
                 $invitation = $this->findById($id, 'GroupInvitation');
                 foreach($options as $option=>$value) {
                     if($option == 'join') {
                         $invitation->Group->addMember($user);
-                        $to = $group->findMembersForNotification('notify_member_joined');
-                        $invitation->Group->sendNewMemberEmail($to);
+                        $to = $invitation->Group->findMembersForNotification('notify_member_joined');
+                        try {
+                            $invitation->Group->sendNewMemberEmail($to);
+                        } catch(Exception $e) {
+                            _log($e);
+                        }
+                        $invitation->delete();
                     }
                 }
             }
-            
+        }
+        if(!empty($_POST['groups'])) {
+  
             foreach($_POST['groups'] as $id=>$options) {
                 $group = $this->findById($id);
                 $membership = groups_get_membership($group);
                 $membership->unsetOptions();
                 foreach($options as $option=>$value) {
-                    $option = substr($option, 1, -1);                        
+            
                     switch($option) {
-                        case 'quit':
-                            $membership->delete();
-                        break;
-                        
-                        case 'submitted':
-                        //do nothing, just here to make the $_POST arrive when nothing is checked    
-                        break;
-                                                    
+            
+                        case "quit":
+                            $membership->delete();            
+                            break;
+            
+                        case "submitted":
+                            //do nothing, just here to make the $_POST arrive when nothing is checked
+                            break;
+            
                         default:
                             $membership->$option = 1;
                             if($confirmation = $membership->getConfirmation($option)) {
                                 $confirmation->delete();
                             }
-                        break;
+                            break;
                     }
-                }                   
-                $membership->save();           
-            }
+                }
+                if($membership->exists()) {
+                    $membership->save();
+                }
+                
+            }                
         }
+
         
+
+        $groups = $this->_helper->db->getTable()->findBy($params);
+        $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));        
         $this->view->groups = $groups;
         $this->view->invitations = $invitations;
     }
@@ -308,38 +320,43 @@ class Groups_GroupController extends Omeka_Controller_Action
                 unset($groups[$key]);
             }
         }
-        if(isset($_POST['invitations'])) {
-            $emails = explode(',', $_POST['invitations']['emails']);
-            $message = $_POST['invitations']['message'];
+        if(isset($_POST['emails'])) {
+            $emails = explode(',', $_POST['emails']);
+            $message = $_POST['message'];
             $userTable = $this->_helper->db->getTable('User');
             
             $nonUserEmails = array();
-            foreach($_POST['invitations']['groups'] as $groupId) {
-                foreach($emails as $index=>$email) {
+            foreach($_POST['groups'] as $groupId) {
+                $group = $this->getTable()->find($groupId);
+                foreach($emails as $index=>$email) {      
                     $email = trim($email);
                     $invitation = new GroupInvitation;
                     $user = $userTable->findByEmail(trim($email));
                     if($user) {
-                        $invitation->user_id = $user->id;
-                        $invitation->sender_id = $sender->id;
-                        $invitation->message = $message;
-                        $invitation->group_id = $groupId;
-                        $invitation->save();                                                
+                        if($group->hasMember($user)) {                            
+                            unset($emails[$index]);
+                        } else {              
+                            $invitation->user_id = $user->id;
+                            $invitation->sender_id = $sender->id;
+                            $invitation->message = $message;
+                            $invitation->group_id = $groupId;
+                            $invitation->save();                            
+                        }
+                                                
                     } else {
                         $nonUserEmails[] = $email;
                         unset($emails[$index]);
                     }                    
                 }
-
-                $group = $this->_helper->db->getTable();
-                $group->sendInvitationEmails($emails, $message, $sender);
-                
+                try {
+                    $group->sendInvitationEmail($emails, $message, $sender);
+                    $this->flashSuccess('Invitations successfully sent');
+                } catch(Exception $e) {
+                    $this->flashError("Couldn't send email");
+                }
+                                
             } 
-            
-            
         }
-        
-        
         $this->view->groups = $groups;        
     }
     
