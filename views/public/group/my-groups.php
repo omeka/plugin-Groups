@@ -85,7 +85,7 @@ head(array());
         </div>        
     </div>
     <?php endwhile; ?>
-    <?php if(!(empty($groups) || empty($invitations))) :?>
+    <?php if(!(empty($groups) && empty($invitations))) :?>
     <button>Submit</button>
     <?php endif; ?>
     </form>
