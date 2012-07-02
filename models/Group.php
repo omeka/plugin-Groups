@@ -213,7 +213,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $subjectText = "An invitation to join the group '{$this->title}' in the Omeka Commons";
         $mail->setSubject($subjectText);        
         $body = "{$sender->name} has invited you to join the group {$this->title} in the Omeka Commons. Here's why:\n";
-        $body .= $mesage;
+        $body .= $message;
         $mail->setBodyText($body);
         $mail->send();
         
