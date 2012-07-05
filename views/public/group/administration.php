@@ -17,13 +17,14 @@ head(array());
             ?>
             <?php 
                 $current_user = current_user();
-                if($membership->user_id == $current_user->id) {continue;}
+                
                 if(count($memberships) == 1): ?>
                 <div class='group-membership'>
                 <p>There are no members in your group! Why not <a href="<?php echo uri('groups/invitations'); ?>">invite some friends</a>?</p>
                 
                 </div>
                 <?php endif; ?>
+                <?php if($membership->user_id == $current_user->id) {continue;} ?>
             <div class='group-membership'>
 
                 <h4><?php echo $membership->User->name; ?></h4>
