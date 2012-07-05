@@ -145,7 +145,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         if($record) {
             return false;
         }
-
         $rel = new RecordRelationsRelation();
         $props['public'] = $public;
         $rel->setProps($props);
@@ -154,53 +153,61 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendPendingMemberEmail($user, $to=null)
     {
-        $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
-        $body .= WEB_ROOT . "/groups/show/" . $this->id;
-        $email = $this->getEmailBase($to);
-        $email->setSubject("A new member wants to join {$this->title} on Omeka Commons");
-        $email->setBodyText($body); 
-        $email->send();
+        if($to) {                        
+            $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
+            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $email = $this->getEmailBase($to);
+            $email->setSubject("A new member wants to join {$this->title} on Omeka Commons");
+            $email->setBodyText($body); 
+            $email->send();
+        }
     }
     
     public function sendNewMemberEmail($user, $to=null)
     {
-        $body = "A new member {$user->name} has joined the {$this->title} group on Omeka Commons.";
-        $body .= WEB_ROOT . "/groups/show/" . $this->id;
-        $email = $this->getEmailBase($to);
-        $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
-        $email->setBodyText($body);        
-        $email->send();
+        if($to) {
+            $body = "A new member {$user->name} has joined the {$this->title} group on Omeka Commons.";
+            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $email = $this->getEmailBase($to);
+            $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
+            $email->setBodyText($body);        
+            $email->send();
+        }
     }
 
     public function sendMemberLeftEmail($user, $to=null)
     {
-        $body = "{$user->name} has left the {$this->title} group on Omeka Commons. ";
-        $body .= WEB_ROOT . "/groups/show/" . $this->id;
-        $email = $this->getEmailBase($to);
-        $email->setSubject("A member has left {$this->title} on Omeka Commons");
-        $email->setBodyText($body);
-        $email->send();
+        if($to) {
+            $body = "{$user->name} has left the {$this->title} group on Omeka Commons. ";
+            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $email = $this->getEmailBase($to);
+            $email->setSubject("A member has left {$this->title} on Omeka Commons");
+            $email->setBodyText($body);
+            $email->send();
+        }
     }
 
     public function sendNewItemEmail($item, $to = null)
     {
-        $body = "A new item been added to the {$this->title} group on Omeka Commons. ";
-        $body .= item('Dublin Core', 'Title', array(), $item);
-        $body .= WEB_ROOT . "/groups/show/" . $this->id;
-        $email = $this->getEmailBase($to);
-        $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
-        $email->setBodyText($body);
-        $email->send();        
+        if($to) {
+            $body = "A new item been added to the {$this->title} group on Omeka Commons. ";
+            $body .= item('Dublin Core', 'Title', array(), $item);
+            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $email = $this->getEmailBase($to);
+            $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
+            $email->setBodyText($body);
+            $email->send();
+        }        
     }
 
     public function sendMemberApprovedEmail($user)
     {
-        $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
-        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
-        $email = $this->getEmailBase(array($user));
-        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
-        $email->setBodyText($body);
-        $email->send();        
+            $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
+            $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
+            $email = $this->getEmailBase(array($user));
+            $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
+            $email->setBodyText($body);
+            $email->send();        
     }
 
     public function sendInvitationEmail($to, $message, $sender)
