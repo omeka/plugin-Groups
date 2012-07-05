@@ -196,8 +196,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function sendMemberApprovedEmail($user)
     {
         $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
+        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
         $email = $this->getEmailBase(array($user));
-        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved");
+        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
         $email->setBodyText($body);
         $email->send();        
     }
@@ -214,6 +215,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $mail->setSubject($subjectText);        
         $body = "{$sender->name} has invited you to join the group {$this->title} in the Omeka Commons. Here's why:\n";
         $body .= $message;
+        $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
         $mail->setBodyText($body);
         $mail->send();
         
