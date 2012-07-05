@@ -8,24 +8,24 @@ head(array());
 <p>You do not have permission to administer any groups.</p>
 <?php else: ?>
 <form method="post">
-    <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>
-    
+    <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>    
         <div class='groups-group'>
             <?php $group = groups_get_current_group(); ?>
             <h3><?php echo $group->title; ?></h3>
-            <?php $memberships = groups_get_memberships($group); 
+            <?php $memberships = groups_get_memberships($group);             
                   foreach($memberships as $membership):
             ?>
             <?php 
                 $current_user = current_user();
-                if($membership->user_id == $current_user->id): ?>
+                if($membership->user_id == $current_user->id) {continue;}
+                if(count($memberships) == 1): ?>
                 <div class='group-membership'>
                 <p>There are no members in your group! Why not <a href="<?php echo uri('groups/invitations'); ?>">invite some friends</a>?</p>
                 
                 </div>
-                <?php endif; continue; ?>
+                <?php endif; ?>
             <div class='group-membership'>
-                
+
                 <h4><?php echo $membership->User->name; ?></h4>
                 <div class='group-options'>
                     
