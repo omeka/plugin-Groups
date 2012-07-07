@@ -201,7 +201,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'administration',
                             'invitations',
                             'approve-request',
-                            'quit'
+                            'change-status',
+                            'quit',
+                            'edit'
                             );
         
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);

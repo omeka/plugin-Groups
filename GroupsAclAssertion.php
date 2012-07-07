@@ -14,6 +14,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
     private $openPrivileges = array(
                 'items',
                 'join',
+                'invitations'
                 );
 
     private $closedPrivileges = array('request');
@@ -37,6 +38,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'remove-member',
             'make-admin',
             'invitations',
+            'change-status',
             'quit'
             );
 
@@ -47,6 +49,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'invitations',
             'approve-request',
             'make-admin',
+            'change-status',
             'remove-member',    
     );    
     
@@ -55,46 +58,64 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
     {    
-        
+        _log($privilege);
         $db = get_db();
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
+        //sometimes we get a Group for the resource, sometimes just the Zend_Acl_Resource_Interface
+        //AJAX requests like addItem pass up a groupId to check permissions on, so dig that up if it is set
+        
         if(isset($_POST['groupId'])) {
             $resource = $db->getTable('Group')->find($_POST['groupId']);
         }
+                                
 
-
-        //sometimes we get a Group for the resource, sometimes just the Zend_Acl_Resource_Interface
-        //AJAX requests like addItem pass up a groupId to check permissions on, so dig that up if it is set
-        if($privilege == 'add-item' && isset($_POST['groupId'])) {
-            $resource = $db->getTable('Group')->find($_POST['groupId']);
-        }
-
-        //to test for join permission, first see if current user has been invited by an owner or admin
-        if($privilege == 'join') {         
-            $invitation = $db->getTable('GroupInvitation')->findInvitationToGroup($resource->id, $role->id);
-            if($invitation) {
-                $senderMembership = groups_get_membership($resource, $invitation->sender_id);      
-                if($senderMembership->is_owner || $senderMembership->is_admin) {
-                    return true;
-                }
-            }
-        }
-        
         if(get_class($resource) == 'Group') {
-            $membership = groups_get_membership($resource, $role);            
-            if($membership) {
+            switch($privilege) {
+                
+                case 'join':
+                    //to test for join permission, first see if current user has been invited by an owner or admin
+                    $invitation = $db->getTable('GroupInvitation')->findInvitationToGroup($resource->id, $role->id);
+                    if($invitation) {
+                        $senderMembership = groups_get_membership($resource, $invitation->sender_id);
+                        if($senderMembership->is_owner || $senderMembership->is_admin) {
+                            return true;
+                        }
+                    }                
+                break;
+                
+                case 'invitations':
+                    //can send an invitation if group is open, or user is owner or admin
+                    if($resource->type == 'open') {
+                        return true;                    
+                    } else {
+                         if($membership) {
+                             return $membership->is_admin || $membership->is_owner;
+                         }                     
+                    }
+                break;
+                            
+            }
+            $membership = groups_get_membership($resource, $role);
+                 
+            if($membership) {      
+
+
                 if($membership->is_admin) {
                     return in_array($privilege, $this->adminPrivileges);
                 }
-                if($membership->is_owner) {
+                if($membership->is_owner) { 
+_log('is owner');
+                     
                     return in_array($privilege, $this->ownerPrivileges);
-                }       
+                }
                 return in_array($privilege, $this->memberPrivileges);
             }
             $arrayName = $resource->visibility . "Privileges";
-            return in_array($privilege, $this->$arrayName);            
+            return in_array($privilege, $this->$arrayName);
+            
+         
         }
         //check to see if there is a potential reason to give access. the controller will sort out details with has_permission()
         //rough pass, if user and is a member of any group
