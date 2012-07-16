@@ -58,7 +58,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
     {    
-        _log($privilege);
         $db = get_db();
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
@@ -105,9 +104,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 if($membership->is_admin) {
                     return in_array($privilege, $this->adminPrivileges);
                 }
-                if($membership->is_owner) { 
-_log('is owner');
-                     
+                if($membership->is_owner) {                      
                     return in_array($privilege, $this->ownerPrivileges);
                 }
                 return in_array($privilege, $this->memberPrivileges);

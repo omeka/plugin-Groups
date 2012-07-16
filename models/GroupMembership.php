@@ -18,7 +18,8 @@ class GroupMembership extends Omeka_Record
     public function unsetOptions()
     {
         //when the post array comes in from the form, unchecked items aren't in the data, so reset all to 0 so we can work from the post
-        $this->is_admin =0;
+        $this->is_admin = 0;
+        $this->is_owner = 0;
         $this->notify_member_joined = 0;
         $this->notify_item_new = 0;
         $this->notify_member_left = 0;
@@ -32,6 +33,17 @@ class GroupMembership extends Omeka_Record
         $this->notify_item_new = true;
         $this->notify_member_left = true;
         $this->notify_item_deleted = true;
+    }
+    
+    public function role()
+    {
+        if($this->is_owner) {
+            return 'Owner';
+        }
+        if($this->is_admin) {
+            return 'Admin';
+        }
+        return 'Member';
     }
     
     public function getGroup()
@@ -50,7 +62,7 @@ class GroupMembership extends Omeka_Record
                         'membership_id'=>$this->id,
                         'type' => $role                
                 );
-        $confirmations = $this->getTable('GroupConfirmation')->findBy();
+        $confirmations = $this->getTable('GroupConfirmation')->findBy($params);
         if(empty($confirmations)) {
             return false;
         } else {

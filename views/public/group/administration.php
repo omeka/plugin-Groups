@@ -38,10 +38,11 @@ head(array());
                         <input name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='checkbox' value='remove' />Remove
                     <?php endif; ?><br/>
                     <?php if(has_permission($group, 'change-status')): ?>
+                        <?php $role = $membership->role(); ?>
                         <label for="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]">Status</label>
-                        <input name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='owner' />Owner
-                        <input <?php if($membership->is_admin) {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin
-                        <input <?php if(!$membership->is_admin) {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='member' />Member
+                        <input <?php if($role == 'Owner') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='owner' />Owner
+                        <input <?php if($role == 'Admin') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin
+                        <input <?php if($role == 'Member') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='member' />Member
                         <p class='explanation'>Users must accept being made an Admin or Owner before the change takes effect</p>
                     <?php endif;?>
                 </div>

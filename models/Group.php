@@ -355,6 +355,18 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_admin'=>1));
     }
     
+    public function findOwner()
+    {
+        $owners =  get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_owner'=>1));
+        return $owners[0];        
+    }
+    
+    public function findOwnerMembership()
+    {
+        $array = get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$this->id, 'is_owner'=>1));
+        return $array[0];        
+    }
+    
     public function findMembership($user)
     {
         if(is_numeric($user)) {

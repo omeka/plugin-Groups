@@ -50,19 +50,19 @@ head(array());
 
                 <?php $adminConfirm = groups_role_confirm($group, $membership, 'is_admin'); ?>
                 <?php $ownerConfirm = groups_role_confirm($group, $membership, 'is_owner'); ?>
-                <?php if($adminConfirm || $ownerConfirm || $membership->is_admin ): ?>
+                <?php if($adminConfirm || $ownerConfirm ): ?>
                     <label class='groups' for="groups[<?php echo $group->id ?>][role]">Role</label>
-                    <?php if( $adminConfirm || ($membership->is_admin === 1) ) :?>
-                        <input checked='checked' type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Admin
-                        <?php if($adminConfirm): ?>
-                            <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>
-                        <?php endif; ?>                                        
+                    <?php if($adminConfirm) :?>
+                        <input type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Admin
+                            <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>                                        
                     <?php endif; ?>
                     <?php if( $ownerConfirm ) :?>
-                        <input checked='checked' type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Owner
+                        <input type='checkbox' value='is_owner' name="groups[<?php echo $group->id ?>][role]" />Owner
                         <p>The owner of this group would like to transfer ownership to you. Check here to accept.</p>
                     <?php endif; ?>
 
+                <?php else: ?>
+                    <p>Role: <?php echo $membership->role(); ?></p>
                 <?php endif; ?>            
             </div>
 

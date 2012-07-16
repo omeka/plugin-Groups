@@ -212,8 +212,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 $group = $this->findById($id);
                 $membership = groups_get_membership($group);
                 $membership->unsetOptions();
-                foreach($options as $option=>$value) {
-            
+                foreach($options as $option=>$value) {          
                     switch($option) {
             
                         case "quit":
@@ -224,11 +223,24 @@ class Groups_GroupController extends Omeka_Controller_Action
                             //do nothing, just here to make the $_POST arrive when nothing is checked
                             break;
             
+                        case "role":
+                            if($confirmation = $membership->getConfirmation($value)) {
+                                $confirmation->delete();
+                                
+                                //make the previous owner no longer the owner
+                                if($value == 'is_owner') {
+                                    $owner = $group->findOwnerMembership();
+                                    $owner->is_owner = 0;
+                                    _log(print_r($owner->toArray(), true));
+                                    $owner->save();
+                                }
+                                $membership->$value = 1;
+                            }                            
+                            break;
+                            
                         default:
                             $membership->$option = 1;
-                            if($confirmation = $membership->getConfirmation($option)) {
-                                $confirmation->delete();
-                            }
+
                             break;
                     }
                 }
@@ -251,65 +263,73 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $user = current_user();
         if(!empty($_POST)) {
-            foreach($_POST['membership'] as $groupId=>$memberships) {
-                $group = $this->_helper->db->getTable('Group')->find($groupId);
-                foreach($memberships as $membershipId=>$action) {
-                    $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                    switch($action) {
-                        case 'remove':
-                            $group->removeMember($membership);
-                            $to = $group->findMembersForNotification('notify_member_left');
-                            $group->sendMemberLeftEmail($to);                            
-                        break;
-                        
-                        case 'deny':
-                            $group->denyMembership($membership);
-                            $to = $membership->User;
-                            $group->sendMemberDeniedEmail($to);
-                        break;
-                        
-                        case 'approve':
-                            $group->approveMember($membership);
-                            $to = $group->findMembersForNotification('notify_member_joined');
-                            $group->sendNewMemberEmail($to);
-                        break;
-                    }
-                }
-            }
-            
-            foreach($_POST['status'] as $groupId=>$memberships) {
-                foreach($memberships as $membershipId=>$action) {
-                    $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                    if($membership) {
+            if(isset($_POST['membership'])) {
+                foreach($_POST['membership'] as $groupId=>$memberships) {
+                    $group = $this->_helper->db->getTable('Group')->find($groupId);
+                    foreach($memberships as $membershipId=>$action) {
+                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
                         switch($action) {
-                            case 'member':
-                                $membership->is_admin = 0;
-                                $membership->is_owner = 0;
-                            break;
-                            
-                            case 'admin':
-                                if(!$membership->is_admin) {
-                                    $confirmation = new GroupConfirmation;
-                                    $confirmation->group_id = $groupId;
-                                    $confirmation->membership_id = $membershipId;
-                                    $confirmation->type = 'is_admin';
-                                }
-                                $membership->is_owner = 0;
-                            break;
-                            
-                            case 'owner':
-                                if(!$membership->is_owner) {
-                                    $confirmation = new GroupConfirmation;
-                                    $confirmation->group_id = $groupId;
-                                    $confirmation->membership_id = $membershipId;
-                                    $confirmation->type = 'is_owner';
-                                }
-                            break;
+                            case 'remove':
+                                $group->removeMember($membership);
+                                $to = $group->findMembersForNotification('notify_member_left');
+                                $group->sendMemberLeftEmail($to);
+                                break;
+                
+                            case 'deny':
+                                $group->denyMembership($membership);
+                                $to = $membership->User;
+                                $group->sendMemberDeniedEmail($to);
+                                break;
+                
+                            case 'approve':
+                                $group->approveMember($membership);
+                                $to = $group->findMembersForNotification('notify_member_joined');
+                                $group->sendNewMemberEmail($to);
+                                break;
                         }
-                        $membership->save();
                     }
-                }
+                }                
             }
+
+            if(isset($_POST['status'])) {
+                foreach($_POST['status'] as $groupId=>$memberships) {
+                    foreach($memberships as $membershipId=>$action) {
+                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
+                        if($membership) {
+                            switch($action) {
+                                case 'member':
+                                    $membership->is_admin = 0;
+                                    $membership->is_owner = 0;
+                                    break;
+                
+                                case 'admin':
+                                    if(!$membership->is_admin) {
+                                        $confirmation = new GroupConfirmation;
+                                        $confirmation->group_id = $groupId;
+                                        $confirmation->membership_id = $membershipId;
+                                        $confirmation->type = 'is_admin';
+                                        $confirmation->save();
+                                    }
+                                    $membership->is_owner = 0;
+                                    break;
+                
+                                case 'owner':
+                                    if(!$membership->is_owner) {
+                                        $confirmation = new GroupConfirmation;
+                                        $confirmation->group_id = $groupId;
+                                        $confirmation->membership_id = $membershipId;
+                                        $confirmation->type = 'is_owner';
+                                        $confirmation->save();
+                                    }
+                                    $membership->is_admin = 0;
+                                    break;
+                            }
+                            $membership->save();
+                        }
+                    }
+                }                
+            }
+
         }
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0, 'admin_or_owner'=>true));
         $this->view->groups = $groups;        
