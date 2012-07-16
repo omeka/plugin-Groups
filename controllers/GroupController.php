@@ -257,18 +257,20 @@ class Groups_GroupController extends Omeka_Controller_Action
                     $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
                     switch($action) {
                         case 'remove':
-                            $group->removeMember($membership->User);
+                            $group->removeMember($membership);
                             $to = $group->findMembersForNotification('notify_member_left');
                             $group->sendMemberLeftEmail($to);                            
                         break;
                         
                         case 'deny':
                             $group->denyMembership($membership);
+                            $to = $membership->User;
+                            $group->sendMemberDeniedEmail($to);
                         break;
                         
                         case 'approve':
-                            $group->approveMember($membership->User);
-                            $to = $group->findMembersForNotification('notify_member_new');
+                            $group->approveMember($membership);
+                            $to = $group->findMembersForNotification('notify_member_joined');
                             $group->sendNewMemberEmail($to);
                         break;
                     }
@@ -278,32 +280,34 @@ class Groups_GroupController extends Omeka_Controller_Action
             foreach($_POST['status'] as $groupId=>$memberships) {
                 foreach($memberships as $membershipId=>$action) {
                     $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                    switch($action) {
-                        case 'member':
-                            $membership->is_admin = 0;
-                            $membership->is_owner = 0;
-                        break;
-                        
-                        case 'admin':
-                            if(!$membership->is_admin) {
-                                $confirmation = new GroupConfirmation;
-                                $confirmation->group_id = $groupId;
-                                $confirmation->membership_id = $membershipId;
-                                $confirmation->type = 'is_admin';
-                            }
-                            $membership->is_owner = 0;
-                        break;
-                        
-                        case 'owner':
-                            if(!$membership->is_owner) {
-                                $confirmation = new GroupConfirmation;
-                                $confirmation->group_id = $groupId;
-                                $confirmation->membership_id = $membershipId;
-                                $confirmation->type = 'is_owner';
-                            }
-                        break;
+                    if($membership) {
+                        switch($action) {
+                            case 'member':
+                                $membership->is_admin = 0;
+                                $membership->is_owner = 0;
+                            break;
+                            
+                            case 'admin':
+                                if(!$membership->is_admin) {
+                                    $confirmation = new GroupConfirmation;
+                                    $confirmation->group_id = $groupId;
+                                    $confirmation->membership_id = $membershipId;
+                                    $confirmation->type = 'is_admin';
+                                }
+                                $membership->is_owner = 0;
+                            break;
+                            
+                            case 'owner':
+                                if(!$membership->is_owner) {
+                                    $confirmation = new GroupConfirmation;
+                                    $confirmation->group_id = $groupId;
+                                    $confirmation->membership_id = $membershipId;
+                                    $confirmation->type = 'is_owner';
+                                }
+                            break;
+                        }
+                        $membership->save();
                     }
-                    $membership->save();
                 }
             }
         }

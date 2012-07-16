@@ -33,17 +33,37 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function removeMember($user)
     {
-        $membership = $this->findMembership($user);
+        if($user instanceof User) {
+            $membership = $this->findMembership($user);
+        } elseif($user instanceof GroupMembership) {
+            $membership = $user;
+        }        
         $membership->delete();
     }
 
     public function approveMember($user)
     {
-        $membership = $this->findMembership($user);
+        if($user instanceof User) {
+            $membership = $this->findMembership($user);
+        } elseif($user instanceof GroupMembership) {
+            $membership = $user;
+        }
+        
         $membership->is_pending = false;
         $membership->save();
     }
 
+    public function denyMembership($user)
+    {
+        if($user instanceof User) {
+            $membership = $this->findMembership($user);
+        } elseif($user instanceof GroupMembership) {
+            $membership = $user;
+        }
+        
+        $membership->delete();
+    }
+    
     public function addItem($item)
     {
         if(is_numeric($item)) {
@@ -159,7 +179,12 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $email = $this->getEmailBase($to);
             $email->setSubject("A new member wants to join {$this->title} on Omeka Commons");
             $email->setBodyText($body); 
-            $email->send();
+            try {
+                $email->send();
+            } catch(Exception $e) {
+                _log($e);
+            }
+            
         }
     }
     
@@ -171,7 +196,11 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $email = $this->getEmailBase($to);
             $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
             $email->setBodyText($body);        
-            $email->send();
+            try {
+                $email->send();
+            } catch(Exception $e) {
+                _log($e);
+            }
         }
     }
 
@@ -183,7 +212,11 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $email = $this->getEmailBase($to);
             $email->setSubject("A member has left {$this->title} on Omeka Commons");
             $email->setBodyText($body);
-            $email->send();
+            try {
+                $email->send();
+            } catch(Exception $e) {
+                _log($e);
+            }
         }
     }
 
@@ -196,20 +229,43 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $email = $this->getEmailBase($to);
             $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
             $email->setBodyText($body);
-            $email->send();
+            try {
+                $email->send();
+            } catch(Exception $e) {
+                _log($e);
+            }
         }        
     }
 
     public function sendMemberApprovedEmail($user)
     {
-            $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
-            $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
-            $email = $this->getEmailBase(array($user));
-            $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
-            $email->setBodyText($body);
-            $email->send();        
+        $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
+        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
+        $email = $this->getEmailBase(array($user));
+        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
+        $email->setBodyText($body);
+        try {
+            $email->send();
+        } catch(Exception $e) {
+            _log($e);
+        }        
     }
 
+    public function sendMemberDeniedEmail($user) 
+    {
+        
+        $body = "Your request to join {$this->title} on Omeka Commons has been denied. ";
+        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
+        $email = $this->getEmailBase(array($user));
+        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been denied");
+        $email->setBodyText($body);
+        try {
+            $email->send();
+        } catch(Exception $e) {
+            _log($e);
+        }       
+    }
+    
     public function sendInvitationEmail($to, $message, $sender)
     {
         $mail = new Zend_Mail();
@@ -224,7 +280,11 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body .= $message;
         $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
         $mail->setBodyText($body);
-        $mail->send();
+        try {
+            $email->send();
+        } catch(Exception $e) {
+            _log($e);
+        }
         
     }
     
