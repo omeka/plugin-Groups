@@ -25,9 +25,6 @@ class GroupsMembersBlock extends Blocks_Block_Abstract
         $html = "<ul class='groups-members'>";
         foreach($this->members as $user) {
             $html .= "<li>" . $user->name;
-            if($user->id == $group->owner_id) {
-                $html .= " *";
-            }
             $html .= "</li>";
         }
         $html .= "</ul>";

@@ -13,10 +13,27 @@ head(array());
     <?php echo groups_group_visibility_text(); ?>
     </p>
     <div class='groups-description'><?php echo $group->description; ?></div>
-    <?php echo groups_tags_list_for_group($group); ?>
-    <p id='groups-member-count'>Members: <?php echo groups_member_count($group); ?></p>
-    <p id='groups-item-count'>Items: <?php echo groups_item_count($group); ?></p>
+    <div class='groups-tags'>
+        <?php echo groups_tags_string_for_group($group); ?>            
+    </div>
+
+    <!--  Members list -->
+    <?php $members = groups_members_for_group($group); ?>
+    <h2>Members (<?php echo groups_member_count($group); ?>)</h2>
+    <p id='groups-owner'>Owner: <?php echo $group->findOwner()->name; ?></p>
     <?php if(has_permission($group, 'items')): ?>
+    <ul class='groups-members'>
+        <?php foreach($members as $member): ?>
+            <li><?php echo $member->name; ?>        
+        <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+    
+    
+    <!--  Items list -->
+    <h2>Items (<?php echo groups_item_count($group); ?>)</h2>
+    <?php if(has_permission($group, 'items')): ?>
+        
         <?php set_items_for_loop(groups_items_for_group()); ?>
         <?php while(loop_items()): ?>
         <div class='groups-item'>

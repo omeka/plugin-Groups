@@ -231,7 +231,6 @@ class Groups_GroupController extends Omeka_Controller_Action
                                 if($value == 'is_owner') {
                                     $owner = $group->findOwnerMembership();
                                     $owner->is_owner = 0;
-                                    _log(print_r($owner->toArray(), true));
                                     $owner->save();
                                 }
                                 $membership->$value = 1;
@@ -348,37 +347,49 @@ class Groups_GroupController extends Omeka_Controller_Action
             $emails = explode(',', $_POST['emails']);
             $message = $_POST['message'];
             $userTable = $this->_helper->db->getTable('User');
-            
+            $invitationTable = $this->_helper->db->getTable('GroupInvitation');
             $nonUserEmails = array();
+            $alreadyMemberEmails = array();
             foreach($_POST['groups'] as $groupId) {
                 $group = $this->getTable()->find($groupId);
                 foreach($emails as $index=>$email) {      
                     $email = trim($email);
-                    $invitation = new GroupInvitation;
+                    
                     $user = $userTable->findByEmail(trim($email));
                     if($user) {
-                        if($group->hasMember($user)) {                            
+                        if($group->hasMember($user)) {        
+                            $this->flashError($user->name . " is already in this group.");                    
                             unset($emails[$index]);
-                        } else {              
-                            $invitation->user_id = $user->id;
-                            $invitation->sender_id = $sender->id;
-                            $invitation->message = $message;
-                            $invitation->group_id = $groupId;
-                            $invitation->save();                            
+                        } else {
+                            if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
+                                $this->flashError("You have already invited " . $user->name . " to this group");
+                                unset($emails[$index]);
+                            } else {    
+                                $invitation = new GroupInvitation;
+                                $invitation->user_id = $user->id;
+                                $invitation->sender_id = $sender->id;
+                                $invitation->message = $message;
+                                $invitation->group_id = $groupId;
+                                $invitation->save();
+                            }                            
                         }
                                                 
                     } else {
                         $nonUserEmails[] = $email;
+                        $this->flashError($email . " is not a member of the Omeka Commons.");
                         unset($emails[$index]);
                     }                    
                 }
-                try {
-                    $group->sendInvitationEmail($emails, $message, $sender);
-                    $this->flashSuccess('Invitations successfully sent');
-                } catch(Exception $e) {
-                    $this->flashError("Couldn't send email");
+                if(count($emails)==0) {
+                    $this->flashSuccess('No invitations sent');        
+                } else {
+                    try {
+                        $group->sendInvitationEmail($emails, $message, $sender);
+                        $this->flashSuccess('Invitations successfully sent');
+                    } catch(Exception $e) {
+                        $this->flashError("Couldn't send email");
+                    }
                 }
-                                
             } 
         }
         $this->view->groups = $groups;        

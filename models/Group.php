@@ -281,9 +281,10 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
         $mail->setBodyText($body);
         try {
-            $email->send();
+            $mail->send();
         } catch(Exception $e) {
             _log($e);
+            throw $e;
         }
         
     }

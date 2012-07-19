@@ -77,12 +77,9 @@ function groups_tags_string_for_group($group = null)
         $group = groups_get_current_group();
     }
     $tags = groups_tags_for_group($group);
-    $string = "";
-    foreach($tags as $tag) {
-        $string .= "{$tag->name},";
-    }
+    $link = uri('groups/browse?tags=');
+    return tag_string($tags, $link);
 
-    return $string;
 }
 
 

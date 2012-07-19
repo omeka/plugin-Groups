@@ -99,8 +99,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             $membership = groups_get_membership($resource, $role);
                  
             if($membership) {      
-
-
                 if($membership->is_admin) {
                     return in_array($privilege, $this->adminPrivileges);
                 }
@@ -118,6 +116,11 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         //rough pass, if user and is a member of any group
         
         $groups = groups_groups_for_user($role);
+        
+        if($privilege == 'my-groups') {
+            return true;
+        }
+        
         if(count($groups) != 0) {
             return true;
         }
