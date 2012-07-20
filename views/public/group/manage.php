@@ -6,6 +6,7 @@ head(array());
 <div id='primary'>
 <?php echo flash(); ?>
 <h1>Manage <?php echo $group->title; ?></h1>
+<a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
 <form method="post">
 <?php if(has_permission($group, 'administration')): ?>
 <h2>Administer Members</h2>
