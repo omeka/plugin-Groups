@@ -93,22 +93,24 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $group = $this->findById();
         
-        if(!empty($_POST['emails'])) {
-            $this->handleInvitations();            
-        }  
-
-        if(empty($_POST['groups'])) {
-            //all the notifications have been unchecked
-            $membership = groups_get_membership($group);
-            $membership->notify_member_joined = 0;
-            $membership->notify_item_new = 0;
-            $membership->notify_member_left = 0;
-            $membership->notify_item_deleted = 0;
-            $membership->save();
-        } else {
-            $this->handleMembershipStatus();
+        if(!empty($_POST)) {
+            if(!empty($_POST['emails'])) {
+                $this->handleInvitations();
+            }
+            
+            if(empty($_POST['groups'])) {
+                //all the notifications have been unchecked
+                $membership = groups_get_membership($group);
+                $membership->notify_member_joined = 0;
+                $membership->notify_item_new = 0;
+                $membership->notify_member_left = 0;
+                $membership->notify_item_deleted = 0;
+                $membership->save();
+            } else {
+                $this->handleMembershipStatus();
+            }                        
         }
-        
+
         $user_membership = groups_get_membership($group);
         $this->handleAdministration();
         $this->view->group = $group;
