@@ -9,6 +9,10 @@ head(array());
         <a href="<?php echo record_uri($group, 'edit'); ?>">Edit</a>
     <?php endif; ?>
 
+    <?php if(has_permission($group, 'manage')):?>
+        <a href="<?php echo record_uri($group, 'manage'); ?>">Manage</a>
+    <?php endif; ?>    
+    
     <p class='groups-type'>Type: <?php echo groups_group('visibility'); ?>
     <?php echo groups_group_visibility_text(); ?>
     </p>
@@ -18,13 +22,15 @@ head(array());
     </div>
 
     <!--  Members list -->
-    <?php $members = groups_members_for_group($group); ?>
+    <?php $members = groups_get_memberships($group); ?>
     <h2>Members (<?php echo groups_member_count($group); ?>)</h2>
     <p id='groups-owner'>Owner: <?php echo $group->findOwner()->name; ?></p>
     <?php if(has_permission($group, 'items')): ?>
     <ul class='groups-members'>
         <?php foreach($members as $member): ?>
-            <li><?php echo $member->name; ?>        
+            <li><?php echo $member->User->name; ?>: <?php echo $member->role(); ?>
+            
+            </li>        
         <?php endforeach; ?>
     </ul>
     <?php endif; ?>

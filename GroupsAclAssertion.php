@@ -37,6 +37,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'approve-request',
             'remove-member',
             'make-admin',
+            'manage',
             'invitations',
             'change-status',
             'quit'
@@ -49,6 +50,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'invitations',
             'approve-request',
             'make-admin',
+            'manage',
+            'make-owner',
             'change-status',
             'remove-member',    
     );    
@@ -68,8 +71,14 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if(isset($_POST['groupId'])) {
             $resource = $db->getTable('Group')->find($_POST['groupId']);
         }
-                                
+        
+        //always get to my-groups
+        if($privilege == 'my-groups') {
+            return true;
+        }                                
 
+        
+        
         if(get_class($resource) == 'Group') {
             switch($privilege) {
                 
@@ -86,13 +95,19 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 
                 case 'invitations':
                     //can send an invitation if group is open, or user is owner or admin
-                    if($resource->type == 'open') {
+                    if($resource->visibility == 'open') {
                         return true;                    
                     } else {
                          if($membership) {
                              return $membership->is_admin || $membership->is_owner;
                          }                     
                     }
+                break;
+                
+                case 'manage':
+                    //since different permissions are all present on the same page, 
+                    // will have the view sort out what to show
+                    return true;
                 break;
                             
             }
@@ -117,9 +132,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         
         $groups = groups_groups_for_user($role);
         
-        if($privilege == 'my-groups') {
-            return true;
-        }
+
         
         if(count($groups) != 0) {
             return true;

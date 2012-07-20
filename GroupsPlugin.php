@@ -203,6 +203,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'approve-request',
                             'change-status',
                             'quit',
+                            'manage',
                             'edit'
                             );
         

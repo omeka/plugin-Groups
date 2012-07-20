@@ -121,7 +121,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     {
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>false), $sort);
     }
-
+    
     public function getMemberCount()
     {
         return get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>false));        
@@ -298,9 +298,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
            //$to could be either an array of email address or an array of users
            foreach($to as $data) {
                if(is_string($data)) {
-                   $mail->addTo($data, $this->title . " Group Owner");
+                   $mail->addTo($data);
                } else {
-                   $mail->addTo($data->email, $this->title . " Group Owner");
+                   $mail->addTo($data->email);
                }               
            } 
         } else {

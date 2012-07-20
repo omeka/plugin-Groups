@@ -31,6 +31,41 @@ class Groups_GroupController extends Omeka_Controller_Action
         parent::browseAction();
     }
 
+    public function addAction()
+    {
+        require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
+        $form = new GroupForm();
+        $this->view->form = $form;
+    
+        if(!empty($_POST)) {
+            $group = new Group();
+            $currUser = current_user();
+            $_POST['owner_id'] = $currUser->id;
+            $group->saveForm($_POST);
+            $group->addMember($currUser, 0, 'is_owner');
+            $this->redirect->gotoUrl('/groups/show/' . $group->id );
+        }
+    
+    }
+    
+    public function editAction()
+    {
+        require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
+        $form = new GroupForm();
+        $this->view->form = $form;
+        $group = $this->findById();
+        $defaults = $group->toArray();
+        $defaults['tags'] = groups_tags_string_for_group($group);
+        $form->setDefaults($defaults);
+        $this->view->form = $form;
+    
+        if(!empty($_POST)) {
+            $currUser = current_user();
+            $group->saveForm($_POST);
+            $this->redirect->gotoUrl('/groups/show/' . $group->id );
+        }
+    }
+    
 
     public function showAction()
     {
@@ -54,6 +89,24 @@ class Groups_GroupController extends Omeka_Controller_Action
         }
     }
 
+    public function manageAction()
+    {
+        $group = $this->findById();
+        
+        if(!empty($_POST['emails'])) {
+            $this->handleInvitations();            
+        }  
+
+        if(!empty($_POST['groups'])) {
+            $this->handleMembershipStatus();
+        }
+        
+        $user_membership = groups_get_membership($group);
+        $this->handleAdministration();
+        $this->view->group = $group;
+        $this->view->user_membership = $user_membership;
+    }
+    
     public function joinAction()
     {
         $user =  current_user();
@@ -147,44 +200,9 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     }
 
-    public function addAction()
-    {
-        require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
-        $form = new GroupForm();
-        $this->view->form = $form;
-
-        if(!empty($_POST)) {
-            $group = new Group();
-            $currUser = current_user();
-            $_POST['owner_id'] = $currUser->id;
-            $group->saveForm($_POST);
-            $group->addMember($currUser, 0, 'is_owner');
-            $this->redirect->gotoUrl('/groups/show/' . $group->id );
-        }
-
-    }
-
-    public function editAction()
-    {
-        require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
-        $form = new GroupForm();
-        $this->view->form = $form;
-        $group = $this->findById();
-        $defaults = $group->toArray();
-        $defaults['tags'] = groups_tags_string_for_group($group);
-        $form->setDefaults($defaults);
-        $this->view->form = $form;
-
-        if(!empty($_POST)) {
-            $currUser = current_user();
-            $group->saveForm($_POST);
-            $this->redirect->gotoUrl('/groups/show/' . $group->id );
-        }
-    }
 
     public function myGroupsAction()
     {
-
         $user = current_user();
         $params = array(
                 'user' => $user
@@ -206,51 +224,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 }
             }
         }
-        if(!empty($_POST['groups'])) {
-  
-            foreach($_POST['groups'] as $id=>$options) {
-                $group = $this->findById($id);
-                $membership = groups_get_membership($group);
-                $membership->unsetOptions();
-                foreach($options as $option=>$value) {          
-                    switch($option) {
-            
-                        case "quit":
-                            $membership->delete();            
-                            break;
-            
-                        case "submitted":
-                            //do nothing, just here to make the $_POST arrive when nothing is checked
-                            break;
-            
-                        case "role":
-                            if($confirmation = $membership->getConfirmation($value)) {
-                                $confirmation->delete();
-                                
-                                //make the previous owner no longer the owner
-                                if($value == 'is_owner') {
-                                    $owner = $group->findOwnerMembership();
-                                    $owner->is_owner = 0;
-                                    $owner->save();
-                                }
-                                $membership->$value = 1;
-                            }                            
-                            break;
-                            
-                        default:
-                            $membership->$option = 1;
-
-                            break;
-                    }
-                }
-                if($membership->exists()) {
-                    $membership->save();
-                }
-                
-            }                
-        }
-
-        
+        $this->handleMembershipStatus();
 
         $groups = $this->_helper->db->getTable()->findBy($params);
         $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));        
@@ -261,75 +235,7 @@ class Groups_GroupController extends Omeka_Controller_Action
     public function administrationAction()
     {
         $user = current_user();
-        if(!empty($_POST)) {
-            if(isset($_POST['membership'])) {
-                foreach($_POST['membership'] as $groupId=>$memberships) {
-                    $group = $this->_helper->db->getTable('Group')->find($groupId);
-                    foreach($memberships as $membershipId=>$action) {
-                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        switch($action) {
-                            case 'remove':
-                                $group->removeMember($membership);
-                                $to = $group->findMembersForNotification('notify_member_left');
-                                $group->sendMemberLeftEmail($to);
-                                break;
-                
-                            case 'deny':
-                                $group->denyMembership($membership);
-                                $to = $membership->User;
-                                $group->sendMemberDeniedEmail($to);
-                                break;
-                
-                            case 'approve':
-                                $group->approveMember($membership);
-                                $to = $group->findMembersForNotification('notify_member_joined');
-                                $group->sendNewMemberEmail($to);
-                                break;
-                        }
-                    }
-                }                
-            }
-
-            if(isset($_POST['status'])) {
-                foreach($_POST['status'] as $groupId=>$memberships) {
-                    foreach($memberships as $membershipId=>$action) {
-                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        if($membership) {
-                            switch($action) {
-                                case 'member':
-                                    $membership->is_admin = 0;
-                                    $membership->is_owner = 0;
-                                    break;
-                
-                                case 'admin':
-                                    if(!$membership->is_admin) {
-                                        $confirmation = new GroupConfirmation;
-                                        $confirmation->group_id = $groupId;
-                                        $confirmation->membership_id = $membershipId;
-                                        $confirmation->type = 'is_admin';
-                                        $confirmation->save();
-                                    }
-                                    $membership->is_owner = 0;
-                                    break;
-                
-                                case 'owner':
-                                    if(!$membership->is_owner) {
-                                        $confirmation = new GroupConfirmation;
-                                        $confirmation->group_id = $groupId;
-                                        $confirmation->membership_id = $membershipId;
-                                        $confirmation->type = 'is_owner';
-                                        $confirmation->save();
-                                    }
-                                    $membership->is_admin = 0;
-                                    break;
-                            }
-                            $membership->save();
-                        }
-                    }
-                }                
-            }
-
-        }
+        $this->handleAdministration();
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0, 'admin_or_owner'=>true));
         $this->view->groups = $groups;        
     }
@@ -343,55 +249,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 unset($groups[$key]);
             }
         }
-        if(isset($_POST['emails'])) {
-            $emails = explode(',', $_POST['emails']);
-            $message = $_POST['message'];
-            $userTable = $this->_helper->db->getTable('User');
-            $invitationTable = $this->_helper->db->getTable('GroupInvitation');
-            $nonUserEmails = array();
-            $alreadyMemberEmails = array();
-            foreach($_POST['groups'] as $groupId) {
-                $group = $this->getTable()->find($groupId);
-                foreach($emails as $index=>$email) {      
-                    $email = trim($email);
-                    
-                    $user = $userTable->findByEmail(trim($email));
-                    if($user) {
-                        if($group->hasMember($user)) {        
-                            $this->flashError($user->name . " is already in this group.");                    
-                            unset($emails[$index]);
-                        } else {
-                            if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
-                                $this->flashError("You have already invited " . $user->name . " to this group");
-                                unset($emails[$index]);
-                            } else {    
-                                $invitation = new GroupInvitation;
-                                $invitation->user_id = $user->id;
-                                $invitation->sender_id = $sender->id;
-                                $invitation->message = $message;
-                                $invitation->group_id = $groupId;
-                                $invitation->save();
-                            }                            
-                        }
-                                                
-                    } else {
-                        $nonUserEmails[] = $email;
-                        $this->flashError($email . " is not a member of the Omeka Commons.");
-                        unset($emails[$index]);
-                    }                    
-                }
-                if(count($emails)==0) {
-                    $this->flashSuccess('No invitations sent');        
-                } else {
-                    try {
-                        $group->sendInvitationEmail($emails, $message, $sender);
-                        $this->flashSuccess('Invitations successfully sent');
-                    } catch(Exception $e) {
-                        $this->flashError("Couldn't send email");
-                    }
-                }
-            } 
-        }
+        $this->handleInvitations();
         $this->view->groups = $groups;        
     }
     
@@ -413,6 +271,183 @@ class Groups_GroupController extends Omeka_Controller_Action
         $to = $group->findMembersForNotification('notify_item_new');  
         $group->sendNewItemEmail($item, $to);        
         $this->_helper->json($response);
+    }
+    
+    private function handleAdministration()
+    {
+        $user = current_user();
+        if(!empty($_POST)) {
+            if(isset($_POST['membership'])) {
+                foreach($_POST['membership'] as $groupId=>$memberships) {
+                    $group = $this->_helper->db->getTable('Group')->find($groupId);
+                    foreach($memberships as $membershipId=>$action) {
+                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
+                        switch($action) {
+                            case 'remove':
+                                $group->removeMember($membership);
+                                $to = $group->findMembersForNotification('notify_member_left');
+                                $group->sendMemberLeftEmail($to);
+                                break;
+        
+                            case 'deny':
+                                $group->denyMembership($membership);
+                                $to = $membership->User;
+                                $group->sendMemberDeniedEmail($to);
+                                break;
+        
+                            case 'approve':
+                                $group->approveMember($membership);
+                                $to = $group->findMembersForNotification('notify_member_joined');
+                                $group->sendNewMemberEmail($to);
+                                break;
+                        }
+                    }
+                }
+            }
+        
+            if(isset($_POST['status'])) {
+                foreach($_POST['status'] as $groupId=>$memberships) {
+                    foreach($memberships as $membershipId=>$action) {
+                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
+                        if($membership) {
+                            switch($action) {
+                                case 'member':
+                                    $membership->is_admin = 0;
+                                    $membership->is_owner = 0;
+                                    break;
+        
+                                case 'admin':
+                                    if(!$membership->is_admin) {
+                                        $confirmation = new GroupConfirmation;
+                                        $confirmation->group_id = $groupId;
+                                        $confirmation->membership_id = $membershipId;
+                                        $confirmation->type = 'is_admin';
+                                        $confirmation->save();
+                                    }
+                                    $membership->is_owner = 0;
+                                    break;
+        
+                                case 'owner':
+                                    if(!$membership->is_owner) {
+                                        $confirmation = new GroupConfirmation;
+                                        $confirmation->group_id = $groupId;
+                                        $confirmation->membership_id = $membershipId;
+                                        $confirmation->type = 'is_owner';
+                                        $confirmation->save();
+                                    }
+                                    $membership->is_admin = 0;
+                                    break;
+                            }
+                            $membership->save();
+                        }
+                    }
+                }
+            }        
+        }        
+    }
+    
+    private function handleInvitations()
+    {
+        if(isset($_POST['emails'])) {
+            $emails = explode(',', $_POST['emails']);
+            $message = $_POST['message'];
+            $userTable = $this->_helper->db->getTable('User');
+            $invitationTable = $this->_helper->db->getTable('GroupInvitation');
+            $nonUserEmails = array();
+            $alreadyMemberEmails = array();
+            foreach($_POST['invite_groups'] as $groupId) {             
+                $group = $this->getTable()->find($groupId);
+                foreach($emails as $index=>$email) {
+                    $email = trim($email);        
+                    $user = $userTable->findByEmail(trim($email));
+                    if($user) {
+                        if($group->hasMember($user)) {         
+                            $this->flashError($user->name . " is already in this group.");
+                            unset($emails[$index]);
+                        } else {
+                            if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
+                                $this->flashError("You have already invited " . $user->name . " to this group");
+                                unset($emails[$index]);
+                            } else {                                
+                                $invitation = new GroupInvitation;
+                                $invitation->user_id = $user->id;
+                                $invitation->sender_id = $sender->id;
+                                $invitation->message = $message;
+                                $invitation->group_id = $groupId;
+                                $invitation->save();
+                            }
+                        }
+        
+                    } else {
+                        $nonUserEmails[] = $email;
+                        $this->flashError($email . " is not a member of the Omeka Commons.");
+                        unset($emails[$index]);
+                    }
+                }
+                if(count($emails)==0) {
+                    $this->flashSuccess('No invitations sent');
+                } else {
+                    try {
+                        $group->sendInvitationEmail($emails, $message, $sender);
+                        $this->flashSuccess('Invitations successfully sent');
+                    } catch(Exception $e) {
+                        $this->flashError("Couldn't send email");
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    private function handleMembershipStatus()
+    {
+        if(!empty($_POST['groups'])) {
+        
+            foreach($_POST['groups'] as $id=>$options) {                
+                $group = $this->findById($id);
+                $membership = groups_get_membership($group);
+                $membership->unsetOptions();
+                foreach($options as $option=>$value) {
+                    switch($option) {
+        
+                        case "quit":
+                            $membership->delete();
+                            break;
+        
+                        case "submitted":
+                            //do nothing, just here to make the $_POST arrive when nothing is checked
+                            break;
+        
+                        case "role":
+                            if($confirmation = $membership->getConfirmation($value)) {
+                                $confirmation->delete();
+        
+                                //make the previous owner no longer the owner
+                                if($value == 'is_owner') {
+                                    $owner = $group->findOwnerMembership();
+                                    $owner->is_owner = 0;
+                                    $owner->save();
+                                }
+                                $membership->$value = 1;
+                            }
+                            break;
+        
+                        default:
+                            $membership->$option = 1;
+
+        
+                            break;
+                    }
+                }     
+                if($membership->exists()) {
+                    $membership->save();
+                }
+
+            }
+        }
+        
+        
+        
     }
 
 }

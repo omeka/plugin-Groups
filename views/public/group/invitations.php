@@ -14,9 +14,9 @@ head(array());
     <input type='text' name='emails' />
 </div>
 <div>
-    <label for='groups[]'>Groups to invite the above people to</label>
+    <label for='invite_groups[]'>Groups to invite the above people to</label>
     <?php foreach($groups as $group): ?>
-        <input name='groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
+        <input name='invite_groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
     
     <?php endforeach; ?>
 </div>

@@ -273,7 +273,6 @@ function groups_get_memberships($group = null)
     
     return get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$group->id));
     
-    
 }
 
 function groups_group_visibility_text($group = null, $options=array())
