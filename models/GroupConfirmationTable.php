@@ -14,4 +14,12 @@ class GroupConfirmationTable extends Omeka_Db_Table
         }
     }    
     
+    public function findOrNew($params)
+    {
+        $select = $this->getSelect();
+        $this->applySearchFilters($select, $params);
+        $conf = $this->fetchObject($select);
+        return $conf ? $conf : new GroupConfirmation();
+    }
+    
 }

@@ -39,6 +39,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'make-admin',
             'manage',
             'invitations',
+            'administration',
             'change-status',
             'quit'
             );
@@ -52,6 +53,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'make-admin',
             'manage',
             'make-owner',
+            'administration',
             'change-status',
             'remove-member',    
     );    

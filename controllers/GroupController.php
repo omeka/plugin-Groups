@@ -97,7 +97,15 @@ class Groups_GroupController extends Omeka_Controller_Action
             $this->handleInvitations();            
         }  
 
-        if(!empty($_POST['groups'])) {
+        if(empty($_POST['groups'])) {
+            //all the notifications have been unchecked
+            $membership = groups_get_membership($group);
+            $membership->notify_member_joined = 0;
+            $membership->notify_item_new = 0;
+            $membership->notify_member_left = 0;
+            $membership->notify_item_deleted = 0;
+            $membership->save();
+        } else {
             $this->handleMembershipStatus();
         }
         
@@ -275,6 +283,7 @@ class Groups_GroupController extends Omeka_Controller_Action
     
     private function handleAdministration()
     {
+        $confirmationTable = get_db()->getTable('GroupConfirmation');
         $user = current_user();
         if(!empty($_POST)) {
             if(isset($_POST['membership'])) {
@@ -309,7 +318,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 foreach($_POST['status'] as $groupId=>$memberships) {
                     foreach($memberships as $membershipId=>$action) {
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        if($membership) {
+                        if($membership) {                        
                             switch($action) {
                                 case 'member':
                                     $membership->is_admin = 0;
@@ -318,7 +327,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         
                                 case 'admin':
                                     if(!$membership->is_admin) {
-                                        $confirmation = new GroupConfirmation;
+                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
                                         $confirmation->group_id = $groupId;
                                         $confirmation->membership_id = $membershipId;
                                         $confirmation->type = 'is_admin';
@@ -329,7 +338,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         
                                 case 'owner':
                                     if(!$membership->is_owner) {
-                                        $confirmation = new GroupConfirmation;
+                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
                                         $confirmation->group_id = $groupId;
                                         $confirmation->membership_id = $membershipId;
                                         $confirmation->type = 'is_owner';
