@@ -98,6 +98,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 $this->handleInvitations();
             }
             
+            
             if(empty($_POST['groups'])) {
                 //all the notifications have been unchecked
                 $membership = groups_get_membership($group);
@@ -106,9 +107,8 @@ class Groups_GroupController extends Omeka_Controller_Action
                 $membership->notify_member_left = 0;
                 $membership->notify_item_deleted = 0;
                 $membership->save();
-            } else {
-                $this->handleMembershipStatus();
-            }                        
+            }        
+            $this->handleMembershipStatus();
         }
 
         $user_membership = groups_get_membership($group);
@@ -320,7 +320,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 foreach($_POST['status'] as $groupId=>$memberships) {
                     foreach($memberships as $membershipId=>$action) {
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        if($membership) {                        
+                        if($membership) {                                                    
                             switch($action) {
                                 case 'member':
                                     $membership->is_admin = 0;
@@ -329,10 +329,13 @@ class Groups_GroupController extends Omeka_Controller_Action
         
                                 case 'admin':
                                     if(!$membership->is_admin) {
-                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
+                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId, 'type'=>'is_admin'));
                                         $confirmation->group_id = $groupId;
                                         $confirmation->membership_id = $membershipId;
                                         $confirmation->type = 'is_admin';
+                                        if($confirmation->exists()) {
+                                            $this->flash("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
+                                        }                                        
                                         $confirmation->save();
                                     }
                                     $membership->is_owner = 0;
@@ -340,16 +343,20 @@ class Groups_GroupController extends Omeka_Controller_Action
         
                                 case 'owner':
                                     if(!$membership->is_owner) {
-                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
+                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId, 'type'=>'is_owner'));
                                         $confirmation->group_id = $groupId;
                                         $confirmation->membership_id = $membershipId;
                                         $confirmation->type = 'is_owner';
+                                        if($confirmation->exists()) {
+                                            $this->flash("You have already asked {$membership->User->name} to become the owner of {$membership->Group->title}");
+                                        }
                                         $confirmation->save();
                                     }
                                     $membership->is_admin = 0;
                                     break;
                             }
                             $membership->save();
+                            $membership->Group->sendChangeStatusEmail($membership->User, $action);
                         }
                     }
                 }

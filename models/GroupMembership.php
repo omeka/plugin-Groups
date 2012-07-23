@@ -18,8 +18,6 @@ class GroupMembership extends Omeka_Record
     public function unsetOptions()
     {
         //when the post array comes in from the form, unchecked items aren't in the data, so reset all to 0 so we can work from the post
-        $this->is_admin = 0;
-        $this->is_owner = 0;
         $this->notify_member_joined = 0;
         $this->notify_item_new = 0;
         $this->notify_member_left = 0;

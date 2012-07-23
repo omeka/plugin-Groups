@@ -266,6 +266,30 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         }       
     }
     
+    public function sendChangeStatusEmail($to, $newStatus)
+    {
+        switch ($newStatus) {
+            case 'member':
+                return;
+                break;
+                
+            case 'admin':
+                $newStatus = 'administrator';
+                break;            
+        }
+        
+        $body = "An administrator of {$this->title} on Omeka Commons has asked you to become an $newStatus.";
+        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
+        $email = $this->getEmailBase(array($to));
+        $email->setSubject("You have been asked to become an $newStatus in {$this->title}");
+        $email->setBodyText($body);
+        try {
+            $email->send();
+        } catch(Exception $e) {
+            _log($e);
+        }        
+    }
+    
     public function sendInvitationEmail($to, $message, $sender)
     {
         $mail = new Zend_Mail();
