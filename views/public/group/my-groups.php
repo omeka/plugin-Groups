@@ -32,7 +32,7 @@ head(array());
     <div class='groups-group'>
         <?php $group = groups_get_current_group(); ?>
         <?php $membership = groups_get_membership(); ?>
-        <h3><?php echo $group->title; ?></h3>
+        <h3><a href="<?php echo uri('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
 
         
         <div class='group-options'>

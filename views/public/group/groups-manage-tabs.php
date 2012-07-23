@@ -1,3 +1,5 @@
+<h1>Groups Bulk Management</h1>
+
 <ul id="section-nav" class="navigation">
     <li class="tab">
         <a class="navigation" href="<?php echo uri('groups/add'); ?>">Create a Group</a>
