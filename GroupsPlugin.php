@@ -202,6 +202,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'invitations',
                             'approve-request',
                             'change-status',
+                            'make-owner',
                             'quit',
                             'manage',
                             'edit'
