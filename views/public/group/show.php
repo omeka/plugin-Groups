@@ -29,7 +29,14 @@ head(array());
     <?php if(has_permission($group, 'items')): ?>
     <ul class='groups-members'>
         <?php foreach($members as $member): ?>
-            <li><?php echo $member->User->name; ?>: <?php echo $member->role(); ?>
+            <li>
+                <?php  
+                    if(plugin_is_active('UserProfiles')) {
+                        user_profiles_link_to_profile($member->User, $member->User->name);
+                    } else {
+                        echo $member->User->name;
+                    }
+                ?>: <?php echo $member->role(); ?>
             
             </li>        
         <?php endforeach; ?>
