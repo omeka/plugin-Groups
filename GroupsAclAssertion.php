@@ -80,9 +80,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             return true;
         }                                
 
-        $membership = groups_get_membership($resource, $role);
-        
         if(get_class($resource) == 'Group') {
+            $membership = groups_get_membership($resource, $role);
             switch($privilege) {
                 
                 case 'join':
