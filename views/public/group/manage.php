@@ -5,9 +5,9 @@ head(array());
 
 <div id='primary'>
 <h1>Manage <?php echo $group->title; ?></h1>
-
-<a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
 <?php echo flash(); ?>
+<a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
+
 <form method="post">
 
 

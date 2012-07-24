@@ -369,6 +369,7 @@ class Groups_GroupController extends Omeka_Controller_Action
     
     private function handleInvitations()
     {
+        $sender = current_user();
         if(isset($_POST['emails'])) {
             $emails = explode(',', $_POST['emails']);
             $message = $_POST['message'];
@@ -378,17 +379,16 @@ class Groups_GroupController extends Omeka_Controller_Action
             $alreadyMemberEmails = array();
             foreach($_POST['invite_groups'] as $groupId) {             
                 $group = $this->getTable()->find($groupId);
+                $groupEmails = array();
                 foreach($emails as $index=>$email) {
                     $email = trim($email);        
                     $user = $userTable->findByEmail(trim($email));
                     if($user) {
                         if($group->hasMember($user)) {         
-                            $this->flashError($user->name . " is already in this group.");
-                            unset($emails[$index]);
+                            $this->flashError($user->name . " is already a member of {$group->title}.");                            
                         } else {
                             if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
-                                $this->flashError("You have already invited " . $user->name . " to this group");
-                                unset($emails[$index]);
+                                $this->flashError("You have already invited " . $user->name . " to {$group->title}");
                             } else {                                
                                 $invitation = new GroupInvitation;
                                 $invitation->user_id = $user->id;
@@ -396,6 +396,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                                 $invitation->message = $message;
                                 $invitation->group_id = $groupId;
                                 $invitation->save();
+                                $groupEmails[] = $email;
                             }
                         }
         
@@ -405,13 +406,15 @@ class Groups_GroupController extends Omeka_Controller_Action
                         unset($emails[$index]);
                     }
                 }
-                if(count($emails)==0) {
-                    $this->flashSuccess('No invitations sent');
+                $groupEmailsCount = count($groupEmails);
+                if($groupEmailsCount==0) {
+                    $this->flashSuccess('No invitations sent to group ' . $group->title);
                 } else {
                     try {
-                        $group->sendInvitationEmail($emails, $message, $sender);
-                        $this->flashSuccess('Invitations successfully sent');
+                        $group->sendInvitationEmail($groupEmails, $message, $sender);
+                        $this->flashSuccess($groupEmailsCount . ' Invitations sent to ' . $group->title);
                     } catch(Exception $e) {
+                        _log($e);
                         $this->flashError("Couldn't send email");
                     }
                 }

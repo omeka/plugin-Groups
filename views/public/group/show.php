@@ -5,6 +5,7 @@ head(array());
 
 <div id='primary'>
     <h1><?php echo $group->title; ?></h1>
+    <?php echo flash(); ?>
     <?php if(has_permission($group, 'edit')):?>
         <a href="<?php echo record_uri($group, 'edit'); ?>">Edit</a>
     <?php endif; ?>
