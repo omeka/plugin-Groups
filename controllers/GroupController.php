@@ -97,8 +97,7 @@ class Groups_GroupController extends Omeka_Controller_Action
             if(!empty($_POST['emails'])) {
                 $this->handleInvitations();
             }
-            
-            
+                        
             if(empty($_POST['groups'])) {
                 //all the notifications have been unchecked
                 $membership = groups_get_membership($group);
@@ -356,7 +355,10 @@ class Groups_GroupController extends Omeka_Controller_Action
                                     break;
                             }
                             $membership->save();
-                            $membership->Group->sendChangeStatusEmail($membership->User, $action);
+                            if($confirmation && !$confirmation->exists()) {
+                                $membership->Group->sendChangeStatusEmail($membership->User, $action);
+                            }
+                            
                         }
                     }
                 }

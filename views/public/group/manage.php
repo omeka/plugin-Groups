@@ -9,6 +9,41 @@ head(array());
 <a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
 <?php echo flash(); ?>
 <form method="post">
+
+
+<div >
+    <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
+
+    <h2>Membership and Role</h2>
+    <?php if($user_membership->is_owner): ?>
+        <p>You are the owner of this group. You can transfer ownership in the <a href="<?php echo uri('groups/administration'); ?>">administration page</a>.</p>
+    
+    <?php else: ?>
+        <label class='groups' for="groups[<?php echo $group->id ?>][quit]">Membership</label>
+        <input type='checkbox' name="groups[<?php echo $group->id ?>][quit]" />Leave<br/>                
+    <?php endif; ?>
+                    
+
+    <?php $adminConfirm = groups_role_confirm($group, $user_membership, 'is_admin'); ?>
+    <?php $ownerConfirm = groups_role_confirm($group, $user_membership, 'is_owner'); ?>
+    <?php if($adminConfirm || $ownerConfirm ): ?>
+        <label class='groups' for="groups[<?php echo $group->id ?>][role]">Role</label>
+        <?php if($adminConfirm) :?>
+            <input type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Admin
+                <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>                                        
+        <?php endif; ?>
+        <?php if( $ownerConfirm ) :?>
+            <input type='checkbox' value='is_owner' name="groups[<?php echo $group->id ?>][role]" />Owner
+            <p>The owner of this group would like to transfer ownership to you. Check here to accept.</p>
+        <?php endif; ?>
+
+    <?php else: ?>
+        <p>Role: <?php echo $user_membership->role(); ?></p>
+    <?php endif; ?>            
+
+</div>
+
+
 <?php if(has_permission($group, 'administration')): ?>
 <h2>Administer Members</h2>
     <div>

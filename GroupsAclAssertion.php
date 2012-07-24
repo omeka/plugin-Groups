@@ -79,8 +79,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             return true;
         }                                
 
-        
-        
         if(get_class($resource) == 'Group') {
             switch($privilege) {
                 
@@ -116,11 +114,12 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             $membership = groups_get_membership($resource, $role);
                  
             if($membership) {      
+                
                 if($membership->is_admin) {
                     return in_array($privilege, $this->adminPrivileges);
                 }
-                if($membership->is_owner) {                      
-                    return in_array($privilege, $this->ownerPrivileges);
+                if($membership->is_owner) {    
+                    return in_array($privilege, $this->ownerPrivileges);                    
                 }
                 return in_array($privilege, $this->memberPrivileges);
             }
@@ -135,7 +134,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         $groups = groups_groups_for_user($role);
         
 
-        
         if(count($groups) != 0) {
             return true;
         }

@@ -22,12 +22,11 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $membership->user_id = $user->id;
         $membership->group_id = $this->id;
         $membership->is_pending = $pending;
+        $membership->is_admin = 0;
+        $membership->is_owner = 0;
         if($role) {
             $membership->$role = 1;
-        } else {
-            $membership->is_admin = 0;
-            $membership->is_owner = 0;
-        }
+        } 
         $membership->save();
     }
 
@@ -279,7 +278,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         }
         
         $body = "An administrator of {$this->title} on Omeka Commons has asked you to become an $newStatus.";
-        $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
+        $body .= "<a href='" . WEB_ROOT . "/groups/manage/" . $this->id . "'>{$this->title}</a>";
         $email = $this->getEmailBase(array($to));
         $email->setSubject("You have been asked to become an $newStatus in {$this->title}");
         $email->setBodyText($body);

@@ -84,8 +84,12 @@ class GroupsManageBlock extends Blocks_Block_Abstract
         foreach($requests as $user) {
             $id = "user-id-" . $user->id;
             $html .= "<li class='groups-pending-request' id='$id'>";
-            $html .= "<span class='groups-pending-request-user'>" . $user->name . "</span>";
-            $html .= "<span class='groups-pending-request-view groups-button' >View</span>";
+            if(plugin_is_active('UserProfiles')) {
+                $html .= "<a href='" . html_escape(PUBLIC_BASE_URL . "/user-profiles/profiles/user/id/{$user->id}") . "'>{$user->name}</a>";
+            } else {
+                $html .= "<span class='groups-pending-request-user'>" . $user->name . "</span>";
+            }
+            
             $html .= "<span class='groups-pending-request-approve groups-button'>Approve</span>";
         }
 
@@ -94,11 +98,6 @@ class GroupsManageBlock extends Blocks_Block_Abstract
                 jQuery(document).ready(
                         jQuery('span.groups-pending-request-approve').click(Omeka.Groups.approveRequest)
                     );
-                jQuery(document).ready(
-                        jQuery('span.groups-pending-request-view').click(Omeka.Groups.viewRequest)
-                    );
-
-
 
                 ";
         $html .= "</script>";
