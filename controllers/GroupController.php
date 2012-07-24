@@ -108,6 +108,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 $membership->save();
             }        
             $this->handleMembershipStatus();
+            $this->redirect->gotoUrl('groups/show/' . $group->id);
         }
 
         $user_membership = groups_get_membership($group);

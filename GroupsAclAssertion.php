@@ -27,7 +27,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
     private $memberPrivileges = array(
                 'add-item',
                 'items',
-                'quit'
+                'quit',
+                'manage'
                 );
 
     
@@ -79,6 +80,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             return true;
         }                                
 
+        $membership = groups_get_membership($resource, $role);
+        
         if(get_class($resource) == 'Group') {
             switch($privilege) {
                 
@@ -105,9 +108,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 break;
                 
                 case 'manage':
-                    //since different permissions are all present on the same page, 
-                    // will have the view sort out what to show
-                    return true;
+                    return $membership;
                 break;
                             
             }
