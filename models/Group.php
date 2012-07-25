@@ -22,11 +22,22 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $membership->user_id = $user->id;
         $membership->group_id = $this->id;
         $membership->is_pending = $pending;
-        $membership->is_admin = 0;
-        $membership->is_owner = 0;
-        if($role) {
-            $membership->$role = 1;
-        } 
+        switch($role) {
+            case 'is_admin':
+                $membership->is_admin = 1;
+                $membership->is_owner = 0;
+                break;
+                
+            case 'is_owner':
+                $membership->is_admin = 1;
+                $membership->is_owner = 1;
+                break;
+                
+            default:
+                $membership->is_admin = 0;
+                $membership->is_owner = 0;
+            break;   
+        }
         $membership->save();
     }
 
@@ -172,7 +183,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendPendingMemberEmail($user, $to=null)
     {
-        _log('sending pending member');
         if($to) {                        
             $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
             $email = $this->getEmailBase($to);
