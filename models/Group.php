@@ -172,6 +172,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendPendingMemberEmail($user, $to=null)
     {
+        _log('sending pending member');
         if($to) {                        
             $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
             $email = $this->getEmailBase($to);
@@ -210,7 +211,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             try {
                 $email->send();
             } catch(Exception $e) {
-                _log($e);
+               _log($e);
             }
         }
     }
@@ -223,7 +224,6 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $email = $this->getEmailBase($to);
             $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
             $email->setBodyHtml($body);
-            _log($body);
             try {
                 $email->send();
             } catch(Exception $e) {
@@ -234,6 +234,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendMemberApprovedEmail($user)
     {
+        _log('sending member approved');
         $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
         $email = $this->getEmailBase(array($user));

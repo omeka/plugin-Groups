@@ -126,7 +126,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $response = json_encode($responseArray);
         $to = $group->findMembersForNotification('notify_member_joined');        
         try {
-            $group->sendNewMemberEmail($to);
+            $group->sendNewMemberEmail($user, $to);
         } catch (Exception $e) {            
             $responseArray = array('status'=>'error');
         }
@@ -226,7 +226,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                         $invitation->Group->addMember($user);
                         $to = $invitation->Group->findMembersForNotification('notify_member_joined');
                         try {
-                            $invitation->Group->sendNewMemberEmail($to);
+                            $invitation->Group->sendNewMemberEmail($user, $to);
                         } catch(Exception $e) {
                             _log($e);
                         }
@@ -298,7 +298,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                             case 'remove':
                                 $group->removeMember($membership);
                                 $to = $group->findMembersForNotification('notify_member_left');
-                                $group->sendMemberLeftEmail($to);
+                                $group->sendMemberLeftEmail($membership->User, $to);
                                 break;
         
                             case 'deny':
@@ -310,7 +310,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                             case 'approve':
                                 $group->approveMember($membership);
                                 $to = $group->findMembersForNotification('notify_member_joined');
-                                $group->sendNewMemberEmail($to);
+                                $group->sendNewMemberEmail($membership->User, $to);
                                 break;
                         }
                     }
