@@ -218,11 +218,12 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function sendNewItemEmail($item, $to = null)
     {
         if($to) {
-            $body = "A new item been added to the {$this->title} group on Omeka Commons. ";
-            $body .= "<a href='" . PUBLIC_BASE_URL . item_uri('show', $item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
+            $body = "A new item been added to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons: ";
+            $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
             $email = $this->getEmailBase($to);
             $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
             $email->setBodyHtml($body);
+            _log($body);
             try {
                 $email->send();
             } catch(Exception $e) {
