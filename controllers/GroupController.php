@@ -108,11 +108,12 @@ class Groups_GroupController extends Omeka_Controller_Action
                 $membership->save();
             }        
             $this->handleMembershipStatus();
-            $this->redirect->gotoUrl('groups/show/' . $group->id);
+            $this->handleAdministration();
+            $this->redirect->gotoUrl('groups/show/' . $group->id);            
         }
-
+        
         $user_membership = groups_get_membership($group);
-        $this->handleAdministration();
+        
         $this->view->group = $group;
         $this->view->user_membership = $user_membership;
     }
@@ -288,10 +289,10 @@ class Groups_GroupController extends Omeka_Controller_Action
         $confirmationTable = get_db()->getTable('GroupConfirmation');
         $user = current_user();
         if(!empty($_POST)) {
-            if(isset($_POST['membership'])) {
+            if(isset($_POST['membership'])) {                
                 foreach($_POST['membership'] as $groupId=>$memberships) {
                     $group = $this->_helper->db->getTable('Group')->find($groupId);
-                    foreach($memberships as $membershipId=>$action) {
+                    foreach($memberships as $membershipId=>$action) {                       
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
                         switch($action) {
                             case 'remove':
