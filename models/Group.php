@@ -173,8 +173,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function sendPendingMemberEmail($user, $to=null)
     {
         if($to) {                        
-            $body = "User {$user->name} has requested membership in {$this->title} group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
-            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
             $email = $this->getEmailBase($to);
             $email->setSubject("A new member wants to join {$this->title} on Omeka Commons");
             $email->setBodyHtml($body); 
@@ -182,16 +181,14 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
                 $email->send();
             } catch(Exception $e) {
                 _log($e);
-            }
-            
+            }            
         }
     }
     
     public function sendNewMemberEmail($user, $to=null)
     {
         if($to) {
-            $body = "A new member {$user->name} has joined the {$this->title} group on Omeka Commons.";
-            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons.";
             $email = $this->getEmailBase($to);
             $email->setSubject("A new member has joined {$this->title} on Omeka Commons");
             $email->setBodyHtml($body);        
@@ -206,8 +203,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function sendMemberLeftEmail($user, $to=null)
     {
         if($to) {
-            $body = "{$user->name} has left the {$this->title} group on Omeka Commons. ";
-            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. ";
             $email = $this->getEmailBase($to);
             $email->setSubject("A member has left {$this->title} on Omeka Commons");
             $email->setBodyHtml($body);
@@ -223,8 +219,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     {
         if($to) {
             $body = "A new item been added to the {$this->title} group on Omeka Commons. ";
-            $body .= item('Dublin Core', 'Title', array(), $item);
-            $body .= WEB_ROOT . "/groups/show/" . $this->id;
+            $body .= "<a href='" . PUBLIC_BASE_URL . item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
             $email = $this->getEmailBase($to);
             $email->setSubject("A new item has been added to {$this->title} on Omeka Commons");
             $email->setBodyHtml($body);
