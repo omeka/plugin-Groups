@@ -321,7 +321,8 @@ class Groups_GroupController extends Omeka_Controller_Action
                 foreach($_POST['status'] as $groupId=>$memberships) {
                     foreach($memberships as $membershipId=>$action) {
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        if($membership) {                                                    
+                        if($membership) {   
+                                                                             
                             switch($action) {
                                 case 'member':
                                     $membership->is_admin = 0;
@@ -336,7 +337,8 @@ class Groups_GroupController extends Omeka_Controller_Action
                                         $confirmation->type = 'is_admin';
                                         if($confirmation->exists()) {
                                             $this->flash("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
-                                        }                                        
+                                        }                     
+                                        $this->flash($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
                                         $confirmation->save();
                                     }
                                     $membership->is_owner = 0;
@@ -351,6 +353,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                                         if($confirmation->exists()) {
                                             $this->flash("You have already asked {$membership->User->name} to become the owner of {$membership->Group->title}");
                                         }
+                                        $this->flash($membership->User->name . " must accept becoming the owner for the changes to take effect.");
                                         $confirmation->save();
                                     }
                                     $membership->is_admin = 0;

@@ -109,12 +109,18 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 case 'manage':
                     return $membership;
                 break;
+                
+                case 'quit':
+                    //don't let owners quit on their flock
+                    if($membership->owner_id == 1) {
+                        return false;
+                    }
+                break;
                             
             }
             $membership = groups_get_membership($resource, $role);
                  
-            if($membership) {      
-                
+            if($membership) {                      
                 if($membership->is_admin) {
                     return in_array($privilege, $this->adminPrivileges);
                 }
