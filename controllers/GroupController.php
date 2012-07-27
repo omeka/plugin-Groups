@@ -222,15 +222,20 @@ class Groups_GroupController extends Omeka_Controller_Action
             foreach($_POST['invitations'] as $id=>$options) {
                 $invitation = $this->findById($id, 'GroupInvitation');
                 foreach($options as $option=>$value) {
-                    if($option == 'join') {
-                        $invitation->Group->addMember($user);
-                        $to = $invitation->Group->findMembersForNotification('notify_member_joined');
-                        try {
+                    switch($option) {
+                        case 'join':
+                            $invitation->Group->addMember($user);
+                            $to = $invitation->Group->findMembersForNotification('notify_member_joined');
                             $invitation->Group->sendNewMemberEmail($user, $to);
-                        } catch(Exception $e) {
-                            _log($e);
-                        }
-                        $invitation->delete();
+                            $invitation->delete();                            
+                            break;
+                            
+                        case 'decline':
+                            $invitation->Group->addMember($user);
+                            $to = $this->getTable('User')->find($invitation->sender_id);
+                            $invitation->Group->sendInvitationDeclinedEmail($user, $to);                            
+                            $invitation->delete();
+                            break;
                     }
                 }
             }
@@ -412,7 +417,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 }
                 $groupEmailsCount = count($groupEmails);
                 if($groupEmailsCount==0) {
-                    $this->flashSuccess('No invitations sent to group ' . $group->title);
+                    $this->flashSuccess('No invitations sent to ' . $group->title);
                 } else {
                     try {
                         $group->sendInvitationEmail($groupEmails, $message, $sender);

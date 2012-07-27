@@ -13,12 +13,14 @@ head(array());
                 <p><?php echo $invitation->Sender->name; ?> has invited you to join this group: </p>
                 <p><?php echo $invitation->message; ?></p>    
                 <?php if( has_permission($invitation->Group, 'join') ): ?>
-                <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][join]" />                
-                <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Join</label>
+                    <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][join]" />                
+                    <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Join</label>
                 <?php else: ?>
-                <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][request]" />                
-                <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Request Membership</label>
+                    <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][request]" />                
+                    <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Request Membership</label>
                 <?php endif; ?>
+                <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][decline]" />                
+                <label class='groups' for="invitations[<?php echo $invitation->id ?>][decline]">Decline</label>                
             </div>
         </div>        
         <?php endforeach; ?>
@@ -40,8 +42,7 @@ head(array());
             <div class='group-status'>
                 <h4>Membership and Role</h4>
                 <?php if($membership->is_owner): ?>
-                    <p>You are the owner of this group. You can transfer ownership in the <a href="<?php echo uri('groups/administration'); ?>">administration page</a>.</p>
-                
+                    <p>You are the owner of this group. You can transfer ownership in the <a href="<?php echo uri('groups/manage/' . $group->id); ?>">group management page</a>.</p>                
                 <?php else: ?>
                     <label class='groups' for="groups[<?php echo $group->id ?>][quit]">Membership</label>
                     <input type='checkbox' name="groups[<?php echo $group->id ?>][quit]" />Leave<br/>                

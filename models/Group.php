@@ -298,12 +298,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     
     public function sendInvitationEmail($to, $message, $sender)
     {
-        $mail = new Zend_Mail();
-        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
-        $mail->setFrom(get_option('administrator_email'), settings('site_title'));
-        foreach($to as $email) {
-            $mail->addTo($email);
-        }
+        $mail = $this->getEmailBase($to);
         $subjectText = "An invitation to join the group '{$this->title}' on " . settings('site_title');
         $mail->setSubject($subjectText);        
         $body = "<p>{$sender->name} has invited you to join the group {$this->title} on " . settings('site_title');
@@ -317,6 +312,20 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             _log($e);
         }
         
+    }
+    
+    public function sendInvitationDeclinedEmail($user, $to)
+    {
+        $mail = $this->getEmailBase($to);
+        $subjectText = "You're invitation to {$user->name} to join {$this->title} was declined";
+        $mail->setSubject($subjextText);
+        $body = "<p>{$user->name} has declined your invitation to join {$this->title} ";
+        $mail->setBodyHtml($body);
+        try {
+            $mail->send();
+        } catch(Exception $e) {
+            _log($e);
+        }                
     }
     
     private function getEmailBase($to = null)
