@@ -416,7 +416,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 } else {
                     try {
                         $group->sendInvitationEmail($groupEmails, $message, $sender);
-                        $this->flashSuccess($groupEmailsCount . ' Invitations sent to ' . $group->title);
+                        $this->flashSuccess($groupEmailsCount . " invitations to {$group->title} sent");
                     } catch(Exception $e) {
                         _log($e);
                         $this->flashError("Couldn't send email");
