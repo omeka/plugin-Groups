@@ -69,8 +69,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
             $membership = $this->findMembership($user);
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
-        }
-        
+        }        
         $membership->delete();
     }
     
@@ -183,63 +182,31 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function sendPendingMemberEmail($user, $to=null)
     {
-        if($to) {                        
-            $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
-            $email = $this->getEmailBase($to);
-            $email->setSubject("A new member wants to join {$this->title} on " . settings('site_title'));
-            $email->setBodyHtml($body); 
-            try {
-                $email->send();
-            } catch(Exception $e) {
-                _log($e);
-            }            
-        }
+        $subject = "A new member wants to join {$this->title} on " . settings('site_title');
+        $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
+        $this->sendEmails($to, $subject, $body);        
     }
     
     public function sendNewMemberEmail($user, $to=null)
     {
-        if($to) {
-            $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
-            $email = $this->getEmailBase($to);
-            $email->setSubject("A new member has joined {$this->title} on " . settings('site_title'));
-            $email->setBodyHtml($body);        
-            try {
-                $email->send();
-            } catch(Exception $e) {
-                _log($e);
-            }
-        }
+        $subject = "A new member has joined {$this->title} on " . settings('site_title');
+        $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
+        $this->sendEmails($to, $body, $subject);     
     }
 
     public function sendMemberLeftEmail($user, $to=null)
     {
-        if($to) {
-            $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on" . settings('site_title');
-            $email = $this->getEmailBase($to);
-            $email->setSubject("A member has left {$this->title} on " . settings('site_title'));
-            $email->setBodyHtml($body);
-            try {
-                $email->send();
-            } catch(Exception $e) {
-               _log($e);
-            }
-        }
+        $subject = "A member has left {$this->title} on " . settings('site_title');
+        $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on" . settings('site_title');
+        $this->sendEmails($to, $body, $subject);                
     }
 
     public function sendNewItemEmail($item, $to = null)
     {
-        if($to) {
-            $body = "A new item been added to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
-            $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
-            $email = $this->getEmailBase($to);
-            $email->setSubject("A new item has been added to {$this->title} on " . settings('site_title'));
-            $email->setBodyHtml($body);
-            try {
-                $email->send();
-            } catch(Exception $e) {
-                _log($e);
-            }
-        }        
+        $subject = "A new item has been added to {$this->title} on " . settings('site_title');
+        $body = "A new item been added to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
+        $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
+        $this->sendEmails($to, $body, $subject);
     }
 
     public function sendMemberApprovedEmail($user)
@@ -247,29 +214,16 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         _log('sending member approved');
         $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
-        $email = $this->getEmailBase(array($user));
-        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been approved!");
-        $email->setBodyHtml($body);
-        try {
-            $email->send();
-        } catch(Exception $e) {
-            _log($e);
-        }        
+        $subject = "Your request to join {$this->title} on Omeka Commons has been approved!";
+        $this->sendEmails($user, $body, $subject);        
     }
 
     public function sendMemberDeniedEmail($user) 
-    {
-        
+    {        
         $body = "Your request to join {$this->title} on Omeka Commons has been denied. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
-        $email = $this->getEmailBase(array($user));
-        $email->setSubject("Your request to join {$this->title} on Omeka Commons has been denied");
-        $email->setBodyHtml($body);
-        try {
-            $email->send();
-        } catch(Exception $e) {
-            _log($e);
-        }       
+        $subject = "Your request to join {$this->title} on Omeka Commons has been denied";
+        $this->sendEmails($user, $body, $subject);       
     }
     
     public function sendChangeStatusEmail($to, $newStatus)
@@ -286,67 +240,67 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         
         $body = "An administrator of {$this->title} on Omeka Commons has asked you to become an $newStatus.";
         $body .= "<a href='" . WEB_ROOT . "/groups/manage/" . $this->id . "'>{$this->title}</a>";
-        $email = $this->getEmailBase(array($to));
-        $email->setSubject("You have been asked to become an $newStatus in {$this->title}");
-        $email->setBodyHtml($body);
-        try {
-            $email->send();
-        } catch(Exception $e) {
-            _log($e);
-        }        
+        $subject = "You have been asked to become an $newStatus in {$this->title}";
+        $this->sendEmails($to, $body, $subject);
     }
     
     public function sendInvitationEmail($to, $message, $sender)
     {
-        $mail = $this->getEmailBase($to);
-        $subjectText = "An invitation to join the group '{$this->title}' on " . settings('site_title');
-        $mail->setSubject($subjectText);        
+        $subject = "An invitation to join the group '{$this->title}' on " . settings('site_title');
         $body = "<p>{$sender->name} has invited you to join the group {$this->title} on " . settings('site_title');
         $body .= "<p>Here's their message</p>";
         $body .= "<p>$message</p>";
         $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
+        foreach($to as $email) {
+            $this->sendEmails($email, $body, $subject);
+        }
+    }
+    
+    public function sendInvitationDeclinedEmail($user, $to)
+    {
+        $body = "<p>{$user->name} has declined your invitation to join {$this->title} ";
+        $subject = "You're invitation to {$user->name} to join {$this->title} was declined";
+        $this->sendEmails($email, $body, $subject );
+    }
+    
+    private function sendEmail($to, $body, $subject)
+    {
+        if(is_string($to)) {
+            $email = $to;
+        }
+
+        if($to instanceOf User) {
+            $email = $to->email;
+        }
+        
+        if($to instanceOf GroupMember) {
+            $email = $to->User->email;
+        }
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
+        $mail->setFrom(get_option('administrator_email'), settings('site_title'));
+        $mail->addTo($email);
+        $mail->setSubject($subject);
         $mail->setBodyHtml($body);
+        
         try {
             $mail->send();
         } catch(Exception $e) {
             _log($e);
         }
-        
+
     }
     
-    public function sendInvitationDeclinedEmail($user, $to)
+    private function sendEmails($to, $body, $subject) 
     {
-        $mail = $this->getEmailBase($to);
-        $subjectText = "You're invitation to {$user->name} to join {$this->title} was declined";
-        $mail->setSubject($subjextText);
-        $body = "<p>{$user->name} has declined your invitation to join {$this->title} ";
-        $mail->setBodyHtml($body);
-        try {
-            $mail->send();
-        } catch(Exception $e) {
-            _log($e);
-        }                
-    }
-    
-    private function getEmailBase($to = null)
-    {
-        $mail = new Zend_Mail();
-        $mail->setFrom(get_option('administrator_email'), settings('site_title'));
-        if($to) {
-           //$to could be either an array of email address or an array of users
-           foreach($to as $data) {
-               if(is_string($data)) {
-                   $mail->addTo($data);
-               } else {
-                   $mail->addTo($data->email);
-               }               
-           } 
+        if(is_array($to)) {
+            foreach($to as $user) {
+                $this->sendEmail($to, $body, $subject);
+            }
         } else {
-            $owner = $this->getOwner();
-            $mail->addTo($owner->email, $this->title . " Group Owner");            
-        }        
-        $mail->addHeader('X-Mailer', 'PHP/' . phpversion());      
-        return $mail;         
+            $this->sendEmail($to, $body, $subject);
+        }
+    
     }
     
     protected function afterSaveForm($post)
