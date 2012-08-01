@@ -28,7 +28,7 @@ head(array());
                 <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline and block invitations from this group.</label>                
             </div>
         </div>        
-        <?php endforeach; ?>
+        <?php endforeach; ?>        
     <?php endif; ?>
     <h2>My Groups</h2>
     <?php if(empty($groups)) : ?>
@@ -38,7 +38,7 @@ head(array());
     
     <div class='groups-group'>
         <?php $group = groups_get_current_group(); ?>
-        <?php $membership = groups_get_membership(); ?>
+        <?php $user_membership = groups_get_membership(); ?>
         <h3><a href="<?php echo uri('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
 
         
@@ -46,48 +46,10 @@ head(array());
             <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
             <div class='group-status'>
                 <h4>Membership and Role</h4>
-                <?php if($membership->is_owner): ?>
-                    <p>You are the owner of this group. You can transfer ownership in the <a href="<?php echo uri('groups/manage/' . $group->id); ?>">group management page</a>.</p>                
-                <?php else: ?>
-                    <label class='groups' for="groups[<?php echo $group->id ?>][quit]">Membership</label>
-                    <input type='checkbox' name="groups[<?php echo $group->id ?>][quit]" />Leave<br/>                
-                <?php endif; ?>
-                                
-
-                <?php $adminConfirm = groups_role_confirm($group, $membership, 'is_admin'); ?>
-                <?php $ownerConfirm = groups_role_confirm($group, $membership, 'is_owner'); ?>
-                <?php if($adminConfirm || $ownerConfirm ): ?>
-                    <label class='groups' for="groups[<?php echo $group->id ?>][role]">Role</label>
-                    <?php if($adminConfirm) :?>
-                        <input type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Admin
-                            <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>                                        
-                    <?php endif; ?>
-                    <?php if( $ownerConfirm ) :?>
-                        <input type='checkbox' value='is_owner' name="groups[<?php echo $group->id ?>][role]" />Owner
-                        <p>The owner of this group would like to transfer ownership to you. Check here to accept.</p>
-                    <?php endif; ?>
-
-                <?php else: ?>
-                    <p>Role: <?php echo $membership->role(); ?></p>
-                <?php endif; ?>            
+                <?php include('role-admin.php'); ?>
             </div>
 
-            <div class='group-notifications'>
-                <h4>Send email notifications to me when:</h4>
-                <input <?php if($membership->notify_member_joined) {echo "checked='checked'"; }?> type='checkbox' name="groups[<?php echo $group->id ?>][notify_member_joined]" />
-                <label class='groups' for="groups[<?php echo $group->id ?>][notify_member_joined]">New Members Join</label>
-
-                <input <?php if($membership->notify_member_left) {echo "checked='checked'"; }?>  type='checkbox' name="groups[<?php echo $group->id ?>][notify_member_left]" />
-                <label class='groups' for="groups[<?php echo $group->id ?>][notify_member_left]">A Member Leaves</label>
-
-            
-                <input  <?php if($membership->notify_item_new) {echo "checked='checked'"; }?>  type='checkbox' name="groups[<?php echo $group->id ?>][notify_item_new]" />                
-                <label class='groups' for="groups[<?php echo $group->id ?>][notify_item_new]">New Items Are Added</label>
-                
-            
-                <input  <?php if($membership->notify_item_deleted) {echo "checked='checked'"; }?>  type='checkbox' name="groups[<?php echo $group->id ?>][notify_item_deleted]" />                
-                <label class='groups' for="groups[<?php echo $group->id ?>][notify_item_deleted]">Items Are Deleted</label>                                                
-            </div>
+            <?php include('notifications-admin.php'); ?>
         </div>        
     </div>
     <?php endwhile; ?>

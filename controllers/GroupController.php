@@ -354,7 +354,6 @@ class Groups_GroupController extends Omeka_Controller_Action
                                         $this->flash($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
                                         $confirmation->save();
                                     }
-                                    $membership->is_owner = 0;
                                     break;
         
                                 case 'owner':
@@ -369,7 +368,6 @@ class Groups_GroupController extends Omeka_Controller_Action
                                         $this->flash($membership->User->name . " must accept becoming the owner for the changes to take effect.");
                                         $confirmation->save();
                                     }
-                                    $membership->is_admin = 0;
                                     break;
                             }
                             $membership->save();
@@ -470,17 +468,24 @@ class Groups_GroupController extends Omeka_Controller_Action
                             
                         case "admin":
                         case "owner":                       
-                            if($confirmation = $membership->getConfirmation('is_' . $option)) {
-                                $confirmation->delete();
-                                if($value != 'decline') {
-                                    //make the previous owner no longer the owner
-                                    if($value == 'is_owner') {
-                                        $owner = $group->findOwnerMembership();
-                                        $owner->is_owner = 0;
-                                        $owner->save();
-                                    }
-                                    $membership->$value = 1;
+                            //allow admins to quit being an admin
+                            if($value == 'decline' && $option == 'admin') {
+                                $membership->is_admin = 0;
+                            }
+                            
+                            if($value != 'decline') {
+                                //make the previous owner no longer the owner
+                                if($value == 'is_owner') {
+                                    $owner = $group->findOwnerMembership();
+                                    $owner->is_owner = 0;
+                                    $owner->is_admin = 1;
+                                    $owner->save();
                                 }
+                                $membership->$value = 1;
+                            }
+                            
+                            if($confirmation = $membership->getConfirmation('is_' . $option)) {
+                                $confirmation->delete();                                
                             }    
                             
                             
