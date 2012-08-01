@@ -17,28 +17,33 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function addMember($user, $pending = 0, $role = null)
     {
-        $membership = new GroupMembership;
-        $membership->unsetOptions();
-        $membership->user_id = $user->id;
-        $membership->group_id = $this->id;
-        $membership->is_pending = $pending;
-        switch($role) {
-            case 'is_admin':
-                $membership->is_admin = 1;
-                $membership->is_owner = 0;
-                break;
-                
-            case 'is_owner':
-                $membership->is_admin = 1;
-                $membership->is_owner = 1;
-                break;
-                
-            default:
-                $membership->is_admin = 0;
-                $membership->is_owner = 0;
-            break;   
+        $count = $this->getDb()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'user_id'=>$user->id));
+        if($count == 0) {
+            $membership = new GroupMembership;
+            $membership->unsetOptions();
+            $membership->user_id = $user->id;
+            $membership->group_id = $this->id;
+            $membership->is_pending = $pending;
+            switch($role) {
+                case 'is_admin':
+                    $membership->is_admin = 1;
+                    $membership->is_owner = 0;
+                    break;
+                    
+                case 'is_owner':
+                    $membership->is_admin = 1;
+                    $membership->is_owner = 1;
+                    break;
+                    
+                default:
+                    $membership->is_admin = 0;
+                    $membership->is_owner = 0;
+                break;   
+            }
+            $membership->save();
+            return $membership;
         }
-        $membership->save();
+        return false;
     }
 
     public function removeMember($user)
@@ -201,17 +206,16 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $this->sendEmails($to, $body, $subject);                
     }
 
-    public function sendNewItemEmail($item, $to = null)
+    public function sendNewItemEmail($item, $to = null, $user)
     {
         $subject = "A new item has been added to {$this->title} on " . settings('site_title');
-        $body = "A new item been added to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
+        $body = "{$user->name} ({$user->username}) has added an item to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
         $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
         $this->sendEmails($to, $body, $subject);
     }
 
     public function sendMemberApprovedEmail($user)
     {
-        _log('sending member approved');
         $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
         $subject = "Your request to join {$this->title} on Omeka Commons has been approved!";
@@ -268,11 +272,9 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         if(is_string($to)) {
             $email = $to;
         }
-
         if($to instanceOf User) {
             $email = $to->email;
-        }
-        
+        }        
         if($to instanceOf GroupMember) {
             $email = $to->User->email;
         }
@@ -281,14 +283,12 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         $mail->setFrom(get_option('administrator_email'), settings('site_title'));
         $mail->addTo($email);
         $mail->setSubject($subject);
-        $mail->setBodyHtml($body);
-        
+        $mail->setBodyHtml($body);        
         try {
             $mail->send();
         } catch(Exception $e) {
             _log($e);
         }
-
     }
     
     private function sendEmails($to, $body, $subject) 

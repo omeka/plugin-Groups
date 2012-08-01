@@ -219,25 +219,33 @@ class Groups_GroupController extends Omeka_Controller_Action
                 'user' => $user
         );     
         if(!empty($_POST['invitations'])) {      
-            foreach($_POST['invitations'] as $id=>$options) {
+            foreach($_POST['invitations'] as $id=>$value) {
                 $invitation = $this->findById($id, 'GroupInvitation');
-                foreach($options as $option=>$value) {
-                    switch($option) {
-                        case 'join':
-                            $invitation->Group->addMember($user);
-                            $to = $invitation->Group->findMembersForNotification('notify_member_joined');
-                            $invitation->Group->sendNewMemberEmail($user, $to);
-                            $invitation->delete();                            
-                            break;
-                            
-                        case 'decline':
-                            $invitation->Group->addMember($user);
-                            $to = $this->getTable('User')->find($invitation->sender_id);
-                            $invitation->Group->sendInvitationDeclinedEmail($user, $to);                            
-                            $invitation->delete();
-                            break;
-                    }
+                switch($value) {
+                    case 'join':
+                        $invitation->Group->addMember($user);
+                        $to = $invitation->Group->findMembersForNotification('notify_member_joined');
+                        $invitation->Group->sendNewMemberEmail($user, $to);                            
+                        break;
+                        
+                    case 'decline':                        
+                        $to = $this->getTable('User')->find($invitation->sender_id);
+                        $invitation->Group->sendInvitationDeclinedEmail($user, $to);                                                    
+                        break;
+                        
+                    case 'block':
+                        $block = new GroupBlock();
+                        $block->group_id = $invitation->sender_id;
+                        $block->user_id = $user->id;
+                        $block->block = 'Group';
+                        $block->save();                            
+                        break;
+                        
+                    case 'request':
+                        $invitation->Group->addMember($user, 1);
+                        break;
                 }
+                $invitation->delete();
             }
         }
         $this->handleMembershipStatus();
@@ -285,7 +293,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $response = json_encode($responseJson);
         
         $to = $group->findMembersForNotification('notify_item_new');  
-        $group->sendNewItemEmail($item, $to);        
+        $group->sendNewItemEmail($item, $to, current_user());        
         $this->_helper->json($response);
     }
     
@@ -392,12 +400,20 @@ class Groups_GroupController extends Omeka_Controller_Action
                 foreach($emails as $index=>$email) {
                     $email = trim($email);        
                     $user = $userTable->findByEmail(trim($email));
+                    if(!$user) {
+                        //$email might actually be a username
+                        $select = $userTable->getSelect();
+                        $select->where("username = ?", $email);
+                        $select->where("active = 1");
+                        $select->limit(1);
+                        $user = $userTable->fetchObject($select);                        
+                    }
                     if($user) {
                         if($group->hasMember($user)) {         
-                            $this->flashError($user->name . " is already a member of {$group->title}.");                            
+                            $this->flashError("{$user->name} ({$user->username}) is already a member of {$group->title}.");                            
                         } else {
                             if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
-                                $this->flashError("You have already invited " . $user->name . " to {$group->title}");
+                                $this->flashError("You have already invited {$user->name} ({$user->username}) to {$group->title}");
                             } else {                                
                                 $invitation = new GroupInvitation;
                                 $invitation->user_id = $user->id;
@@ -421,7 +437,7 @@ class Groups_GroupController extends Omeka_Controller_Action
                 } else {
                     try {
                         $group->sendInvitationEmail($groupEmails, $message, $sender);
-                        $this->flashSuccess($groupEmailsCount . " invitations to {$group->title} sent");
+                        $this->flashSuccess($groupEmailsCount . " invitation(s) to {$group->title} sent");
                     } catch(Exception $e) {
                         _log($e);
                         $this->flashError("Couldn't send email");
@@ -451,20 +467,25 @@ class Groups_GroupController extends Omeka_Controller_Action
                             //do nothing, just here to make the $_POST arrive when nothing is checked
                             break;
         
-                        case "role":
-                            if($confirmation = $membership->getConfirmation($value)) {
+                            
+                        case "admin":
+                        case "owner":                       
+                            if($confirmation = $membership->getConfirmation('is_' . $option)) {
                                 $confirmation->delete();
-        
-                                //make the previous owner no longer the owner
-                                if($value == 'is_owner') {
-                                    $owner = $group->findOwnerMembership();
-                                    $owner->is_owner = 0;
-                                    $owner->save();
+                                if($value != 'decline') {
+                                    //make the previous owner no longer the owner
+                                    if($value == 'is_owner') {
+                                        $owner = $group->findOwnerMembership();
+                                        $owner->is_owner = 0;
+                                        $owner->save();
+                                    }
+                                    $membership->$value = 1;
                                 }
-                                $membership->$value = 1;
-                            }
+                            }    
+                            
+                            
                             break;
-        
+                            
                         default:
                             $membership->$option = 1;
 
@@ -477,10 +498,6 @@ class Groups_GroupController extends Omeka_Controller_Action
                 }
 
             }
-        }
-        
-        
-        
+        }        
     }
-
 }

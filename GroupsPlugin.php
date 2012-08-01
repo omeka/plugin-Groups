@@ -11,11 +11,13 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'commenting_append_to_form',
         'after_save_comment',
         'comment_browse_sql'
+        
     );
 
     protected $_filters = array(
         'define_action_contexts',
-        'guest_user_widgets'
+        'guest_user_widgets',
+        'blocks_notifications'
     );
 
     public function setUp()
@@ -350,6 +352,36 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                     ));
             }
         }
+    }
+    
+    public function filterBlocksNotifications($notifications)
+    {
+        $notification = array('title'=>'Groups Notifications');
+        $invitations = groups_invitations_for_user();
+        $html = '';
+        if(!empty($invitations)) {
+            $html .= "<p><a href='" . public_uri('groups/my-groups') . "'>Manage Invitations</a></p>";
+            $html .= "<ul>";
+            foreach($invitations as $invitation) {
+                $html .= "<li>{$invitation->Sender->name} has invited you to join {$invitation->Group->title}";
+            }
+            $html .= "</ul>";            
+        }
+        $confirmations = groups_confirmations_for_user();
+        if(!empty($confirmations)) {
+            $html .= "<ul>";
+            foreach($confirmations as $confirmation) {
+                $group = $confirmation->Group;
+                $type = substr($confirmation->type, 3);
+                $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a>";
+            }
+            
+            $html .= "</ul>";
+            
+        }
+        $notification['html'] = $html;
+        $notifications[] = $notification;
+        return $notifications;
     }
 
     public function filterCommentingAppendToComment($html, $comment)

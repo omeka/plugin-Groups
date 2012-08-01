@@ -78,4 +78,5 @@ class GroupMembershipTable extends Omeka_Db_Table
         $this->applySearchFilters($select, $params);
         return $groupTable->fetchObjects($select);        
     }    
+    
 }

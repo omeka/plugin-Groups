@@ -29,12 +29,14 @@ head(array());
     <?php if($adminConfirm || $ownerConfirm ): ?>
         <label class='groups' for="groups[<?php echo $group->id ?>][role]">Role</label>
         <?php if($adminConfirm) :?>
-            <input type='checkbox' value='is_admin' name="groups[<?php echo $group->id ?>][role]" />Admin
-                <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>                                        
+            <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>
+            <input type='radio' value='is_admin' name="groups[<?php echo $group->id ?>][admin]" />Accept
+            <input type='radio' value='decline' name="groups[<?php echo $group->id ?>][admin]" />Decline                                                        
         <?php endif; ?>
         <?php if( $ownerConfirm ) :?>
-            <input type='checkbox' value='is_owner' name="groups[<?php echo $group->id ?>][role]" />Owner
             <p>The owner of this group would like to transfer ownership to you. Check here to accept.</p>
+            <input type='radio' value='is_owner' name="groups[<?php echo $group->id ?>][admin]" />Accept 
+            <input type='radio' value='decline' name="groups[<?php echo $group->id ?>][admin]" />Decline          
         <?php endif; ?>
 
     <?php else: ?>

@@ -4,6 +4,9 @@ head(array());
 <?php include 'groups-manage-tabs.php' ; ?>
 <div id='primary'>
     <form method="post">
+    <?php if(!(empty($groups) && empty($invitations))) :?>
+        <button>Submit</button>
+    <?php endif; ?>
     <?php if(count($invitations) != 0): ?>
         <h2>Invitations</h2>
         <?php foreach($invitations as $invitation):  ?>            
@@ -13,14 +16,16 @@ head(array());
                 <p><?php echo $invitation->Sender->name; ?> has invited you to join this group: </p>
                 <p><?php echo $invitation->message; ?></p>    
                 <?php if( has_permission($invitation->Group, 'join') ): ?>
-                    <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][join]" />                
-                    <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Join</label>
+                    <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='join' />                
+                    <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Join</label>
                 <?php else: ?>
-                    <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][request]" />                
-                    <label class='groups' for="invitations[<?php echo $invitation->id ?>][join]">Request Membership</label>
+                    <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='request' />                
+                    <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Request Membership</label>
                 <?php endif; ?>
-                <input type='checkbox' name="invitations[<?php echo $invitation->id ?>][decline]" />                
-                <label class='groups' for="invitations[<?php echo $invitation->id ?>][decline]">Decline</label>                
+                <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='decline' />                
+                <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline</label>
+                <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='block' />                
+                <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline and block invitations from this group.</label>                
             </div>
         </div>        
         <?php endforeach; ?>
@@ -87,7 +92,7 @@ head(array());
     </div>
     <?php endwhile; ?>
     <?php if(!(empty($groups) && empty($invitations))) :?>
-    <button>Submit</button>
+        <button>Submit</button>
     <?php endif; ?>
     </form>
 

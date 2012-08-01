@@ -183,6 +183,20 @@ function groups_invitations_for_user($user = null)
     
 }
 
+function groups_confirmations_for_user($user = null)
+{
+    if(!$user) {
+        $user = current_user();
+    }
+    
+    if(!$user) {
+        return array();
+    }
+    
+    $db = get_db();
+    return $db->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));
+        
+}
 
 /**
  * get the groups that an Item is associated with
