@@ -218,6 +218,35 @@ class Groups_GroupController extends Omeka_Controller_Action
         $params = array(
                 'user' => $user
         );     
+
+        if(!empty($_POST['blocks'])) {
+            _log(print_r($_POST['blocks'], true));
+            foreach($_POST['blocks'] as $id=>$values) {
+                $invitation = $this->findById($id, 'GroupInvitation');
+                foreach($values as $value) {
+                    switch($value) {
+                        case 'block-user':
+                            $block = new GroupBlock();
+                            $block->blocked_id = $invitation->sender_id;
+                            $block->blocker_id = $user->id;
+                            $block->blocked_type = 'User';
+                            $block->blocker_type = 'User';
+                            $block->save();
+                            break;
+                    
+                        case 'block-group':
+                            $block = new GroupBlock();
+                            $block->blocked_id = $invitation->group_id;
+                            $block->blocker_id = $user->id;
+                            $block->blocked_type = 'Group';
+                            $block->blocker_type = 'User';
+                            $block->save();
+                            break;     
+                    }                    
+                }
+            }
+        }        
+        
         if(!empty($_POST['invitations'])) {      
             foreach($_POST['invitations'] as $id=>$value) {
                 $invitation = $this->findById($id, 'GroupInvitation');
@@ -231,23 +260,17 @@ class Groups_GroupController extends Omeka_Controller_Action
                     case 'decline':                        
                         $to = $this->getTable('User')->find($invitation->sender_id);
                         $invitation->Group->sendInvitationDeclinedEmail($user, $to);                                                    
-                        break;
-                        
-                    case 'block':
-                        $block = new GroupBlock();
-                        $block->group_id = $invitation->sender_id;
-                        $block->user_id = $user->id;
-                        $block->block = 'Group';
-                        $block->save();                            
-                        break;
-                        
+                        break;          
+                                
                     case 'request':
                         $invitation->Group->addMember($user, 1);
                         break;
                 }
                 $invitation->delete();
             }
+            
         }
+
         $this->handleMembershipStatus();
 
         $groups = $this->_helper->db->getTable()->findBy($params);
@@ -390,6 +413,7 @@ class Groups_GroupController extends Omeka_Controller_Action
             $message = $_POST['message'];
             $userTable = $this->_helper->db->getTable('User');
             $invitationTable = $this->_helper->db->getTable('GroupInvitation');
+            $blocksTable = $this->_helper->db->getTable('GroupBlock');
             $nonUserEmails = array();
             $alreadyMemberEmails = array();
             foreach($_POST['invite_groups'] as $groupId) {             
@@ -412,14 +436,30 @@ class Groups_GroupController extends Omeka_Controller_Action
                         } else {
                             if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
                                 $this->flashError("You have already invited {$user->name} ({$user->username}) to {$group->title}");
-                            } else {                                
-                                $invitation = new GroupInvitation;
-                                $invitation->user_id = $user->id;
-                                $invitation->sender_id = $sender->id;
-                                $invitation->message = $message;
-                                $invitation->group_id = $groupId;
-                                $invitation->save();
-                                $groupEmails[] = $email;
+                            } else {                
+                                $userBlocks = $blocksTable->count(array('blocker_id'=>$user->id, 
+                                                                        'blocked_id'=>$sender->id, 
+                                                                        'blocked_type'=>'User',
+                                                                        'blocker_type'=>'User'));
+                                $groupBlocks = $blocksTable->count(array('blocker_id'=>$user->id, 
+                                                                         'blocked_id'=>$group->id, 
+                                                                         'blocked_type'=>'Group',
+                                                                         'blocker_type'=>'User'));
+                                if($userBlocks == 0 && $groupBlocks == 0) {
+                                    $invitation = new GroupInvitation;
+                                    $invitation->user_id = $user->id;
+                                    $invitation->sender_id = $sender->id;
+                                    $invitation->message = $message;
+                                    $invitation->group_id = $groupId;
+                                    $invitation->save();
+                                    $groupEmails[] = $email;
+                                }
+                                if($userBlocks) {
+                                    $this->flashError("{$user->name} has blocked invitations from you");
+                                }
+                                if($groupBlocks) {
+                                    $this->flashError("{$user->name} has blocked invitations from {$group->title}");
+                                }
                             }
                         }
         

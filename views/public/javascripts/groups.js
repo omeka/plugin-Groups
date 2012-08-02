@@ -75,12 +75,29 @@ Omeka.Groups = {
         itemId = splitId[splitId.length -1];
         groupSelector = 'li#groups-comment-group-' + itemId;
         jQuery(groupSelector).closest('div.comment').toggle('fast');
+    },
+    
+    
+    
+    toggleBlocking: function() {
+        inputClasses = jQuery(this).attr('class');
+        split = inputClasses.split(' ');
+        inputClass = split[split.length -1];
+        value = jQuery("." + inputClass + ":checked").val();
+        blockingDivSelector = '#groups-block-' + inputClass;
+        if(value == 'decline') {
+            jQuery(blockingDivSelector).show('fast');    
+        } else {
+            jQuery(blockingDivSelector).hide('fast');
+        }
     }
+    
 };
 
 jQuery(document).ready(function() {
     jQuery('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
     jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
+    jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleBlocking);
 });
 
 

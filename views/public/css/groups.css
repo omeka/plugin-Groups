@@ -46,3 +46,7 @@ div.groups-group div.group-membership {
 div.groups-group {
     border-top: 1px solid grey;
 }
+
+div.group-block-invitations {
+    display:none;
+}

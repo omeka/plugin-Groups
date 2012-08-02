@@ -16,16 +16,21 @@ head(array());
                 <p><?php echo $invitation->Sender->name; ?> has invited you to join this group: </p>
                 <p><?php echo $invitation->message; ?></p>    
                 <?php if( has_permission($invitation->Group, 'join') ): ?>
-                    <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='join' />                
+                    <input type='radio' class='groups-invitation-action invitation-<?php echo $invitation->id ?>' name="invitations[<?php echo $invitation->id ?>]" value='join' />                
                     <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Join</label>
                 <?php else: ?>
-                    <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='request' />                
+                    <input type='radio' class='groups-invitation-action invitation-<?php echo $invitation->id ?>' name="invitations[<?php echo $invitation->id ?>]" value='request' />                
                     <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Request Membership</label>
                 <?php endif; ?>
-                <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='decline' />                
+                <input type='radio' class='groups-invitation-action invitation-<?php echo $invitation->id ?>' id='invitation-decline-<?php echo $invitation->id; ?>' name="invitations[<?php echo $invitation->id ?>]" value='decline' />                
                 <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline</label>
-                <input type='radio' name="invitations[<?php echo $invitation->id ?>]" value='block' />                
-                <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline and block invitations from this group.</label>                
+                <div class='group-block-invitations' id='groups-block-invitation-<?php echo $invitation->id; ?>'>
+                    <input type='checkbox' name="blocks[<?php echo $invitation->id ?>][]" value='block-group' />                
+                    <label class='groups' for="blocks[<?php echo $invitation->id ?>][]">Block invitations from this group.</label>
+                    <input type='checkbox' name="blocks[<?php echo $invitation->id ?>][]" value='block-user' />                
+                    <label class='groups' for="blocks[<?php echo $invitation->id ?>][]">Block invitations from this person.</label>                
+                </div>
+                                
             </div>
         </div>        
         <?php endforeach; ?>        
