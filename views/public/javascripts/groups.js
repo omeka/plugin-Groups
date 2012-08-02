@@ -80,15 +80,12 @@ Omeka.Groups = {
     
     
     toggleBlocking: function() {
-        inputClasses = jQuery(this).attr('class');
-        split = inputClasses.split(' ');
-        inputClass = split[split.length -1];
-        value = jQuery("." + inputClass + ":checked").val();
-        blockingDivSelector = '#groups-block-' + inputClass;
+        parent = jQuery(this).parent(); 
+        value = parent.children('input:checked').val();        
         if(value == 'decline') {
-            jQuery(blockingDivSelector).show('fast');    
+            parent.children('div.group-block-invitations').show('fast');    
         } else {
-            jQuery(blockingDivSelector).hide('fast');
+            parent.children('div.group-block-invitations').hide('fast');
         }
     }
     
