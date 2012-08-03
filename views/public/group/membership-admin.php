@@ -1,6 +1,6 @@
 
 <div>
-<?php $memberships = groups_get_memberships($group);
+<?php 
 foreach($memberships as $membership):
 ?>
     <?php 
@@ -19,20 +19,25 @@ foreach($memberships as $membership):
                 
                 <label for="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]">Membership</label>
                 <?php if($membership->is_pending) : ?>
-                    <input name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='approve' />Approve
-                    <input name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='deny' />Deny
+                    <input class='groups-membership-options' name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='approve' />Approve
+                    <input class='groups-membership-options' name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='deny' />Deny
                 <?php else: ?>
-                    <input name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='checkbox' value='remove' />Remove
-                <?php endif; ?><br/>
+                    <input class='groups-membership-options' name="membership[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='checkbox' value='remove' />Remove
+                <?php endif; ?>
+                    <div class="groups-block-entities">
+                        <input name="block[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='checkbox' value='block' />Block                    
+                    </div>
                 <?php if(has_permission($group, 'change-status')): ?>
-                    <?php $role = $membership->role(); ?>
-                    <label for="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]">Status</label>
-                    <?php if(has_permission($group, 'make-owner')): ?>
-                        <input <?php if($role == 'Owner') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='owner' />Owner
-                    <?php endif; ?>
-                    <input <?php if($role == 'Admin') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin
-                    <input <?php if($role == 'Member') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='member' />Member
-                    <p class='explanation'>Users must accept being made an Admin or Owner before the change takes effect</p>
+                    <div class='groups-role-change <?php if($membership->is_pending) {echo "pending";}?>'>
+                        <?php $role = $membership->role(); ?>
+                        <label for="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]">Status</label>
+                        <?php if(has_permission($group, 'make-owner')): ?>
+                            <input <?php if($role == 'Owner') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='owner' />Owner
+                        <?php endif; ?>
+                        <input <?php if($role == 'Admin') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin
+                        <input <?php if($role == 'Member') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='member' />Member
+                        <p class='explanation'>Users must accept being made an Admin or Owner before the change takes effect</p>
+                    </div>
                 <?php endif;?>
             </div>
         </div>

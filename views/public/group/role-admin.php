@@ -1,5 +1,7 @@
 <?php if($user_membership->is_owner): ?>
-    <p>You are the owner of this group. You can transfer ownership below.</p>
+    <?php if(count($memberships) > 1): ?>
+        <p>You are the owner of this group. You can transfer ownership below.</p>
+    <?php endif;?>
 <?php else: ?>
     <label class='groups' for="groups[<?php echo $group->id ?>][quit]">Membership</label>
     <input type='checkbox' name="groups[<?php echo $group->id ?>][quit]" />Leave<br/>                

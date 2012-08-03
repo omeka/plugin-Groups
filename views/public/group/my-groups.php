@@ -24,7 +24,7 @@ head(array());
                 <?php endif; ?>
                 <input type='radio' class='groups-invitation-action invitation-<?php echo $invitation->id ?>' id='invitation-decline-<?php echo $invitation->id; ?>' name="invitations[<?php echo $invitation->id ?>]" value='decline' />                
                 <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Decline</label>
-                <div class='group-block-invitations' id='groups-block-invitation-<?php echo $invitation->id; ?>'>
+                <div class='groups-block-entities' id='groups-block-invitation-<?php echo $invitation->id; ?>'>
                     <input type='checkbox' name="blocks[<?php echo $invitation->id ?>][]" value='block-group' />                
                     <label class='groups' for="blocks[<?php echo $invitation->id ?>][]">Block invitations from this group.</label>
                     <input type='checkbox' name="blocks[<?php echo $invitation->id ?>][]" value='block-user' />                

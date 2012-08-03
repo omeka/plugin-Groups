@@ -207,7 +207,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'make-owner',
                             'quit',
                             'manage',
-                            'edit'
+                            'edit',
+                            'block',
+                            'unblock'
                             );
         
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);

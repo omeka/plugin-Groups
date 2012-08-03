@@ -47,6 +47,10 @@ div.groups-group {
     border-top: 1px solid grey;
 }
 
-div.group-block-invitations {
+div.groups-block-entities {
+    display:none;
+}
+
+div.pending {
     display:none;
 }

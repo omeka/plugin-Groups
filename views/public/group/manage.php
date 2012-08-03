@@ -9,18 +9,26 @@ head(array());
 <a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
 
 <form method="post">
-<div>
+
     <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
 
     <h2>Membership and Role</h2>
-    <?php include('role-admin.php'); ?>
-</div>
+    <div>
+        <?php include('role-admin.php'); ?>
+    </div>
 
 
 <?php if(has_permission($group, 'administration')): ?>
     <h2>Administer Members</h2>    
     <?php include('membership-admin.php'); ?>
 
+<?php endif;?>
+
+<?php if(has_permission($group, 'unblock')): ?>
+    <?php if(!empty($blocked_users)):?>    
+        <h2>Blocked Users</h2>    
+    <?php endif; ?>
+    <?php include('group-blocks-admin.php'); ?>
 <?php endif;?>
 
 <?php if(has_permission($group, 'invitations')): ?>

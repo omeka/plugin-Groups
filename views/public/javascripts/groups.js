@@ -77,24 +77,37 @@ Omeka.Groups = {
         jQuery(groupSelector).closest('div.comment').toggle('fast');
     },
     
-    
-    
-    toggleBlocking: function() {
+    toggleSecondaryAdminOptions: function() {
         parent = jQuery(this).parent(); 
-        value = parent.children('input:checked').val();        
-        if(value == 'decline') {
-            parent.children('div.group-block-invitations').show('fast');    
-        } else {
-            parent.children('div.group-block-invitations').hide('fast');
+        val = parent.children('input:checked').val();   
+        switch(val) {
+            case 'decline':
+            case 'deny':
+            case 'remove':
+                parent.children('div.groups-block-entities').show('fast');
+                parent.children('div.pending').hide('fast');
+                break;
+                
+            case 'approve':
+                parent.children('div.pending').show('fast');
+                parent.find('div.groups-block-entities input').removeAttr('checked');
+                parent.children('div.groups-block-entities').hide('slow');                
+                break;
+            default:
+                
+                parent.find('div.groups-block-entities input').removeAttr('checked');
+                parent.children('div.groups-block-entities').hide('slow');            
+                parent.children('div.pending').hide('slow');
         }
-    }
-    
+    }    
 };
 
 jQuery(document).ready(function() {
     jQuery('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
     jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
-    jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleBlocking);
+    jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
+    jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
+    
 });
 
 

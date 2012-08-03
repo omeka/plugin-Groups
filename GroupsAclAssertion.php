@@ -42,6 +42,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'invitations',
             'administration',
             'change-status',
+            'block',
+            'unblock',
             'quit'
             );
 
@@ -56,7 +58,9 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'make-owner',
             'administration',
             'change-status',
-            'remove-member',    
+            'remove-member',
+            'block',
+            'unblock'    
     );    
     
     public function assert(Zend_Acl $acl,
@@ -65,6 +69,9 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            $privilege = null)
     {    
         $db = get_db();
+
+                
+        
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
@@ -82,9 +89,20 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
         if(get_class($resource) == 'Group') {
             $membership = groups_get_membership($resource, $role);
+            $blockTable = $db->getTable('GroupBlock');
+            $block = $blockTable->count(array(
+                    'blocked_id'=>$role->id,
+                    'blocked_type'=>'User',
+                    'blocker_id'=>$resource->id,
+                    'blocker_type'=>'Group'
+            ));
             switch($privilege) {
                 
                 case 'join':
+                    if($block) {
+                        return false;
+                    }
+
                     //to test for join permission, first see if current user has been invited by an owner or admin
                     $invitation = $db->getTable('GroupInvitation')->findInvitationToGroup($resource->id, $role->id);
                     if($invitation) {
@@ -93,7 +111,13 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                             return true;
                         }
                     }                
-                break;
+                    break;
+                    
+                case 'request' :
+                    if($block) {
+                        return false;
+                    }
+                    break;
                 
                 case 'invitations':
                     //can send an invitation if group is open, or user is owner or admin
@@ -104,21 +128,22 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                              return $membership->is_admin || $membership->is_owner;
                          }                     
                     }
-                break;
+                    break;
                 
                 case 'manage':
+                    //if user has a membership, they can manage it
                     return $membership;
-                break;
+                    break;
                 
                 case 'quit':
                     //don't let owners quit on their flock
                     if($membership->owner_id == 1) {
                         return false;
                     }
-                break;
+                    break;
                             
             }
-            $membership = groups_get_membership($resource, $role);
+            //$membership = groups_get_membership($resource, $role);
                  
             if($membership) {                      
                 if($membership->is_admin) {
@@ -139,7 +164,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         
         $groups = groups_groups_for_user($role);
         
-
         if(count($groups) != 0) {
             return true;
         }

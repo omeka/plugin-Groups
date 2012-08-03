@@ -279,13 +279,15 @@ function groups_get_membership($group = null, $user = null)
     return $table->fetchObject($select);    
 }
 
-function groups_get_memberships($group = null)
+function groups_get_memberships($group = null, $all = false)
 {
     if(!$group) {
         $group = groups_get_current_group();
     }
-    
-    return get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$group->id));
+    if($all) {
+        return get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$group->id));
+    }
+    return get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$group->id, 'is_pending'=>0));
     
 }
 

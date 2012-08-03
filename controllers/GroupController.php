@@ -109,13 +109,13 @@ class Groups_GroupController extends Omeka_Controller_Action
             }        
             $this->handleMembershipStatus();
             $this->handleAdministration();
+            $this->handleUnblocks();
             $this->redirect->gotoUrl('groups/show/' . $group->id);            
         }
-        
-        $user_membership = groups_get_membership($group);
-        
+        $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
         $this->view->group = $group;
-        $this->view->user_membership = $user_membership;
+        $this->view->user_membership = groups_get_membership($group);
+        $this->view->memberships = groups_get_memberships($group, true); 
     }
     
     public function joinAction()
@@ -324,10 +324,40 @@ class Groups_GroupController extends Omeka_Controller_Action
     {
         $confirmationTable = get_db()->getTable('GroupConfirmation');
         $user = current_user();
+        $blockTable = $this->_helper->db->getTable('GroupBlock');
         if(!empty($_POST)) {
+            if(isset($_POST['block'])) {
+                foreach($_POST['block'] as $groupId=>$memberships) {
+                    foreach($memberships as $membershipId=>$action) {
+                        $membership = $this->findById($membershipId, 'GroupMembership');
+                        switch($action) {
+                            case 'block':
+                                $block = new GroupBlock;
+                                $block->blocked_id = $membership->User->id;
+                                $block->blocked_type = 'User';
+                                $block->blocker_id = $groupId;
+                                $block->blocker_type = 'Group';
+                                $block->save();                                
+                                break;
+                                
+                            case 'unblock':
+                                $blocks = $blockTable->findBy(array('blocked_id'=>$user_id,
+                                                          'blocked_type'=>'User',
+                                                          'blocker_id'=>$groupId,
+                                                          'blocker_type'=>'Group'
+                                                          )
+                                                    );
+                                $block = $blocks[0];
+                                $block->delete();
+                                break;
+                        }
+                    }
+
+                }
+            }
             if(isset($_POST['membership'])) {                
                 foreach($_POST['membership'] as $groupId=>$memberships) {
-                    $group = $this->_helper->db->getTable('Group')->find($groupId);
+                    $group = $this->findById($groupId);
                     foreach($memberships as $membershipId=>$action) {                       
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
                         switch($action) {
@@ -544,5 +574,25 @@ class Groups_GroupController extends Omeka_Controller_Action
 
             }
         }        
+    }
+    private function handleUnblocks()
+    {
+        
+        if(!empty($_POST['unblocks'])) {
+            $blocksTable = $this->_helper->db->getTable('GroupBlock');
+            foreach($_POST['unblocks'] as $groupId=>$userId) {
+                $blocks = $blocksTable->findBy(array(
+                                                    'blocked_id'=>$userId,
+                                                    'blocked_type'=>'User',
+                                                    'blocker_id'=>$groupId,
+                                                    'blocker_type'=>'Group'
+                                                    ));
+                $block = $blocks[0];
+                $block->delete();
+            }
+            
+            
+        }
+        
     }
 }
