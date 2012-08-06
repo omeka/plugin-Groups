@@ -115,7 +115,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
         $this->view->group = $group;
         $this->view->user_membership = groups_get_membership($group);
-        $this->view->memberships = groups_get_memberships($group, true); 
+        
     }
     
     public function joinAction()
@@ -282,6 +282,7 @@ class Groups_GroupController extends Omeka_Controller_Action
     public function administrationAction()
     {
         $user = current_user();
+        $this->handleUnblocks();
         $this->handleAdministration();
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0, 'admin_or_owner'=>true));
         $this->view->groups = $groups;        

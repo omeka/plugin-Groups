@@ -38,13 +38,14 @@ div.group-options {
 }
 
 
-div.groups-group div.group-membership {
+div.groups-group div.groups-admin-actions {
     padding-left: 90px;
     padding-top: 20px;
 }
 
 div.groups-group {
     border-top: 1px solid grey;
+    margin-top: 40px;
 }
 
 div.groups-block-entities {

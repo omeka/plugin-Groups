@@ -155,7 +155,7 @@ function groups_items_for_group($group = null)
  * @return array Group
  */
 
-function groups_groups_for_user($user = null)
+function groups_groups_for_user($user = null, $adminOnly = false)
 {
     if(!$user) {
         $user = current_user();
@@ -165,7 +165,11 @@ function groups_groups_for_user($user = null)
         return array();
     }
     $db = get_db();
-    return $db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0));
+    $params = array('user_id'=>$user->id, 'is_pending'=>0);
+    if($adminOnly) {
+        $params['admin_or_owner'] = true;
+    }
+    return $db->getTable('GroupMembership')->findGroupsBy($params);
 }
 
 function groups_invitations_for_user($user = null)
@@ -331,6 +335,16 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
                                             'type'=>$role            
             ));
     return $count;
+}
+
+
+function groups_get_blocked_users($group = null)
+{
+    if(!$group) {
+        $group = groups_get_current_group();
+    }
+    return get_db()->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
+    
 }
 
 /* Commenting-related functions */

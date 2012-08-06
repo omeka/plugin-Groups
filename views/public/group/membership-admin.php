@@ -1,6 +1,8 @@
 
 <div>
 <?php 
+
+$memberships = groups_get_memberships($group, true);
 foreach($memberships as $membership):
 ?>
     <?php 
@@ -12,7 +14,7 @@ foreach($memberships as $membership):
             </div>
         <?php endif; ?>
         <?php if($membership->user_id == $current_user->id) {continue;} ?>
-        <div class='group-membership'>
+        <div class='groups-admin-actions'>
     
             <h4><?php echo $membership->User->name; ?></h4>
             <div class='group-options'>
@@ -46,4 +48,4 @@ foreach($memberships as $membership):
 
 
             
-    </div>
+</div>

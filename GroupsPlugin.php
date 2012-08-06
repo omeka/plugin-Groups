@@ -365,7 +365,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             $html .= "<p><a href='" . public_uri('groups/my-groups') . "'>Manage Invitations</a></p>";
             $html .= "<ul>";
             foreach($invitations as $invitation) {
-                $html .= "<li>{$invitation->Sender->name} has invited you to join {$invitation->Group->title}";
+                $html .= "<li>{$invitation->Sender->name} has invited you to join 
+                    <a href='" . record_uri($invitation->Group, 'show') . "'>{$invitation->Group->title}</a>";
             }
             $html .= "</ul>";            
         }
@@ -375,12 +376,24 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             foreach($confirmations as $confirmation) {
                 $group = $confirmation->Group;
                 $type = substr($confirmation->type, 3);
-                $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a>";
+                $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";
             }
             
             $html .= "</ul>";
             
         }
+        
+        $membershipsTable = get_db()->getTable('GroupMemberships');
+        $groups = groups_groups_for_user(current_user(), true);
+        $html .= "<ul>";
+        foreach($groups as $group) {
+            $requests = $group->memberRequests();
+            if(!empty($requests)) {
+                $html .= "<li>" . count($requests) . " pending membership request(s) to <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";
+            }
+        }
+        $html .= "</ul>";
+        
         $notification['html'] = $html;
         $notifications[] = $notification;
         return $notifications;
