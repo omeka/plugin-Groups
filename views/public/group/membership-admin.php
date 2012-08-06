@@ -39,6 +39,9 @@ foreach($memberships as $membership):
                         <input <?php if($role == 'Admin') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin
                         <input <?php if($role == 'Member') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='member' />Member
                         <p class='explanation'>Users must accept being made an Admin or Owner before the change takes effect</p>
+                        <?php if(groups_membership_requested_admin($membership, $group)): ?>
+                            <p><?php echo $membership->User->name; ?> has requested being an admin</p>
+                        <?php endif;?>
                     </div>
                 <?php endif;?>
             </div>

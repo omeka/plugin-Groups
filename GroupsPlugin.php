@@ -374,9 +374,11 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         if(!empty($confirmations)) {
             $html .= "<ul>";
             foreach($confirmations as $confirmation) {
-                $group = $confirmation->Group;
-                $type = substr($confirmation->type, 3);
-                $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";
+                if($confirmation->type != 'make_admin') {
+                    $group = $confirmation->Group;
+                    $type = substr($confirmation->type, 3);
+                    $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";                    
+                }
             }
             
             $html .= "</ul>";

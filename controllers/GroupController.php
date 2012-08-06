@@ -528,8 +528,20 @@ class Groups_GroupController extends Omeka_Controller_Action
                 foreach($options as $option=>$value) {
                     switch($option) {
         
-                        case "quit":
-                            $membership->delete();
+                        case "status":
+                            switch($value) {
+                                case 'quit':
+                                    $membership->delete();
+                                    break;
+                                case 'make_admin':
+                                    $confirmation = new GroupConfirmation;
+                                    $confirmation->group_id = $group->id;
+                                    $confirmation->membership_id = $membership->id;
+                                    $confirmation->type = 'make_admin';
+                                    $confirmation->save();
+                                    break;
+                            }
+                            
                             break;
         
                         case "submitted":
@@ -564,8 +576,6 @@ class Groups_GroupController extends Omeka_Controller_Action
                             
                         default:
                             $membership->$option = 1;
-
-        
                             break;
                     }
                 }     

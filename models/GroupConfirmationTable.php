@@ -12,6 +12,14 @@ class GroupConfirmationTable extends Omeka_Db_Table
                 $select->where("$alias.$param = ?", $value );
             }
         }
+        if(array_key_exists('user_id', $params)) {            
+            $membershipTable = $this->getDb()->getTable('GroupMembership');
+            $mtAlias = 'omeka_group_memberships';
+            $select->join(array($mtAlias, $membershipTable),
+                           "$mtAlias.id = group_confirmations.membership_id", array()
+                            );
+            $select->where( "$mtAlias.user_id = {$params['user_id']}");
+        }
     }    
     
     public function findOrNew($params)

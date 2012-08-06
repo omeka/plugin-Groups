@@ -3,8 +3,9 @@
         <p>You are the owner of this group. You can transfer ownership below.</p>
     <?php endif;?>
 <?php else: ?>
-    <label class='groups' for="groups[<?php echo $group->id ?>][quit]">Membership</label>
-    <input type='checkbox' name="groups[<?php echo $group->id ?>][quit]" />Leave<br/>                
+    <label class='groups' for="groups[<?php echo $group->id ?>][status]">Membership</label>
+    <input type='checkbox' value='quit' name="groups[<?php echo $group->id ?>][status]" />Leave<br/>  
+    <input type='checkbox' value='make_admin' name="groups[<?php echo $group->id ?>][status]" />Request Admin Privileges<br/>  
 <?php endif; ?>
                 
 

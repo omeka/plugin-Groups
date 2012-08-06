@@ -191,16 +191,25 @@ function groups_confirmations_for_user($user = null)
 {
     if(!$user) {
         $user = current_user();
-    }
-    
+    }    
     if(!$user) {
         return array();
-    }
-    
+    }    
     $db = get_db();
-    return $db->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));
-        
+    return $db->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));        
 }
+
+function groups_membership_requested_admin($membership, $group)
+{
+    $db = get_db();
+    $params = array('membership_id'=>$membership->id,
+                    'group_id'=>$group->id,
+                    'type'=>'make_admin');
+    
+    $confirmations = $db->getTable('GroupConfirmation')->findBy($params);
+    return !empty($confirmations);
+}
+
 
 /**
  * get the groups that an Item is associated with
