@@ -398,15 +398,27 @@ class Groups_GroupController extends Omeka_Controller_Action
         
                                 case 'admin':
                                     if(!$membership->is_admin) {
-                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId, 'type'=>'is_admin'));
-                                        $confirmation->group_id = $groupId;
-                                        $confirmation->membership_id = $membershipId;
-                                        $confirmation->type = 'is_admin';
+                                        $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
                                         if($confirmation->exists()) {
-                                            $this->flash("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
-                                        }                     
-                                        $this->flash($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
-                                        $confirmation->save();
+                                            switch($confirmation->type) {
+                                                case 'is_admin':
+                                                    $this->flash("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
+                                                    break;
+                                                    //make_admin is when the user requests being made an admin
+                                                case 'make_admin':
+                                                    $membership->is_admin = 1;
+                                                    $confirmation->delete();
+                                                    break;
+                                            }
+                                            
+                                            
+                                        } else {
+                                            $confirmation->group_id = $groupId;
+                                            $confirmation->membership_id = $membershipId;
+                                            $confirmation->type = 'is_admin';                                             
+                                            $this->flash($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
+                                            $confirmation->save();                                            
+                                        }                                     
                                     }
                                     break;
         

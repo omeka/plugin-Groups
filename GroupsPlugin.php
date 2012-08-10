@@ -404,6 +404,17 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     public function filterCommentingAppendToComment($html, $comment)
     {
         $groups = groups_groups_for_comment($comment);
+        $request = Zend_Controller_Front::getInstance()->getRequest();
+                
+        $class = Inflector::classify($request->getControllerName());
+        $id = $request->getParam('id');
+
+        if(! ($class == $comment->record_type && $id = $comment->record_id)) {
+            $html .= "<div class='groups-original-item'>";
+            $html .= "<a href='" . WEB_ROOT . "{$comment->path}#comment-{$comment->id}'>View original comment</a>";
+            $html .= "</div>";            
+        }
+
         $html .= "<div class='groups-comment-groups'><h3>Groups</h3><ul> ";
         foreach($groups as $group) {
             $html .= "<li class='groups-comment-group' id='groups-comment-group-{$group->id}'>" . $group->title .  "</li>";
