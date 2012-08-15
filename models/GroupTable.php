@@ -3,6 +3,14 @@
 class GroupTable extends Omeka_Db_Table
 {
 
+    public function getTableAlias() {
+        if (empty($this->_name)) {
+            $this->setTableName();
+        }
+    
+        return $this->_name;
+    }    
+    
     public function applySearchFilters($select, $params)
     {
 
@@ -107,11 +115,11 @@ class GroupTable extends Omeka_Db_Table
     {
         $db = get_db();
         $quotedTerms = $db->quote($terms);
-
-        $select->where("MATCH (description, title) AGAINST ($quotedTerms)");
-
+        $select->where("MATCH (title, description) AGAINST ($quotedTerms)");
         //$tagsSelect = $this->getSelectForFindBy(array('tags'=>$terms));
         //copied from ItemTable::filterByTags
+        
+
         $tags = explode(get_option('tag_delimiter'), $terms);
         foreach ($tags as $tagName) {
             $subSelect = new Omeka_Db_Select;
@@ -120,6 +128,7 @@ class GroupTable extends Omeka_Db_Table
                 ->where('tags.name = ? AND taggings.type = "Group"', trim($tagName));
         }
         $select->orWhere('groups.id IN (' . (string) $subSelect . ')');
+        
     }  
 
 }

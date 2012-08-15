@@ -29,6 +29,12 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             $this->_filters[] = 'commenting_append_to_comment';
             $this->_filters[] = 'commenting_prepend_to_comments';
         }
+        
+        if(!class_exists('Ownable')) {
+            include(GROUPS_PLUGIN_DIR . '/Ownable.php');
+            include(GROUPS_PLUGIN_DIR . '/Ownership.php');
+        }
+        
         parent::setUp();
     }
 
@@ -44,7 +50,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   `owner_id` int(10) unsigned NOT NULL,
                   PRIMARY KEY (`id`),
                   KEY `owner_id` (`owner_id`),
-                  FULLTEXT KEY (`title`,`description`)
+                  FULLTEXT KEY `title` (`title`),
+                  FULLTEXT KEY `description` (`description`),
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
                 ";
         $db->query($sql);
@@ -79,6 +86,19 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                         ";
         $db->query($sql);
         
+        
+        $sql = "
+            
+            CREATE TABLE IF NOT EXISTS `$db->GroupBlock` (
+              `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+              `blocked_id` int(11) NOT NULL,
+              `blocker_id` int(11) NOT NULL,
+              `blocked_type` tinytext CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+              `blocker_type` tinytext NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
+                        ";
+        $db->query($sql);
         
         $sql = "
         CREATE TABLE IF NOT EXISTS `$db->GroupInvitation` (
@@ -347,7 +367,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 $elements[] = $name;
             }
             if(!empty($elements)) {
-                $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions'"));
+                $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions"));
                 $form->addElement('checkbox', 'groups_public', array(
                     'label' => 'Also make the comment public?',
                     'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
@@ -408,10 +428,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 
         $class = Inflector::classify($request->getControllerName());
         $id = $request->getParam('id');
-
         if(! ($class == $comment->record_type && $id = $comment->record_id)) {
             $html .= "<div class='groups-original-item'>";
-            $html .= "<a href='" . WEB_ROOT . "{$comment->path}#comment-{$comment->id}'>View original comment</a>";
+            $html .= "<a href='" . WEB_ROOT . "{$comment->path}'>View original context</a>";
             $html .= "</div>";            
         }
 

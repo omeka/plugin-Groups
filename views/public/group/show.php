@@ -25,7 +25,14 @@ head(array());
     <!--  Members list -->
     <?php $members = groups_get_memberships($group); ?>
     <h2>Members (<?php echo groups_member_count($group); ?>)</h2>
-    <p id='groups-owner'>Owner: <?php echo $group->findOwner()->name; ?></p>
+    <?php $owner = $group->findOwner(); ?>
+    <?php if($owner->name) {
+        $name = $owner->name;
+    } else {
+        $name = $owner->username;
+    }     
+    ?>
+    <p id='groups-owner'>Owner: <?php echo $name; ?></p>
     <?php if(has_permission($group, 'items')): ?>
     <ul class='groups-members'>
         <?php foreach($members as $member): ?>
@@ -34,7 +41,12 @@ head(array());
                     if(plugin_is_active('UserProfiles')) {
                         user_profiles_link_to_profile($member->User, $member->User->name);
                     } else {
-                        echo $member->User->name;
+                        if($member->User->name) {
+                            echo $member->User->name;
+                        } else {
+                            echo $member->User->username;
+                        }
+                        
                     }
                 ?>: <?php echo $member->role(); ?>
             

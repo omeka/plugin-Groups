@@ -2,6 +2,15 @@
 
 class GroupMembershipTable extends Omeka_Db_Table
 {
+
+    
+    public function getTableAlias() {
+        if (empty($this->_name)) {
+            $this->setTableName();
+        }
+    
+        return $this->_name;
+    }    
     
     public function applySearchFilters($select, $params)
     {
@@ -74,6 +83,7 @@ class GroupMembershipTable extends Omeka_Db_Table
         $groupTableAlias = $groupTable->getTableAlias();
         $select = $groupTable->getSelect();
         $alias = $this->getTableAlias();
+
         $select->join(array($alias=>$db->GroupMembership), "$groupTableAlias.id = $alias.group_id", array());
         $this->applySearchFilters($select, $params);
         return $groupTable->fetchObjects($select);        

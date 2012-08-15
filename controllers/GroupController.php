@@ -69,19 +69,11 @@ class Groups_GroupController extends Omeka_Controller_Action
 
     public function showAction()
     {
-        //unfortunate duplication of parent because I want the group record later
-        $varName = strtolower($this->_helper->db->getDefaultModelName());
-
         $record = $this->findById();
-
-        Zend_Registry::set($varName, $record);
-
         fire_plugin_hook('show_' . strtolower(get_class($record)), $record);
 
-        $this->view->assign(array($varName => $record));
-        //end unfortunate duplication
-        //now do something useful with it
-
+        $this->view->group = $record;
+        
         //stuff the items in so they are available to output formats
         if(has_permission($record, 'items')) {
             $items = groups_items_for_group();
@@ -220,7 +212,6 @@ class Groups_GroupController extends Omeka_Controller_Action
         );     
 
         if(!empty($_POST['blocks'])) {
-            _log(print_r($_POST['blocks'], true));
             foreach($_POST['blocks'] as $id=>$values) {
                 $invitation = $this->findById($id, 'GroupInvitation');
                 foreach($values as $value) {
@@ -273,7 +264,7 @@ class Groups_GroupController extends Omeka_Controller_Action
 
         $this->handleMembershipStatus();
 
-        $groups = $this->_helper->db->getTable()->findBy($params);
+        $groups = $this->_helper->db->getTable('Group')->findBy($params);        
         $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));        
         $this->view->groups = $groups;
         $this->view->invitations = $invitations;
