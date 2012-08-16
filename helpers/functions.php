@@ -284,6 +284,10 @@ function groups_get_membership($group = null, $user = null)
         $user = current_user();
     }
     
+    if(!$user) {
+        return false;
+    }
+    
     if(is_numeric($user)) {
         $userId = $user;
     } else {
@@ -389,7 +393,7 @@ function groups_comments_for_group($group = null)
             'object_record_type' => 'Comment',
             'subject_id' => $group->id
     );
-    return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
+    return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), array('groups_skip_hook'=>true));
 }
 
 

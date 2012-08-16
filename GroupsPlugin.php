@@ -314,14 +314,19 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     public function hookCommentBrowseSql($select, $params)
     {
 
+        $filter = true;
+        //skip this hook under certain conditions from groups, like when getting all the comments for a single group
+        if(isset($params['groups_skip_hook'])) {
+            $filter = false;
+        }
+        
         $user = current_user();
         if($user) {
             $userId = $user->id;
         } else {
             $userId = 0;
         }
-
-        $filter = true;
+        
         if(has_permission('Commenting_Comment', 'updateapproved') || has_permission('Commenting_Comment', 'updatespam')) {
             $filter = false;
         }
@@ -335,19 +340,23 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             $select->distinct();
 
             //first, just get a connection to the relation
-            $db = get_db();
+            
+            $rrTable = $db->getTable('RecordRelationsRelation');
+            //there are a lot of crazy joins by the end of some queries, so
+            //the 'a' is there to prevent assigning the same alias twice
+            //gotta be a better way?
+            $rrAlias = $rrTable->getTableAlias() . 'a'; 
             $select->joinLeft(array('rr'=>$db->RecordRelationsRelation),
                             "rr.object_id = comments.id AND rr.object_record_type = 'Comment' ", array()
                             );
-            //$select->where("rr.object_record_type = 'Comment'");
 
             $has_member = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
-            $select->join(array('record_relations_relations'=>$db->RecordRelationsRelation),
-                            ' (  rr.subject_id = record_relations_relations.subject_id ' .
-                            'AND record_relations_relations.subject_record_type = "Group" ' .
-                            'AND record_relations_relations.property_id = ' . $has_member->id .' ' .
-                            'AND record_relations_relations.object_record_type = "User" ' .
-                            'AND ( ( rr.public = 1 ) OR  ( record_relations_relations.object_id = ' . $userId  . ') ) ) ' .
+            $select->join(array($rrAlias=>$db->RecordRelationsRelation),
+                            ' (  rr.subject_id = ' . $rrAlias . '.subject_id ' .
+                            'AND ' . $rrAlias . '.subject_record_type = "Group" ' .
+                            'AND ' . $rrAlias . '.property_id = ' . $has_member->id .' ' .
+                            'AND ' . $rrAlias . '.object_record_type = "User" ' .
+                            'AND ( ( rr.public = 1 ) OR  ( ' . $rrAlias . '.object_id = ' . $userId  . ') ) ) ' .
                             'OR ( rr.id IS NULL)',
                             array()
                             );
