@@ -55,7 +55,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $this->view->form = $form;
         $group = $this->findById();
         $defaults = $group->toArray();
-        $defaults['tags'] = groups_tags_string_for_group($group);
+        $defaults['tags'] = groups_tags_string_for_group($group, false);
         $form->setDefaults($defaults);
         $this->view->form = $form;
     

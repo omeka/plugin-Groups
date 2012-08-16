@@ -193,6 +193,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     {
         queue_js('groups');
         queue_css('groups');
+        queue_js('tiny_mce', 'javascripts/tiny_mce');
     }
 
 

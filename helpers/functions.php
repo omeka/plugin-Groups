@@ -71,13 +71,16 @@ function groups_tags_list_for_group($group = null)
  * @return string html <ul>
  */
 
-function groups_tags_string_for_group($group = null)
+function groups_tags_string_for_group($group = null, $uri = true)
 {
     if(!$group) {
         $group = groups_get_current_group();
     }
     $tags = groups_tags_for_group($group);
-    $link = uri('groups/browse?tags=');
+    if($uri) {
+        $link = uri('groups/browse?tags=');
+    }
+    
     return tag_string($tags, $link);
 
 }

@@ -102,12 +102,57 @@ Omeka.Groups = {
     }    
 };
 
+
+/**
+ * Add the TinyMCE WYSIWYG editor to a page.
+ * Default is to add to all textareas.
+ * Modified from the admin-side global.js Omeka.wysiwyg
+ *
+ * @param {Object} [params] Parameters to pass to TinyMCE, these override the
+ * defaults.
+ */
+Omeka.Groups.wysiwyg = function (params) {
+    // Default parameters
+    initParams = {
+        plugins: "paste,inlinepopups",
+        convert_urls: false,
+        mode: "exact", 
+        elements: 'groups_description',
+        object_resizing: true,
+        theme: "advanced",
+        theme_advanced_toolbar_location: "top",
+        force_br_newlines: false,
+        forced_root_block: 'p', // Needed for 3.x
+        remove_linebreaks: true,
+        fix_content_duplication: false,
+        fix_list_elements: true,
+        valid_child_elements: "ul[li],ol[li]",
+        theme_advanced_buttons1: "bold,italic,underline,link,justifyleft,justifycenter,justifyright,bullist,numlist,link,formatselect",
+        theme_advanced_buttons2: "",
+        theme_advanced_buttons3: "",
+        theme_advanced_toolbar_align: "left"
+    };
+
+    // Overwrite default params with user-passed ones.
+    for (var attribute in params) {
+        // Account for annoying scripts that mess with prototypes.
+        if (params.hasOwnProperty(attribute)) {
+            initParams[attribute] = params[attribute];
+        }
+    }
+
+    tinyMCE.init(initParams);
+};
+
+
+
+
 jQuery(document).ready(function() {
     jQuery('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
     jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
     jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
     jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
-    
+    Omeka.Groups.wysiwyg();
 });
 
 
