@@ -230,7 +230,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             'manage',
                             'edit',
                             'block',
-                            'unblock'
+                            'unblock',
+                            'remove-comment'
                             );
         
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
@@ -449,6 +450,14 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             $html .= "<li class='groups-comment-group' id='groups-comment-group-{$group->id}'>" . $group->title .  "</li>";
         }
         $html .= "</ul></div>";
+        
+        $group = groups_get_current_group();
+        if($group && has_permission($group, 'remove-comment')) {
+            $html .= "<div id='groups-comment-administration'>";
+            $html .= "<p><a href='" . WEB_ROOT . "/groups/group/remove-comment/id/{$group->id}/comment/{$comment->id}' class='groups-remove-comment' id='groups-remove-comment-{$comment->id}'>Remove from this group</a></p>";            
+            $html .= "</div>";            
+        }
+
         return $html;
     }
 

@@ -170,6 +170,20 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>true));
     }
     
+    public function removeComment($commentId)
+    {
+        $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+        $params = array(
+                    'subject_record_type' => 'Group',
+                    'subject_id' => $this->id,
+                    'object_record_type' => 'Comment',
+                    'object_id' => $commentId,
+                    'property_id' => $ownsComment->id
+                );        
+        $rels = get_db()->getTable('RecordRelationsRelation')->findBy($params);
+        $rel = $rels[0];
+        $rel->delete();
+    }
 
     private function newRelation($object, $prefix, $localpart, $public = true)
     {

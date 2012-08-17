@@ -44,6 +44,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'change-status',
             'block',
             'unblock',
+            'remove-comment',
             'quit'
             );
 
@@ -60,7 +61,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'change-status',
             'remove-member',
             'block',
-            'unblock'    
+            'unblock',
+            'remove-comment',
     );    
     
     public function assert(Zend_Acl $acl,

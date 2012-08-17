@@ -195,14 +195,19 @@ class Groups_GroupController extends Omeka_Controller_Action
         $user = get_db()->getTable('User')->find($userId);
         $group= $this->findById();
         $group->removeMember($user);
-        $response = array('status'=>'ok');
-        
+        $response = array('status'=>'ok');        
         $to = $group->findMembersForNotification('notify_member_left');
         $group->sendMemberLeftEmail($user, $to);
         $this->_helper->json($response);
-
     }
 
+    public function removeCommentAction()
+    {
+        $commentId = $this->getRequest()->getParam('comment');
+        $group = $this->findById();
+        $group->removeComment($commentId);     
+        $this->redirect->gotoUrl('groups/show/' . $group->id);   
+    }
 
     public function myGroupsAction()
     {

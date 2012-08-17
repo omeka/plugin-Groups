@@ -57,10 +57,10 @@ Omeka.Groups = {
     },
 
     approveRequest: function() {
-        splitId = this.parentNode.id.split('-');
-        userId = groupId = splitId[splitId.length - 1];
-        splitUrl = window.document.URL.split('/');
-        groupId = splitUrl[splitUrl.length - 1];
+        var splitId = this.parentNode.id.split('-');
+        var userId = groupId = splitId[splitId.length - 1];
+        var splitUrl = window.document.URL.split('/');
+        var groupId = splitUrl[splitUrl.length - 1];
         jQuery.post(Omeka.webRoot + '/groups/approve-request/', {'groupId': groupId, 'userId':userId}, Omeka.Groups.approveRequestResponse);        
         
     },
@@ -69,11 +69,11 @@ Omeka.Groups = {
         var responseJson = JSON.parse(response);        
         window.location.reload(true);
     },
-    
+        
     filterGroups: function() {
-        splitId = this.id.split('-');
-        itemId = splitId[splitId.length -1];
-        groupSelector = 'li#groups-comment-group-' + itemId;
+        var splitId = this.id.split('-');
+        var itemId = splitId[splitId.length -1];
+        var groupSelector = 'li#groups-comment-group-' + itemId;
         jQuery(groupSelector).closest('div.comment').toggle('fast');
     },
     

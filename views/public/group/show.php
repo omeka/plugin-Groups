@@ -79,7 +79,7 @@ head(array());
         <?php $comments = groups_comments_for_group($group); ?>
         <?php commenting_echo_comments(array('approved'=>true), $comments)?>
     </div>
-</div>
+
 
 
 <?php foot(); ?>

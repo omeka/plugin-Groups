@@ -8,7 +8,7 @@
 function groups_get_current_group()
 {
     if (!($group = __v()->group)) {
-        throw new Exception(__('A group has not been set to be displayed on this theme page! Please see Omeka documentation for details.'));
+        return false;
     }
     return $group;
 }
