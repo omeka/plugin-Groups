@@ -482,8 +482,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             }
             $html .= "</ul>";
             $html .= "</div>";
-            return $html;
         }
+        return $html;        
     }
 
     public function filterGuestUserWidgets($widgets)
