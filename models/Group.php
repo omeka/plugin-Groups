@@ -285,13 +285,18 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     {
         if(is_string($to)) {
             $email = $to;
+            _log('is string');
         }
         if($to instanceOf User) {
             $email = $to->email;
+            _log('is user');
         }        
         if($to instanceOf GroupMember) {
             $email = $to->User->email;
+            _log('is groupmember');
         }
+        _log($email);
+        
         $mail = new Zend_Mail();
         $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
         $mail->setFrom(get_option('administrator_email'), settings('site_title'));
@@ -309,7 +314,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     {
         if(is_array($to)) {
             foreach($to as $user) {
-                $this->sendEmail($to, $body, $subject);
+                $this->sendEmail($user, $body, $subject);
             }
         } else {
             $this->sendEmail($to, $body, $subject);

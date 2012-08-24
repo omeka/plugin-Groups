@@ -9,7 +9,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         'define_routes',
         'public_theme_header',
         'commenting_append_to_form',
-        'after_save_comment',
         'comment_browse_sql'
         
     );
@@ -23,7 +22,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
     public function setUp()
     {
         if(plugin_is_active('Commenting')) {
-            $this->_hooks[] = 'after_save_comment';
+            $this->_hooks[] = 'before_save_form_comment';
             $this->_hooks[] = 'comment_browse_sql';
             $this->_hooks[] = 'commenting_append_to_form';
             $this->_filters[] = 'commenting_append_to_comment';
@@ -245,10 +244,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             new Zend_Controller_Router_Route(
                 'groups/:action/:id',
                 array(
-                        'module'        => 'groups',
-                        'controller'    => 'group',
-                        'action'		=> 'show',
-                        'id'			=> ''
+                    'module'        => 'groups',
+                    'controller'    => 'group',
+                    'action'		=> 'show',
+                    'id'			=> ''
                 )
             )
         );
@@ -267,40 +266,69 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         ); 
     }    
     
-    public function hookAfterSaveComment($comment)
+    public function hookBeforeSaveFormComment()
     {
         //build relations between comment and groups
-
-        //unfortunate process of going through all the keys looking for 'groups_{id}'
-        //Zend doesn't like form element names with []
-        $groupIds = array();
-        $public = false;
-        foreach($_POST as $key=>$value) {
-            $splitKey = explode('_', $key);
-            if ( ($splitKey[0] == 'groups') && $value == 1) {
-                if($splitKey[1] == 'public') {
-                    $public = true;
-                } else {
+        //first save the actual comment 
+        $form = new Commenting_CommentForm();
+        $data = $_POST;
+        $valid = $form->isValid($_POST);
+        $gbody = $form->getElement('groups_commenting_body')->getValue();
+        $gbodyEmpty = false;
+        if(trim(strip_tags($gbody)) == '' ) {
+            $gbodyEmpty = true;
+            _log('thinks gbody empty');
+        }
+        $body = $form->getElement('commenting_body')->getValue();
+        $bodyEmpty = false;
+        if(trim(strip_tags($body)) == '' ) {
+            $bodyEmpty = true;
+        }        
+        if($bodyEmpty && $gbodyEmpty) {
+            return;
+        }        
+        
+        $data['body'] = $gbody;
+        $data['ip'] = $_SERVER['REMOTE_ADDR'];
+        $data['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+        $data['approved'] = has_permission('Commenting_Comment', 'noappcomment');
+        $data['flagged'] = 0;        
+        
+        if($form->isValid($data)) {
+            $comment = new Comment();
+            //commenting uses saveForm, so don't use that here to avoid triggering this hook again            
+            $comment->setArray($data);
+            $comment->save();
+_log(print_r($data, true));            
+            //unfortunate process of going through all the keys looking for 'groups_{id}'
+            $groupIds = array();
+            foreach($_POST as $key=>$value) {
+                $splitKey = explode('_', $key);
+                if ( ($splitKey[0] == 'groups') && $value == 1) {
                     $groupIds[] = $splitKey[1];
                 }
             }
-        }
-
-        $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
-        $options = array(
-            'subject_record_type' => 'Group',
-//        	'subject_id' => this changes around in the loop below
-            'object_record_type' => 'Comment',
-            'object_id' => $comment->id,
-            'public' => $public,
-            'property_id' => $ownsComment->id
-
-        );
-        foreach($groupIds as $id) {
-              $options['subject_id'] = $id;
-              $rel = new RecordRelationsRelation;
-              $rel->setProps($options);
-              $rel->save();
+            
+            if(!empty($groupIds)) {
+                $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
+                $options = array(
+                    'subject_record_type' => 'Group',
+                    //'subject_id' => this changes around in the loop below
+                    'object_record_type' => 'Comment',
+                    'object_id' => $comment->id,
+                    'public' => true,
+                    'property_id' => $ownsComment->id
+        
+                );
+                _log(print_r($options, true));
+                foreach($groupIds as $id) {
+                    $options['subject_id'] = $id;
+                    $rel = new RecordRelationsRelation;
+                    $rel->setProps($options);
+                    $rel->save();
+                }
+            }
+            
         }
     }
 
@@ -365,10 +393,16 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         }
     }
 
+    /**
+     * Create a duplicate commenting form, just for group-specific comments
+     * @param unknown_type $form
+     */
+    
     public function hookCommentingAppendToForm($form)
     {
         $user = current_user();
         if($user) {
+
             $groups = get_db()->getTable('Group')->findBy(array('user' => $user));
             $elements = array();
             foreach($groups as $group) {
@@ -377,12 +411,27 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 $form->addElement('checkbox', $name, array('label'=>$label));
                 $elements[] = $name;
             }
+
             if(!empty($elements)) {
-                $form->addDisplayGroup($elements, 'groups', array('legend'=>"Add to your groups' discussions"));
-                $form->addElement('checkbox', 'groups_public', array(
-                    'label' => 'Also make the comment public?',
-                    'description' => "If unchecked, comment will only be visible to the selected groups. Otherwise, it will also be visible to anyone. A link to the group will appear next to it."
-                    ));
+                $form->addElement('textarea', 'groups_commenting_body',
+                    array('required'=>false,
+                        'filters'=> array(
+                            array('StripTags', array('allowTags' => array('p', 'em', 'strong', 'a'))),
+                            ),
+                        )
+                    );
+                $elements[] = 'groups_commenting_body';
+                $form->addDisplayGroup($elements, 'groups_commenting', 
+                       array(
+                       'id'=>'groups_comment_form',
+                       'description'=>"<label>Group-specific comment</label><p>Comments made here will only appear in the selected groups</p>"
+                        
+                      )
+                );
+                $displayGroup = $form->getDisplayGroup('groups_commenting');
+                $decOptions = array('escape'=>false, 'placement'=>'prepend', 'tag'=>'div', 'class'=>'groups-commenting', 'id'=>'groups-commenting');
+                $dec = $displayGroup->addDecorator('description', $decOptions);
+                $dec = $displayGroup->getDecorator('description');
             }
         }
     }
@@ -441,16 +490,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $id = $request->getParam('id');
         if(! ($class == $comment->record_type && $id = $comment->record_id)) {
             $html .= "<div class='groups-original-item'>";
-            $html .= "<a href='" . WEB_ROOT . "{$comment->path}'>View original context</a>";
+            $html .= "<a href='" . WEB_ROOT . "{$comment->path}'>Source</a>";
             $html .= "</div>";            
         }
 
-        $html .= "<div class='groups-comment-groups'><h3>Groups</h3><ul> ";
-        foreach($groups as $group) {
-            $html .= "<li class='groups-comment-group' id='groups-comment-group-{$group->id}'>" . $group->title .  "</li>";
-        }
-        $html .= "</ul></div>";
-        
         $group = groups_get_current_group();
         if($group && has_permission($group, 'remove-comment')) {
             $html .= "<div id='groups-comment-administration'>";

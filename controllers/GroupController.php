@@ -313,6 +313,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $response = json_encode($responseJson);
         
         $to = $group->findMembersForNotification('notify_item_new');  
+        _log(print_r($to, true));
         $group->sendNewItemEmail($item, $to, current_user());        
         $this->_helper->json($response);
     }

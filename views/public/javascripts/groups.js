@@ -153,6 +153,10 @@ jQuery(document).ready(function() {
     jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
     jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
     Omeka.Groups.wysiwyg();
+    jQuery('#groups-commenting').click(function() {
+        jQuery('#groups_comment_form').toggle('slow');    
+    });
+    jQuery('#groups_comment_form').hide();
 });
 
 
