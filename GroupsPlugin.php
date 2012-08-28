@@ -383,6 +383,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                             "rr.object_id = comments.id AND rr.object_record_type = 'Comment' ", array()
                             );
 
+            if(isset($params['item_id'])) {
+                
+            }
             $has_member = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
             $select->join(array($rrAlias=>$db->RecordRelationsRelation),
                             ' (  rr.subject_id = ' . $rrAlias . '.subject_id ' .

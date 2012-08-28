@@ -382,7 +382,7 @@ function groups_groups_for_comment($comment)
 }
 
 
-function groups_comments_for_group($group = null)
+function groups_comments_for_group($group = null, $record=null)
 {
     if(!$group) {
         $group = groups_get_current_group();
@@ -393,7 +393,12 @@ function groups_comments_for_group($group = null)
             'object_record_type' => 'Comment',
             'subject_id' => $group->id
     );
-    return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), array('groups_skip_hook'=>true));
+    //skip filter on membership in group
+    if($record) {
+        $objectParams = array('groups_skip_hook'=>true, 'record_id'=>$record->id, 'record_type'=>get_class($record));
+    } else {
+        $objectParams = array('groups_skip_hook'=>true);
+    }
+    
+    return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), $objectParams);
 }
-
-

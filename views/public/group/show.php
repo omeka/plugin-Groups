@@ -68,17 +68,19 @@ head(array());
                 <p>From <?php echo sites_link_to_site_for_item(); ?></p>
             </div>
         <?php if (item_has_thumbnail()): ?>
-        <div class="item-img">
-            <?php echo link_to_item(item_square_thumbnail()); ?>
-        </div>
+            <div class="item-img">
+                <?php echo link_to_item(item_square_thumbnail()); ?>
+            </div>
         <?php endif; ?>
+            <div class="groups-comments">
+                <?php $item = get_current_item(); ?>
+                <?php $comments = groups_comments_for_group($group, $item); ?>
+                <?php commenting_echo_comments(array('approved'=>true), $comments)?>
+            </div>
         </div>
         <?php endwhile; ?>
     <?php endif; ?>
-    <div class="groups-comments">
-        <?php $comments = groups_comments_for_group($group); ?>
-        <?php commenting_echo_comments(array('approved'=>true), $comments)?>
-    </div>
+
 
 
 
