@@ -26,7 +26,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             $this->_hooks[] = 'comment_browse_sql';
             $this->_hooks[] = 'commenting_append_to_form';
             $this->_filters[] = 'commenting_append_to_comment';
-            $this->_filters[] = 'commenting_prepend_to_comments';
+            //$this->_filters[] = 'commenting_prepend_to_comments';
         }
         
         if(!class_exists('Ownable')) {
@@ -277,7 +277,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $gbodyEmpty = false;
         if(trim(strip_tags($gbody)) == '' ) {
             $gbodyEmpty = true;
-            _log('thinks gbody empty');
         }
         $body = $form->getElement('commenting_body')->getValue();
         $bodyEmpty = false;
@@ -299,8 +298,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             //commenting uses saveForm, so don't use that here to avoid triggering this hook again            
             $comment->setArray($data);
             $comment->save();
-_log(print_r($data, true));            
-            //unfortunate process of going through all the keys looking for 'groups_{id}'
             $groupIds = array();
             foreach($_POST as $key=>$value) {
                 $splitKey = explode('_', $key);
@@ -310,6 +307,7 @@ _log(print_r($data, true));
             }
             
             if(!empty($groupIds)) {
+                $groupTable = get_db()->getTable('Group');
                 $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
                 $options = array(
                     'subject_record_type' => 'Group',
@@ -320,15 +318,21 @@ _log(print_r($data, true));
                     'property_id' => $ownsComment->id
         
                 );
-                _log(print_r($options, true));
+                
                 foreach($groupIds as $id) {
                     $options['subject_id'] = $id;
                     $rel = new RecordRelationsRelation;
                     $rel->setProps($options);
                     $rel->save();
+                    
+                    //make sure that, if record for comment is an Item, it is also in the group.
+                    if($comment->record_type = 'Item') {                        
+                        $group = $groupTable->find($id);
+                        //addItem does it's own checking for duplicates
+                        $group->addItem($comment->record_id);
+                    }                    
                 }
-            }
-            
+            }            
         }
     }
 
@@ -415,8 +419,9 @@ _log(print_r($data, true));
             if(!empty($elements)) {
                 $form->addElement('textarea', 'groups_commenting_body',
                     array('required'=>false,
-                        'filters'=> array(
-                            array('StripTags', array('allowTags' => array('p', 'em', 'strong', 'a'))),
+                          'rows'=>5,                          
+                          'filters'=> array(
+                              array('StripTags', array('allowTags' => array('p', 'em', 'strong', 'a'))),
                             ),
                         )
                     );
@@ -502,31 +507,6 @@ _log(print_r($data, true));
         }
 
         return $html;
-    }
-
-    public function filterCommentingPrependToComments($html, $comments)
-    {
-        $user = current_user();
-        if($user && ( count($comments) > 1 )) {
-            $groups = array();
-            foreach($comments as $comment) {
-                $commentGroups = groups_groups_for_comment($comment);
-                foreach($commentGroups as $g) {
-                    if(!isset($groups[$g->id])) {
-                        $groups[$g->id] = $g;
-                    }
-                }
-            }
-            $html .= "<div id='groups-comment-filter'>";
-            $html .= "<p>Filter comments by groups</p>";
-            $html .= "<ul id='groups-group-list'>";
-            foreach($groups as $group) {
-                $html .= "<li class='groups-group' id='groups-group-filter-{$group->id}'>" . $group->title . "</li>";
-            }
-            $html .= "</ul>";
-            $html .= "</div>";
-        }
-        return $html;        
     }
 
     public function filterGuestUserWidgets($widgets)

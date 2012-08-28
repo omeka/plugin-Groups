@@ -56,3 +56,10 @@ div.groups-block-entities {
 div.pending {
     display:none;
 }
+
+
+/* commenting integration */
+
+div#groups-commenting > label {
+    cursor: pointer;
+}

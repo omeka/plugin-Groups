@@ -69,13 +69,6 @@ Omeka.Groups = {
         var responseJson = JSON.parse(response);        
         window.location.reload(true);
     },
-        
-    filterGroups: function() {
-        var splitId = this.id.split('-');
-        var itemId = splitId[splitId.length -1];
-        var groupSelector = 'li#groups-comment-group-' + itemId;
-        jQuery(groupSelector).closest('div.comment').toggle('fast');
-    },
     
     toggleSecondaryAdminOptions: function() {
         parent = jQuery(this).parent(); 
@@ -127,7 +120,7 @@ Omeka.Groups.wysiwyg = function (params) {
         fix_content_duplication: false,
         fix_list_elements: true,
         valid_child_elements: "ul[li],ol[li]",
-        theme_advanced_buttons1: "bold,italic,underline,link,justifyleft,justifycenter,justifyright,bullist,numlist,link,formatselect",
+        theme_advanced_buttons1: "bold,italic,underline,link",
         theme_advanced_buttons2: "",
         theme_advanced_buttons3: "",
         theme_advanced_toolbar_align: "left"
@@ -152,7 +145,9 @@ jQuery(document).ready(function() {
     jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
     jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
     jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
+    
     Omeka.Groups.wysiwyg();
+    Omeka.Groups.wysiwyg({elements: 'groups_commenting_body', width: "100%"});
     jQuery('#groups-commenting').click(function() {
         jQuery('#groups_comment_form').toggle('slow');    
     });
