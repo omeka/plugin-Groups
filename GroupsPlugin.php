@@ -432,7 +432,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 $form->addDisplayGroup($elements, 'groups_commenting', 
                        array(
                        'id'=>'groups_comment_form',
-                       'description'=>"<label>Group-specific comment</label><p>Comments made here will only appear in the selected groups</p>"
+                       'description'=>"<label>Group-specific comment</label><p>Comments made here will only appear in the selected groups. <span id='groups-commenting-copy'>Copy comment</span></p>"
                         
                       )
                 );

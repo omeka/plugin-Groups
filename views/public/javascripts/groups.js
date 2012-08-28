@@ -70,6 +70,11 @@ Omeka.Groups = {
         window.location.reload(true);
     },
     
+    copyComment: function() {
+        var body = tinyMCE.get('commenting_body').getContent();
+        tinyMCE.get('groups_commenting_body').setContent(body);
+    },
+    
     toggleSecondaryAdminOptions: function() {
         parent = jQuery(this).parent(); 
         val = parent.children('input:checked').val();   
@@ -145,10 +150,10 @@ jQuery(document).ready(function() {
     jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
     jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
     jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
-    
+    jQuery('#groups-commenting-copy').click(Omeka.Groups.copyComment);
     Omeka.Groups.wysiwyg();
     Omeka.Groups.wysiwyg({elements: 'groups_commenting_body', width: "100%"});
-    jQuery('#groups-commenting').click(function() {
+    jQuery('#groups-commenting > label').click(function() {
         jQuery('#groups_comment_form').toggle('slow');    
     });
     jQuery('#groups_comment_form').hide();

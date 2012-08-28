@@ -63,3 +63,7 @@ div.pending {
 div#groups-commenting > label {
     cursor: pointer;
 }
+
+#groups-commenting-copy {
+    cursor: pointer;
+}
