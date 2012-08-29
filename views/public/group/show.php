@@ -1,4 +1,6 @@
 <?php
+
+
 head(array());
 ?>
 
@@ -80,7 +82,7 @@ head(array());
         </div>
         <?php endwhile; ?>
     <?php endif; ?>
-
+    <?php commenting_echo_comment_form(); ?>
 
 
 
