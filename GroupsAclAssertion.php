@@ -1,5 +1,6 @@
 <?php
 
+require_once(GROUPS_PLUGIN_DIR . '/helpers/functions.php');
 
 class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 {
@@ -71,9 +72,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            $privilege = null)
     {    
         $db = get_db();
-
-                
-        
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
@@ -99,7 +97,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                         'blocker_id'=>$resource->id,
                         'blocker_type'=>'Group'
                 );
-                $block = $blockTable->count($blockParams);                
+                $block = $blockTable->count($blockParams);
             }
 
             switch($privilege) {

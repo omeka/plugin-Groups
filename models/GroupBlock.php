@@ -1,6 +1,6 @@
 <?php
 
-class GroupBlock extends Omeka_Record
+class GroupBlock extends Omeka_Record_AbstractRecord
 {
     public $blocked_id;
     public $blocker_id;

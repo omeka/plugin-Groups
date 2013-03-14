@@ -9,7 +9,7 @@ foreach($memberships as $membership):
         $current_user = current_user();                
         if(count($memberships) == 1): ?>
             <div class='group-membership'>
-            <p>There are no members in your group! Why not <a href="<?php echo uri('groups/invitations'); ?>">invite some friends</a>?</p>
+            <p>There are no members in your group! Why not <a href="<?php echo url('groups/invitations'); ?>">invite some friends</a>?</p>
             
             </div>
         <?php endif; ?>
@@ -29,11 +29,11 @@ foreach($memberships as $membership):
                     <div class="groups-block-entities">
                         <input name="block[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='checkbox' value='block' />Block                    
                     </div>
-                <?php if(has_permission($group, 'change-status')): ?>
+                <?php if(is_allowed($group, 'change-status')): ?>
                     <div class='groups-role-change <?php if($membership->is_pending) {echo "pending";}?>'>
                         <?php $role = $membership->role(); ?>
                         <label for="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]">Status</label>
-                        <?php if(has_permission($group, 'make-owner')): ?>
+                        <?php if(is_allowed($group, 'make-owner')): ?>
                             <input <?php if($role == 'Owner') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='owner' />Owner
                         <?php endif; ?>
                         <input <?php if($role == 'Admin') {echo "checked='checked'"; } ?> name="status[<?php echo $group->id; ?>][<?php echo $membership->id; ?>]" type='radio' value='admin' />Admin

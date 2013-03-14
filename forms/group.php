@@ -3,7 +3,6 @@
 
 class GroupForm extends Omeka_Form
 {
-
     public function init()
     {
         parent::init();

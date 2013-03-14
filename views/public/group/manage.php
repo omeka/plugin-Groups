@@ -1,12 +1,11 @@
 <?php
-head(array());
+echo head(array('title'=> 'Manage' . $group->title));
 ?>
 
 
 <div id='primary'>
-<h1>Manage <?php echo $group->title; ?></h1>
 <?php echo flash(); ?>
-<a href="<?php echo record_uri($group, 'show'); ?>">Back</a>
+<a href="<?php echo record_url($group, 'show'); ?>">Back</a>
 
 <form method="post">
 
@@ -18,20 +17,20 @@ head(array());
     </div>
 
 
-<?php if(has_permission($group, 'administration')): ?>
+<?php if(is_allowed($group, 'administration')): ?>
     <h2>Administer Members</h2>    
     <?php include('membership-admin.php'); ?>
 
 <?php endif;?>
 
-<?php if(has_permission($group, 'unblock')): ?>
+<?php if(is_allowed($group, 'unblock')): ?>
     <?php if(!empty($blocked_users)):?>    
         <h2>Blocked Users</h2>    
     <?php endif; ?>
     <?php include('group-blocks-admin.php'); ?>
 <?php endif;?>
 
-<?php if(has_permission($group, 'invitations')): ?>
+<?php if(is_allowed($group, 'invitations')): ?>
     <h2>Invite Others</h2>
     <div>
         <div>
@@ -57,4 +56,4 @@ head(array());
 
 
 
-<?php foot(); ?>
+<?php echo foot(); ?>

@@ -2,28 +2,12 @@
 
 class GroupMembershipTable extends Omeka_Db_Table
 {
-
-    
-    public function getTableAlias() {
-        if (empty($this->_name)) {
-            $this->setTableName();
-        }
-    
-        return $this->_name;
-    }    
-    
     public function applySearchFilters($select, $params)
     {
-        $columns = $this->getColumns();
-        $alias = $this->getTableAlias();
-        foreach($params as $param=>$value) {
-
-            if($param == 'admin_or_owner') {
-                $select->where("$alias.is_owner = 1 OR $alias.is_admin = 1");
-            }
-            if(in_array($param, $columns)) {
-                $select->where("$alias.$param = ?", $value );
-            }      
+        parent::applySearchFilters($select, $params);
+        if(isset($params['admin_or_owner'])) {
+            $alias = $this->getTableAlias();
+            $select->where("$alias.is_owner = 1 OR $alias.is_admin = 1");
         }
     }
     
@@ -72,7 +56,10 @@ class GroupMembershipTable extends Omeka_Db_Table
         $alias = $this->getTableAlias();
         $select->join(array($alias=>$db->GroupMembership), "$userTableAlias.id = $alias.user_id", array());
         $this->applySearchFilters($select, $params);
-        $userTable->applySorting($select, $sort['sort_field'], $sort['sort_dir']);
+        if(!empty($sort)) {
+            $userTable->applySorting($select, $sort['sort_field'], $sort['sort_dir']);
+        }
+        
         return $userTable->fetchObjects($select);
     }
     

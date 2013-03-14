@@ -1,12 +1,12 @@
 <?php
-head(array());
+echo head(array('title'=>'Edit Group'));
 ?>
 
 
 <div id='primary'>
-<h1>Add a group</h1>
+<h1>Edit a group</h1>
 <?php echo $form; ?>
 </div>
 
 
-<?php foot(); ?>
+<?php echo foot(); ?>

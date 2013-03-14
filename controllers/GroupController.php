@@ -1,18 +1,13 @@
 <?php
 
 
-class Groups_GroupController extends Omeka_Controller_Action
+class Groups_GroupController extends Omeka_Controller_AbstractActionController
 {
-
     protected $_browseRecordsPerPage = 10;
 
     public function init()
     {
-        if (version_compare(OMEKA_VERSION, '2.0-dev', '>=')) {
-            $this->_helper->db->setDefaultModelName('Group');
-        } else {
-            $this->_modelClass = 'Group';
-        }
+        $this->_helper->db->setDefaultModelName('Group');
 //@TODO: check if I really need to muck about with the contexts
         $ajaxContext = $this->_helper->getHelper('AjaxContext');
         $ajaxContext->addActionContext('join', 'json')
@@ -36,15 +31,27 @@ class Groups_GroupController extends Omeka_Controller_Action
         require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
         $form = new GroupForm();
         $this->view->form = $form;
-    
-        if(!empty($_POST)) {
+           
+        // Check if the form was submitted.
+        if ($this->getRequest()->isPost()) {
             $group = new Group();
-            $currUser = current_user();
-            $_POST['owner_id'] = $currUser->id;
-            $group->saveForm($_POST);
-            $group->addMember($currUser, 0, 'is_owner');
-            $this->redirect->gotoUrl('/groups/show/' . $group->id );
-        }
+            $group->setPostData($_POST);
+            $currentUser = current_user();
+            $group->owner_id = $currentUser->id;
+            
+            // Save the record. Passing false prevents thrown exceptions.
+            if ($group->save(false)) {
+                $group->addMember($currentUser, false, 'is_owner');
+                $successMessage = $this->_getEditSuccessMessage($group);
+                if ($successMessage) {
+                    $this->_helper->flashMessenger($successMessage, 'success');
+                }
+                $this->_redirectAfterEdit($group);
+                // Flash an error if the record does not validate.
+            } else {
+                $this->_helper->flashMessenger($group->getErrors());
+            }
+        }        
     
     }
     
@@ -65,25 +72,23 @@ class Groups_GroupController extends Omeka_Controller_Action
             $this->redirect->gotoUrl('/groups/show/' . $group->id );
         }
     }
-    
 
     public function showAction()
     {
-        $record = $this->findById();
-        fire_plugin_hook('show_' . strtolower(get_class($record)), $record);
+        $record = $this->_helper->db->findById();
 
         $this->view->group = $record;
-        
+        parent::showAction();
         //stuff the items in so they are available to output formats
-        if(has_permission($record, 'items')) {
-            $items = groups_items_for_group();
+        if(is_allowed($this->view->group, 'items')) {
+            $items = groups_items_for_group($this->view->group);
             $this->view->assign(array('items'=>$items));
         }
     }
 
     public function manageAction()
     {
-        $group = $this->findById();
+        $group = $this->_helper->db->findById();
         
         if(!empty($_POST)) {
             if(!empty($_POST['emails'])) {
@@ -107,7 +112,6 @@ class Groups_GroupController extends Omeka_Controller_Action
         $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
         $this->view->group = $group;
         $this->view->user_membership = groups_get_membership($group);
-        
     }
     
     public function joinAction()
@@ -289,7 +293,7 @@ class Groups_GroupController extends Omeka_Controller_Action
         $sender = current_user();
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$sender->id, 'is_pending'=>0));
         foreach($groups as $key=>$group) {
-            if(!has_permission($group, 'invitations')) {
+            if(!is_allowed($group, 'invitations')) {
                 unset($groups[$key]);
             }
         }

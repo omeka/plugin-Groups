@@ -1,38 +1,36 @@
 <?php
 
-class GroupsPlugin extends Omeka_Plugin_Abstract
+define('GROUPS_PLUGIN_DIR', dirname(__FILE__));
+require_once PLUGIN_DIR . '/RecordRelations/models/RelatableRecord.php';
+
+class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
 {
     protected $_hooks = array(
         'install',
         'uninstall',
         'define_acl',
         'define_routes',
-        'public_theme_header',
+        'public_head',
+        //'admin_navigation_main',
         'commenting_append_to_form',
         'comment_browse_sql'
-        
     );
 
     protected $_filters = array(
         'define_action_contexts',
         'guest_user_widgets',
-        'blocks_notifications'
+      //  'blocks_notifications'
     );
 
     public function setUp()
     {
         if(plugin_is_active('Commenting')) {
-            $this->_hooks[] = 'before_save_form_comment';
-            $this->_hooks[] = 'comment_browse_sql';
-            $this->_hooks[] = 'commenting_append_to_form';
-            $this->_filters[] = 'commenting_append_to_comment';
+         //   $this->_hooks[] = 'before_save_form_comment';
+         //   $this->_hooks[] = 'comment_browse_sql';
+         //   $this->_hooks[] = 'commenting_form';
+         //   $this->_filters[] = 'commenting_comment';
             //$this->_filters[] = 'commenting_prepend_to_comments';
-        }
-        
-        if(!class_exists('Ownable')) {
-            include(GROUPS_PLUGIN_DIR . '/Ownable.php');
-            include(GROUPS_PLUGIN_DIR . '/Ownership.php');
-        }
+        }        
         
         parent::setUp();
     }
@@ -43,15 +41,13 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $sql = "
                 CREATE TABLE IF NOT EXISTS `$db->Group` (
                   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-                  `title` text COLLATE utf8_unicode_ci NOT NULL,
-                  `description` text COLLATE utf8_unicode_ci,
-                  `visibility` tinytext COLLATE utf8_unicode_ci NOT NULL,
+                  `title` text NOT NULL,
+                  `description` text,
+                  `visibility` tinytext NOT NULL,
                   `owner_id` int(10) unsigned NOT NULL,
                   PRIMARY KEY (`id`),
-                  KEY `owner_id` (`owner_id`),
-                  FULLTEXT KEY `title` (`title`),
-                  FULLTEXT KEY `description` (`description`),
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+                  KEY `owner_id` (`owner_id`)
+                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                 ";
         $db->query($sql);
         
@@ -70,7 +66,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   PRIMARY KEY (`id`),
                   KEY `group_id` (`group_id`),
                   KEY `user_id` (`user_id`)
-                ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;                        
+                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci               
                 ";
         $db->query($sql);
         
@@ -79,9 +75,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
                   `group_id` int(10) unsigned NOT NULL,
                   `membership_id` int(10) unsigned NOT NULL,
-                  `type` text COLLATE utf8_unicode_ci,
+                  `type` text ,
                   PRIMARY KEY (`id`)
-                  ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+                  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                         ";
         $db->query($sql);
         
@@ -92,10 +88,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
               `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
               `blocked_id` int(11) NOT NULL,
               `blocker_id` int(11) NOT NULL,
-              `blocked_type` tinytext CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+              `blocked_type` tinytext  NOT NULL,
               `blocker_type` tinytext NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
+            ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                         ";
         $db->query($sql);
         
@@ -112,6 +108,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         ";        
         $db->query($sql);
         
+        /*
         $blocksArray = array(
             'GroupsItemBlock',
             'GroupsAddItemBlock',
@@ -120,7 +117,8 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'GroupsMembersBlock'
         );
         blocks_register_blocks($blocksArray);
-
+*/
+        
         $omekaMemberProps = array(
             array(
                 'name' => 'Omeka',
@@ -184,20 +182,21 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
             'GroupsMyGroupsBlock',
             'GroupsMembersBlock'
         );
-        blocks_unregister_blocks($blocksArray);
+        //blocks_unregister_blocks($blocksArray);
         record_relations_delete_relations(array('subject_record_type'=>'Group'));
     }
 
-    public function hookPublicThemeHeader()
+    public function hookPublicHead()
     {
-        queue_js('groups');
-        queue_css('groups');
-        queue_js('tiny_mce', 'javascripts/tiny_mce');
+        queue_js_file('groups');
+        queue_css_file('groups');
+        queue_js_file('tiny_mce', 'javascripts/vendor/tiny_mce');
     }
 
 
-    public function hookDefineAcl($acl)
+    public function hookDefineAcl($args)
     {
+        $acl = $args['acl'];
         require_once GROUPS_PLUGIN_DIR . '/GroupsAclAssertion.php';
         $acl->addResource('Groups_Group');
 
@@ -206,7 +205,6 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         if($acl->hasRole('guest')) {
             $roles[] = 'guest';
         }
-
 
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
         $acl->allow($roles, 'Groups_Group', array('add', 'editSelf') );
@@ -236,9 +234,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
-    public function hookDefineRoutes($router)
+    public function hookDefineRoutes($args)
     {      
-
+        $router = $args['router'];
         $router->addRoute(
             'group-show',
             new Zend_Controller_Router_Route(
@@ -246,7 +244,7 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
                 array(
                     'module'        => 'groups',
                     'controller'    => 'group',
-                    'action'		=> 'show',
+                    'action'		=> 'browse',
                     'id'			=> ''
                 )
             )
@@ -266,11 +264,11 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         ); 
     }    
     
-    public function hookBeforeSaveFormComment()
+    public function hookBeforeSaveFormComment($args)
     {
         //build relations between comment and groups
         //first save the actual comment 
-        $form = new Commenting_CommentForm();
+        $form = $args['form'];
         $data = $_POST;
         $valid = $form->isValid($_POST);
         $gbody = $form->getElement('groups_commenting_body')->getValue();
@@ -344,9 +342,10 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
      * This allows for filtering the conversation to what is part of a group
      */
 
-    public function hookCommentBrowseSql($select, $params)
+    public function hookCommentBrowseSql($args)
     {
-
+        $select = $args['select'];
+        $params = $args['params'];
         $filter = true;
         //skip this hook under certain conditions from groups, like when getting all the comments for a single group
         if(isset($params['groups_skip_hook'])) {
@@ -405,8 +404,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
      * @param unknown_type $form
      */
     
-    public function hookCommentingAppendToForm($form)
+    public function hookCommentingAppendToForm($args)
     {
+        $form = $args['form'];
         $user = current_user();
         if($user) {
 
@@ -489,8 +489,9 @@ class GroupsPlugin extends Omeka_Plugin_Abstract
         return $notifications;
     }
 
-    public function filterCommentingAppendToComment($html, $comment)
+    public function filterCommentingAppendToComment($html, $args)
     {
+        $comment = $args['comment'];
         $groups = groups_groups_for_comment($comment);
         $request = Zend_Controller_Front::getInstance()->getRequest();
                 

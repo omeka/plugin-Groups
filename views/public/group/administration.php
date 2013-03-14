@@ -1,5 +1,5 @@
 <?php
-head(array());
+echo head(array('title'=>'Administer Groups'));
 ?>
 <?php include 'groups-manage-tabs.php' ; ?>
 
@@ -8,10 +8,10 @@ head(array());
 <p>You do not have permission to administer any groups.</p>
 <?php else: ?>
 <form method="post">
-    <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>    
+    <?php foreach(loop('groups') as $group):  ?>    
         <div class='groups-group'>
             <?php $group = groups_get_current_group(); ?>
-            <h3><a href="<?php echo uri('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
+            <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
 
             <?php include('membership-admin.php'); ?>
             <?php $blocked_users = groups_get_blocked_users($group); ?>
@@ -21,10 +21,10 @@ head(array());
             <?php endif;?>
         </div>
         
-    <?php endwhile; ?>
+    <?php endforeach; ?>
     <button>Submit</button>
 </form>
 <?php endif; ?>
 </div>
 
-<?php foot(); ?>
+<?php echo foot(); ?>

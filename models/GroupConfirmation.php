@@ -1,6 +1,6 @@
 <?php
 
-class GroupConfirmation extends Omeka_Record
+class GroupConfirmation extends Omeka_Record_AbstractRecord
 {
     public $id;
     public $group_id;

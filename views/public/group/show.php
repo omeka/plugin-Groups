@@ -1,19 +1,18 @@
 <?php
 
-
-head(array());
+$this->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
+echo head(array('title'=>$group->title));
 ?>
 
 
 <div id='primary'>
-    <h1><?php echo $group->title; ?></h1>
     <?php echo flash(); ?>
-    <?php if(has_permission($group, 'edit')):?>
-        <a href="<?php echo record_uri($group, 'edit'); ?>">Edit</a>
+    <?php if(is_allowed($group, 'edit')):?>
+        <a href="<?php echo record_url($group, 'edit'); ?>">Edit</a>
     <?php endif; ?>
 
-    <?php if(has_permission($group, 'manage')):?>
-        <a href="<?php echo record_uri($group, 'manage'); ?>">Manage</a>
+    <?php if(is_allowed($group, 'manage')):?>
+        <a href="<?php echo record_url($group, 'manage'); ?>">Manage</a>
     <?php endif; ?>    
     
     <p class='groups-type'>Type: <?php echo groups_group('visibility'); ?>
@@ -26,7 +25,7 @@ head(array());
 
     <!--  Members list -->
     <?php $members = groups_get_memberships($group); ?>
-    <h2>Members (<?php echo groups_member_count($group); ?>)</h2>
+    <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
     <?php $owner = $group->findOwner(); ?>
     <?php if($owner->name) {
         $name = $owner->name;
@@ -35,40 +34,39 @@ head(array());
     }     
     ?>
     <p id='groups-owner'>Owner: <?php echo $name; ?></p>
-    <?php if(has_permission($group, 'items')): ?>
+    <?php if(is_allowed($group, 'items')): ?>
     <ul class='groups-members'>
         <?php foreach($members as $member): ?>
             <li>
                 <?php  
                     if(plugin_is_active('UserProfiles')) {
-                        user_profiles_link_to_profile($member->User, $member->User->name);
+                        echo $this->linkToOwnerProfile(array('owner'=>$member->User, 'text'=> '(' . metadata($member, 'role') . ')' ));
                     } else {
                         if($member->User->name) {
                             echo $member->User->name;
                         } else {
                             echo $member->User->username;
                         }
-                        
                     }
-                ?>: <?php echo $member->role(); ?>
-            
+                ?>
             </li>        
         <?php endforeach; ?>
     </ul>
     <?php endif; ?>
     
-    
     <!--  Items list -->
     <h2>Items (<?php echo groups_item_count($group); ?>)</h2>
-    <?php if(has_permission($group, 'items')): ?>
+    <?php if(is_allowed($group, 'items')): ?>
         
-        <?php set_items_for_loop(groups_items_for_group()); ?>
-        <?php while(loop_items()): ?>
+        <?php set_loop_records('item', groups_items_for_group()); ?>
+        <?php foreach(loop('item') as $item): ?>
         <div class='groups-item'>
-        <h2><?php echo link_to_item(item('Dublin Core', 'Title'), array('class'=>'permalink')); ?></h2>
+        <h2><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h2>
+            <?php if(plugin_is_active('Sites')): ?>
             <div class="sites-site-title">
-                <p>From <?php echo sites_link_to_site_for_item(); ?></p>
+                <p>From <?php // echo sites_link_to_site_for_item(); ?></p>
             </div>
+            <?php endif; ?>
         <?php if (item_has_thumbnail()): ?>
             <div class="item-img">
                 <?php echo link_to_item(item_square_thumbnail()); ?>
@@ -76,14 +74,10 @@ head(array());
         <?php endif; ?>
             <div class="groups-comments">
                 <?php $item = get_current_item(); ?>
-                <?php $comments = groups_comments_for_group($group, $item); ?>
-                <?php commenting_echo_comments(array('approved'=>true), $comments)?>
+                <?php echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
             </div>
         </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     <?php endif; ?>
-    <?php commenting_echo_comment_form(); ?>
-
-
-
-<?php foot(); ?>
+</div>
+<?php echo foot(); ?>

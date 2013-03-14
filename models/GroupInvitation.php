@@ -1,6 +1,6 @@
 <?php
 
-class GroupInvitation extends Omeka_Record
+class GroupInvitation extends Omeka_Record_AbstractRecord
 {
     public $id;
     public $user_id;

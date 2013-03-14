@@ -1,25 +1,25 @@
 <?php
 
-class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
+class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Interface
 {
     public $id;
     public $title;
     public $description;
     public $visibility;    
 
-    protected $_related = array('Tags' => 'getTags');
+    protected $_related = array('Tags' => 'getTags', 'Items'=>'getItems');
 
     protected function _initializeMixins()
     {
-        $this->_mixins[] = new Taggable($this);
-        $this->_mixins[] = new Ownable($this);
+        $this->_mixins[] = new Mixin_Tag($this);
+        $this->_mixins[] = new Mixin_Owner($this);
     }
 
     public function addMember($user, $pending = 0, $role = null)
     {
         $count = $this->getDb()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'user_id'=>$user->id));
         if($count == 0) {
-            $membership = new GroupMembership;
+            $membership = new GroupMembership();
             $membership->unsetOptions();
             $membership->user_id = $user->id;
             $membership->group_id = $this->id;
@@ -49,7 +49,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function removeMember($user)
     {
         if($user instanceof User) {
-            $membership = $this->findMembership($user);
+            $membership = $this->getMembership($user);
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }        
@@ -59,7 +59,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function approveMember($user)
     {
         if($user instanceof User) {
-            $membership = $this->findMembership($user);
+            $membership = $this->getMembership($user);
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }
@@ -71,7 +71,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function denyMembership($user)
     {
         if($user instanceof User) {
-            $membership = $this->findMembership($user);
+            $membership = $this->getMembership($user);
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }        
@@ -94,14 +94,14 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     public function removeItem($item)
     {
-        $params = $this->buildProps($item, DCTERMS, 'references');
+        $params = $this->buildParams($item, DCTERMS, 'references');
         $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);        
         $rel->delete();
     }
 
     public function setRelationPublic($record, $prefix, $localpart, $public)
     {
-        $params = $this->buildProps($record, $prefix, $localpart);
+        $params = $this->buildParams($record, $prefix, $localpart);
         $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);
         $rel->public = $public;
         $rel->save();
@@ -110,7 +110,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     public function getItems()
     {
         $params = $this->buildParams('Item', DCTERMS, 'references');
-        return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
+        return $this->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
     }
 
     public function hasItem($item)
@@ -120,27 +120,32 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
         } else {
             $itemId = $item->id;
         }
-        $params = $this->buildProps('Item', DCTERMS, 'references');
+        $params = $this->buildParams('Item', DCTERMS, 'references');
         $params['object_id'] = $itemId;
         return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
-    }
-
-    public function getItemCount()
-    {
-        $params = $this->buildProps('Item', DCTERMS, 'references');
-        return get_db()->getTable('RecordRelationsRelation')->count($params);
     }
 
     public function getMembers($sort = array())
     {
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>false), $sort);
+    }    
+
+    public function getProperty($property)
+    {
+        switch($property) {
+            case 'members count':
+                return $this->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>false));
+                break;
+            
+            case 'items count':
+                $params = $this->buildParams('Item', DCTERMS, 'references');
+                return get_db()->getTable('RecordRelationsRelation')->count($params);                
+                break;
+            default: 
+                parent::getProperty($property);
+        }
     }
     
-    public function getMemberCount()
-    {
-        return get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>false));        
-    }
-
     public function hasMember($user)
     {
         if(!$user->id) {
@@ -187,7 +192,7 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
 
     private function newRelation($object, $prefix, $localpart, $public = true)
     {
-        $props = $this->buildProps($object, $prefix, $localpart);
+        $props = $this->buildParams($object, $prefix, $localpart);
         //first, see if the relation already exists
         $record = get_db()->getTable('RecordRelationsRelation')->findOne($props);
         if($record) {
@@ -322,14 +327,13 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
     
     }
     
-    protected function afterSaveForm($post)
+    protected function afterSave($args)
     {
-        //Add the tags after the form has been saved
-        $current_user = Omeka_Context::getInstance()->getCurrentUser();
-        $this->applyTagString($post['tags'], $current_user->Entity, true);
+        $post = $args['post'];
+        $this->applyTagString($post['tags'], ',');
     }
 
-    private function buildProps($record, $prefix, $localpart){
+    private function buildParams($record, $prefix, $localpart){
 
         $pred = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName($prefix, $localpart);
         $params = array();
@@ -357,41 +361,66 @@ class Group extends Omeka_Record implements Zend_Acl_Resource_Interface
      *
      */    
     
-    public function findMembersForNotification($notification)
+    public function getMembersForNotification($notification)
     {
         return get_db()->getTable('GroupMembership')->findUsersForNotification($this, $notification);
     }
     
-    public function findAdmins()
+    public function getMembership($params=array())
     {
-        return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_admin'=>1));
-    }
-    
-    public function findOwner()
-    {
-        $owners =  get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_owner'=>1));
-        return $owners[0];        
-    }
-    
-    public function findOwnerMembership()
-    {
-        $array = get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$this->id, 'is_owner'=>1));
-        return $array[0];        
-    }
-    
-    public function findMembership($user)
-    {
-        if(is_numeric($user)) {
-            $userId = $user;
-        } else {
-            $userId = $user->id;
+        if(!isset($params['group_id'])) {
+            $params['group_id'] = $this->id;
         }
-        $array = get_db()->getTable('GroupMembership')->findBy(array('group_id'=>$this->id, 'user_id'=>$userId));
-        return $array[0];
+
+        $array = $this->getTable('GroupMembership')->findBy($params, 1);
+        return isset($array[0]) ? $array[0] : false;
     }
+    
+    public function getMemberships($params)
+    {
+        $this->getTable('GroupMembership')->findBy($params);
+    }
+    
+    public function getBlockedUsers()
+    {
+        return $this->getTable('GroupBlock')->findBy(array('blocker_id'=>$this->id, 'blocker_type'=>'Group'));
+    }
+    
+    public function getComments($record = null) 
+    {
+        
+        $params = array(
+                'subject_record_type' => 'Group',
+                'object_record_type' => 'Comment',
+                'subject_id' => $group->id
+        );
+        //skip filter on membership in group
+        if($record) {
+            $objectParams = array('groups_skip_hook'=>true, 'record_id'=>$record->id, 'record_type'=>get_class($record));
+        } else {
+            $objectParams = array('groups_skip_hook'=>true);
+        }
+        
+        return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), $objectParams);                
+    }    
     
     public function getResourceId()
     {
         return 'Groups_Group';
+    }
+    
+    public static function visibilityText()
+    {
+        switch(metadata($self, 'visibility')) {
+            case 'open':
+                return " -- Anyone may join and see all items";
+                break;
+            case 'public':
+                return " -- Anyone can see items, but approval is required to join";
+                break;
+            case 'closed':
+                return " -- Approval is required to join; items only visible to members";
+                break;
+        }        
     }
 }

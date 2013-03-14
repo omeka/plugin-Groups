@@ -1,5 +1,5 @@
 <?php
-head(array());
+echo head(array('title'=>'Group Invitations'));
 ?>
 <?php include 'groups-manage-tabs.php' ; ?>
 
@@ -30,4 +30,4 @@ head(array());
 </form>
 <?php endif; ?>
 </div>
-<?php foot(); ?>
+<?php echo foot(); ?>

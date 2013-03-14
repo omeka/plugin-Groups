@@ -1,6 +1,6 @@
 <?php
 
-class GroupMembership extends Omeka_Record
+class GroupMembership extends Omeka_Record_AbstractRecord
 {
     public $id;
     public $group_id;
@@ -33,15 +33,24 @@ class GroupMembership extends Omeka_Record
         $this->notify_item_deleted = true;
     }
     
-    public function role()
+    public function getProperty($property)
     {
-        if($this->is_owner) {
-            return 'Owner';
+        switch($property) {
+            case 'role':
+                if($this->is_owner) {
+                    return 'Owner';
+                }
+                if($this->is_admin) {
+                    return 'Admin';
+                }
+                return 'Member';                
+                break;
+            
+            default:
+                parent::getProperty($property);
         }
-        if($this->is_admin) {
-            return 'Admin';
-        }
-        return 'Member';
+        
+        
     }
     
     public function getGroup()
