@@ -1,4 +1,5 @@
 <?php if($user_membership->is_owner): ?>
+    <?php $memberships = $group->getMemberships(); ?>
     <?php if(count($memberships) > 1): ?>
         <p>You are the owner of this group. You can transfer ownership below.</p>
     <?php endif;?>
@@ -25,8 +26,8 @@
     <?php endif; ?>
 
 <?php else: ?>
-    <?php $role = $user_membership->role(); ?>
-    <p>Role: <?php echo $role ?></p>
+    <?php $role = metadata($user_membership, 'role'); ?>
+    <p>Role: <?php echo $role  ?></p>
     <?php if($role == 'Admin'): ?>
         <input type='checkbox' value='decline' name="groups[<?php echo $group->id ?>][admin]" />Stop being an admin
     <?php endif; ?>

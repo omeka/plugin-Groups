@@ -1,8 +1,9 @@
 <?php
 echo head(array('title'=>'Group Invitations'));
 ?>
-<?php include 'groups-manage-tabs.php' ; ?>
-
+<?php 
+echo $this->partial('groups-navigation.php');
+?>
 
 <div id='primary'>
 <?php if(empty($groups)) :?>

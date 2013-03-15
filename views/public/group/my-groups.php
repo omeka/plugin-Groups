@@ -1,13 +1,19 @@
 <?php
-head(array('title'=>'My Groups'));
+echo head(array('title'=>'My Groups'));
 ?>
-<?php include 'groups-manage-tabs.php' ; ?>
+
+<?php 
+echo $this->partial('groups-navigation.php');
+?>
+
+
+<?php echo flash(); ?>
+
 <div id='primary'>
     <form method="post">
     <?php if(!(empty($groups) && empty($invitations))) :?>
         <button>Submit</button>
     <?php endif; ?>
-    <?php if(count($invitations) != 0): ?>
         <h2>Invitations</h2>
         <?php foreach($invitations as $invitation):  ?>            
         <div class='groups-group'>    
@@ -34,16 +40,13 @@ head(array('title'=>'My Groups'));
             </div>
         </div>        
         <?php endforeach; ?>        
-    <?php endif; ?>
     <h2>My Groups</h2>
     <?php if(empty($groups)) : ?>
     <p>You are not a member of any groups. Why not <a href="<?php echo url('groups/browse'); ?>">browse for interesting groups</a>?</p>
     <?php endif; ?>
-    <?php while(loop_records('groups', $groups, 'groups_set_current_group')):  ?>
-    
+    <?php foreach(loop('groups') as $group): ?>
     <div class='groups-group'>
-        <?php $group = groups_get_current_group(); ?>
-        <?php $user_membership = groups_get_membership(); ?>
+        <?php $user_membership = $group->getMembership(array('user_id' => current_user()->id));?>
         <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
 
         
@@ -57,7 +60,7 @@ head(array('title'=>'My Groups'));
             <?php include('notifications-admin.php'); ?>
         </div>        
     </div>
-    <?php endwhile; ?>
+    <?php endforeach; ?>
     <?php if(!(empty($groups) && empty($invitations))) :?>
         <button>Submit</button>
     <?php endif; ?>

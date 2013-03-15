@@ -1,3 +1,18 @@
+
+#section-nav, #section-nav ul {
+    font-family: "Arvo",sans-serif;
+    list-style-type: none;
+    margin: -20px 0 16px;
+    padding: 0;
+}
+
+
+#section-nav li {
+    display: inline-block;
+}
+
+
+
 label.groups {
     display: inline;
 }

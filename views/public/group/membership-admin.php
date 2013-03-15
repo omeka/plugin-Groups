@@ -1,8 +1,7 @@
 
 <div>
 <?php 
-
-$memberships = groups_get_memberships($group, true);
+$memberships = $group->getMemberships();
 foreach($memberships as $membership):
 ?>
     <?php 
@@ -46,9 +45,5 @@ foreach($memberships as $membership):
                 <?php endif;?>
             </div>
         </div>
-    
 <?php endforeach; ?>
-
-
-            
 </div>

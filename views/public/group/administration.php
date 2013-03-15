@@ -1,7 +1,9 @@
 <?php
 echo head(array('title'=>'Administer Groups'));
 ?>
-<?php include 'groups-manage-tabs.php' ; ?>
+<?php 
+echo $this->partial('groups-navigation.php');
+?>
 
 <div id='primary'>
 <?php if(empty($groups)) :?>
@@ -10,11 +12,9 @@ echo head(array('title'=>'Administer Groups'));
 <form method="post">
     <?php foreach(loop('groups') as $group):  ?>    
         <div class='groups-group'>
-            <?php $group = groups_get_current_group(); ?>
-            <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
-
+            <h3><?php echo link_to($group, 'show', $group->title); ?></h3>
             <?php include('membership-admin.php'); ?>
-            <?php $blocked_users = groups_get_blocked_users($group); ?>
+            <?php $blocked_users = $group->getBlockedUsers(); ?>
             <?php if(!empty($blocked_users)): ?>
             <h4>Blocked Users</h4>
             <?php include('group-blocks-admin.php');?>

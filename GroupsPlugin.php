@@ -19,6 +19,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array(
         'define_action_contexts',
         'guest_user_widgets',
+        'guest_user_links'
       //  'blocks_notifications'
     );
 
@@ -513,16 +514,25 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         return $html;
     }
 
+    public function filterGuestUserLinks($nav)
+    {
+        $nav['Groups'] = array('label'=>'My Groups',
+                'uri'=> url('groups/my-groups')
+        );
+        
+        return $nav;        
+    }
+    
     public function filterGuestUserWidgets($widgets)
     {
         $user = current_user();
         $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $widget = array('label' => 'Groups');
-        $widget['content'] = "<p><a href='" . uri('groups/add') . "'>Add a group</a></p>";
-        $widget['content'] .= "<p><a href='" . uri('groups/my-groups') . "'>Manage your groups</a></p>";
+        $widget['content'] = "<p><a href='" . url('groups/add') . "'>Add a group</a></p>";
+        $widget['content'] .= "<p><a href='" . url('groups/my-groups') . "'>Manage your groups</a></p>";
         foreach($groups as $group) {
             $widget['content'] .= "<h3>";
-            $widget['content'] .= groups_link_to_group($group);
+            $widget['content'] .= link_to($group);
             $widget['content'] .= "</h3>";
         }
         $widgets[] = $widget;
