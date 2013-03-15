@@ -6,6 +6,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public $title;
     public $description;
     public $visibility;    
+    public $owner_id;
 
     protected $_related = array('Tags' => 'getTags', 'Items'=>'getItems');
 
@@ -133,11 +134,11 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function getProperty($property)
     {
         switch($property) {
-            case 'members count':
+            case 'members_count':
                 return $this->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>false));
                 break;
             
-            case 'items count':
+            case 'items_count':
                 $params = $this->buildParams('Item', DCTERMS, 'references');
                 return get_db()->getTable('RecordRelationsRelation')->count($params);                
                 break;
@@ -376,9 +377,13 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         return isset($array[0]) ? $array[0] : false;
     }
     
-    public function getMemberships($params)
+    public function getMemberships($params = array())
     {
-        $this->getTable('GroupMembership')->findBy($params);
+        if(!isset($params['group_id'])) {
+            $params['group_id'] = $this->id;
+        }
+        
+        return $this->getTable('GroupMembership')->findBy($params);
     }
     
     public function getBlockedUsers()
@@ -409,9 +414,9 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         return 'Groups_Group';
     }
     
-    public static function visibilityText()
+    public function visibilityText()
     {
-        switch(metadata($self, 'visibility')) {
+        switch(metadata($this, 'visibility')) {
             case 'open':
                 return " -- Anyone may join and see all items";
                 break;

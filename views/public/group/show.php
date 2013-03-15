@@ -15,8 +15,8 @@ echo head(array('title'=>$group->title));
         <a href="<?php echo record_url($group, 'manage'); ?>">Manage</a>
     <?php endif; ?>    
     
-    <p class='groups-type'>Type: <?php echo groups_group('visibility'); ?>
-    <?php echo groups_group_visibility_text(); ?>
+    <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
+    <?php echo $group->visibilityText(); ?>
     </p>
     <div class='groups-description'><?php echo $group->description; ?></div>
     <div class='groups-tags'>
@@ -24,9 +24,9 @@ echo head(array('title'=>$group->title));
     </div>
 
     <!--  Members list -->
-    <?php $members = groups_get_memberships($group); ?>
+    <?php $memberships = $group->getMemberships(); ?>
     <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
-    <?php $owner = $group->findOwner(); ?>
+    <?php $owner = $group->getOwner(); ?>
     <?php if($owner->name) {
         $name = $owner->name;
     } else {
@@ -36,16 +36,16 @@ echo head(array('title'=>$group->title));
     <p id='groups-owner'>Owner: <?php echo $name; ?></p>
     <?php if(is_allowed($group, 'items')): ?>
     <ul class='groups-members'>
-        <?php foreach($members as $member): ?>
+        <?php foreach($memberships as $membership): ?>
             <li>
                 <?php  
                     if(plugin_is_active('UserProfiles')) {
-                        echo $this->linkToOwnerProfile(array('owner'=>$member->User, 'text'=> '(' . metadata($member, 'role') . ')' ));
+                        echo $this->linkToOwnerProfile(array('owner'=>$membership->User, 'text'=> '(' . metadata($membership, 'role') . ')' ));
                     } else {
-                        if($member->User->name) {
-                            echo $member->User->name;
+                        if($membership->User->name) {
+                            echo $membership->User->name;
                         } else {
-                            echo $member->User->username;
+                            echo $membership->User->username;
                         }
                     }
                 ?>
@@ -55,10 +55,9 @@ echo head(array('title'=>$group->title));
     <?php endif; ?>
     
     <!--  Items list -->
-    <h2>Items (<?php echo groups_item_count($group); ?>)</h2>
+    <h2>Items (<?php echo metadata($group, 'items_count'); ?>)</h2>
     <?php if(is_allowed($group, 'items')): ?>
         
-        <?php set_loop_records('item', groups_items_for_group()); ?>
         <?php foreach(loop('item') as $item): ?>
         <div class='groups-item'>
         <h2><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h2>

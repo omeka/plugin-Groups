@@ -88,7 +88,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         }                                
 
         if(get_class($resource) == 'Group') {
-            $membership = groups_get_membership($resource, $role);
+            $membership = $resource->getMembership(array('user'=>$role));
+           // $membership = groups_get_membership($resource, $role);
             $blockTable = $db->getTable('GroupBlock');
             if($role->id) {
                 $blockParams = array(

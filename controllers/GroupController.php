@@ -81,7 +81,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         parent::showAction();
         //stuff the items in so they are available to output formats
         if(is_allowed($this->view->group, 'items')) {
-            $items = groups_items_for_group($this->view->group);
+            $items = $this->view->group->getItems();
             $this->view->assign(array('items'=>$items));
         }
     }
