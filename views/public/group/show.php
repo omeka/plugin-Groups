@@ -4,16 +4,10 @@ $this->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_'
 echo head(array('title'=>$group->title));
 ?>
 
+<?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
 
 <div id='primary'>
     <?php echo flash(); ?>
-    <?php if(is_allowed($group, 'edit')):?>
-        <a href="<?php echo record_url($group, 'edit'); ?>">Edit</a>
-    <?php endif; ?>
-
-    <?php if(is_allowed($group, 'manage')):?>
-        <a href="<?php echo record_url($group, 'manage'); ?>">Manage</a>
-    <?php endif; ?>    
     
     <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
     <?php echo $group->visibilityText(); ?>

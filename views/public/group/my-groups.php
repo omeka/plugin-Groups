@@ -1,12 +1,13 @@
 <?php
-echo head(array('title'=>'My Groups'));
+$title = __('My groups');
+echo head(array('title'=>$title));
 ?>
 
 <?php 
 echo $this->partial('groups-navigation.php');
 ?>
 
-
+<h1><?php echo $title; ?></h1>
 <?php echo flash(); ?>
 
 <div id='primary'>
@@ -14,6 +15,7 @@ echo $this->partial('groups-navigation.php');
     <?php if(!(empty($groups) && empty($invitations))) :?>
         <button>Submit</button>
     <?php endif; ?>
+        <?php if(!empty($invitations)): ?>
         <h2>Invitations</h2>
         <?php foreach($invitations as $invitation):  ?>            
         <div class='groups-group'>    
@@ -39,8 +41,8 @@ echo $this->partial('groups-navigation.php');
                                 
             </div>
         </div>        
-        <?php endforeach; ?>        
-    <h2>My Groups</h2>
+        <?php endforeach; ?>
+        <?php endif; ?>
     <?php if(empty($groups)) : ?>
     <p>You are not a member of any groups. Why not <a href="<?php echo url('groups/browse'); ?>">browse for interesting groups</a>?</p>
     <?php endif; ?>

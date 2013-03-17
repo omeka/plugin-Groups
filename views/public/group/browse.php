@@ -16,12 +16,12 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 <h1>Groups</h1>
 <?php foreach(loop('groups') as $group):  ?>
 <div class="hentry">
-<h2><?php echo groups_link_to_group(); ?></h2>
-<p class='groups-type'>Type: <?php echo groups_group('visibility'); ?>
-<?php echo groups_group_visibility_text(); ?>
+<h2><?php echo link_to($group, 'show', $group->title); ?></h2>
+<p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
+<?php echo $group->visibilityText(); ?>
 </p>
 <h3>Description</h3>
-<div class='groups-description'><?php echo groups_group('description'); ?></div>
+<div class='groups-description'><?php echo $group->description; ?></div>
 
 <?php $group_tags = groups_tags_list_for_group($group); ?>
 
@@ -32,8 +32,8 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 </div>
 <?php endif;?>
 
-<p id='groups-member-count'>Members: <?php echo groups_member_count($group); ?></p>
-<p id='groups-item-count'>Items: <?php echo groups_item_count($group); ?></p>
+<p id='groups-member-count'>Members: <?php echo metadata($group, 'members_count'); ?></p>
+<p id='groups-item-count'>Items: <?php echo metadata($group, 'items_count'); ?></p>
 </div>
 <?php endforeach; ?>
 

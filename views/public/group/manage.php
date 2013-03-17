@@ -1,21 +1,18 @@
 <?php
-echo head(array('title'=> 'Manage' . $group->title));
+echo head(array('title'=> 'Manage ' . $group->title));
 ?>
 
+<?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
 
 <div id='primary'>
 <?php echo flash(); ?>
-<a href="<?php echo record_url($group, 'show'); ?>">Back</a>
 
 <form method="post">
-
     <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
-
     <h2>Membership and Role</h2>
     <div>
         <?php include('role-admin.php'); ?>
     </div>
-
 
 <?php if(is_allowed($group, 'administration')): ?>
     <h2>Administer Members</h2>    

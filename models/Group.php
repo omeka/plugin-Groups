@@ -14,6 +14,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         $this->_mixins[] = new Mixin_Tag($this);
         $this->_mixins[] = new Mixin_Owner($this);
+        $this->_mixins[] = new Mixin_Search($this);
     }
 
     public function addMember($user, $pending = 0, $role = null)
@@ -142,8 +143,12 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
                 $params = $this->buildParams('Item', DCTERMS, 'references');
                 return get_db()->getTable('RecordRelationsRelation')->count($params);                
                 break;
+                
+            case 'visibility':
+                return ucfirst($this->visibility);
+                break;
             default: 
-                parent::getProperty($property);
+                return parent::getProperty($property);
         }
     }
     
@@ -207,29 +212,29 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
 
     public function sendPendingMemberEmail($user, $to=null)
     {
-        $subject = "A new member wants to join {$this->title} on " . settings('site_title');
+        $subject = "A new member wants to join {$this->title} on " . get_option('site_title');
         $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
         $this->sendEmails($to, $subject, $body);        
     }
     
     public function sendNewMemberEmail($user, $to=null)
     {
-        $subject = "A new member has joined {$this->title} on " . settings('site_title');
-        $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
+        $subject = "A new member has joined {$this->title} on " . get_option('site_title');
+        $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . get_option('site_title');
         $this->sendEmails($to, $body, $subject);     
     }
 
     public function sendMemberLeftEmail($user, $to=null)
     {
-        $subject = "A member has left {$this->title} on " . settings('site_title');
-        $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on" . settings('site_title');
+        $subject = "A member has left {$this->title} on " . get_option('site_title');
+        $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on" . get_option('site_title');
         $this->sendEmails($to, $body, $subject);                
     }
 
     public function sendNewItemEmail($item, $to = null, $user)
     {
-        $subject = "A new item has been added to {$this->title} on " . settings('site_title');
-        $body = "{$user->name} ({$user->username}) has added an item to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . settings('site_title');
+        $subject = "A new item has been added to {$this->title} on " . get_option('site_title');
+        $body = "{$user->name} ({$user->username}) has added an item to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . get_option('site_title');
         $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
         $this->sendEmails($to, $body, $subject);
     }
@@ -270,8 +275,8 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     
     public function sendInvitationEmail($to, $message, $sender)
     {
-        $subject = "An invitation to join the group '{$this->title}' on " . settings('site_title');
-        $body = "<p>{$sender->name} has invited you to join the group {$this->title} on " . settings('site_title');
+        $subject = "An invitation to join the group '{$this->title}' on " . get_option('site_title');
+        $body = "<p>{$sender->name} has invited you to join the group {$this->title} on " . get_option('site_title');
         $body .= "<p>Here's their message</p>";
         $body .= "<p>$message</p>";
         $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
@@ -305,7 +310,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         
         $mail = new Zend_Mail();
         $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
-        $mail->setFrom(get_option('administrator_email'), settings('site_title'));
+        $mail->setFrom(get_option('administrator_email'), get_option('site_title'));
         $mail->addTo($email);
         $mail->setSubject($subject);
         $mail->setBodyHtml($body);        
@@ -325,13 +330,14 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         } else {
             $this->sendEmail($to, $body, $subject);
         }
-    
     }
-    
+
     protected function afterSave($args)
     {
         $post = $args['post'];
         $this->applyTagString($post['tags'], ',');
+        $this->setSearchTextTitle($this->title);
+        $this->addSearchText($this->description);
     }
 
     private function buildParams($record, $prefix, $localpart){
@@ -417,13 +423,13 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function visibilityText()
     {
         switch(metadata($this, 'visibility')) {
-            case 'open':
+            case 'Open':
                 return " -- Anyone may join and see all items";
                 break;
-            case 'public':
+            case 'Public':
                 return " -- Anyone can see items, but approval is required to join";
                 break;
-            case 'closed':
+            case 'Closed':
                 return " -- Approval is required to join; items only visible to members";
                 break;
         }        

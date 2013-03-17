@@ -1,10 +1,13 @@
 <?php
+$title = __('Group invitations');
 echo head(array('title'=>'Group Invitations'));
 ?>
 <?php 
 echo $this->partial('groups-navigation.php');
 ?>
 
+<h1><?php echo $title; ?></h1>
+<?php echo flash(); ?>
 <div id='primary'>
 <?php if(empty($groups)) :?>
 <p>You do not have permission to invite people to any of your groups.</p>

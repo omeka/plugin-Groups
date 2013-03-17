@@ -16,7 +16,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
 
     public function indexAction()
     {
-        $this->redirect->goto('groups/browse');
+        $this->_helper->redirector->goto('groups/browse');
     }
 
     public function browseAction()
@@ -52,24 +52,22 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 $this->_helper->flashMessenger($group->getErrors());
             }
         }        
-    
     }
     
     public function editAction()
     {
         require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
         $form = new GroupForm();
-        $this->view->form = $form;
-        $group = $this->findById();
+        $group = $this->_helper->db->findById();
         $defaults = $group->toArray();
         $defaults['tags'] = groups_tags_string_for_group($group, false);
         $form->setDefaults($defaults);
         $this->view->form = $form;
-    
-        if(!empty($_POST)) {
-            $currUser = current_user();
-            $group->saveForm($_POST);
-            $this->redirect->gotoUrl('/groups/show/' . $group->id );
+        $this->view->group = $group;    
+        if($this->getRequest()->isPost()) {
+            $group->setPostData($_POST);
+            $group->save();
+            $this->_helper->redirector->gotoUrl('/groups/show/' . $group->id );
         }
     }
 
@@ -107,11 +105,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             $this->handleMembershipStatus();
             $this->handleAdministration();
             $this->handleUnblocks();
-            $this->redirect->gotoUrl('groups/show/' . $group->id);            
+            $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);            
         }
         $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
         $this->view->group = $group;
-        $this->view->user_membership = groups_get_membership($group);
+        $this->view->user_membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
     
     public function joinAction()
@@ -129,7 +127,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $group->addMember($user);
         $this->_helper->json($response);
     }
-
 
     public function quitAction()
     {
@@ -177,7 +174,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $this->_helper->json($response);
     }
 
-
     public function approveRequestAction()
     {
         $userId = $_POST['userId'];
@@ -191,7 +187,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $group->sendMemberApprovedEmail($user);
         $this->_helper->json($response);
     }
-
 
     public function removeMemberAction()
     {
@@ -210,7 +205,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $commentId = $this->getRequest()->getParam('comment');
         $group = $this->findById();
         $group->removeComment($commentId);     
-        $this->redirect->gotoUrl('groups/show/' . $group->id);   
+        $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);   
     }
 
     public function myGroupsAction()
@@ -268,7 +263,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 }
                 $invitation->delete();
             }
-            
         }
 
         $this->handleMembershipStatus();
@@ -460,7 +454,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             $nonUserEmails = array();
             $alreadyMemberEmails = array();
             foreach($_POST['invite_groups'] as $groupId) {             
-                $group = $this->getTable()->find($groupId);
+                $group = $this->_helper->db->getTable()->find($groupId);
                 $groupEmails = array();
                 foreach($emails as $index=>$email) {
                     $email = trim($email);        
@@ -474,11 +468,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                         $user = $userTable->fetchObject($select);                        
                     }
                     if($user) {
-                        if($group->hasMember($user)) {         
-                            $this->flashError("{$user->name} ({$user->username}) is already a member of {$group->title}.");                            
+                        if($group->hasMember($user)) {
+                            $this->_helper->flashMessenger("{$user->name} ({$user->username}) is already a member of {$group->title}.", 'error');     
                         } else {
                             if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
-                                $this->flashError("You have already invited {$user->name} ({$user->username}) to {$group->title}");
+                                $this->_helper->flashMessenger("You have already invited {$user->name} ({$user->username}) to {$group->title}", 'error');
                             } else {                
                                 $userBlocks = $blocksTable->count(array('blocker_id'=>$user->id, 
                                                                         'blocked_id'=>$sender->id, 
@@ -498,35 +492,34 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                     $groupEmails[] = $email;
                                 }
                                 if($userBlocks) {
-                                    $this->flashError("{$user->name} has blocked invitations from you");
+                                    $this->_helper->flashMessenger("{$user->name} has blocked invitations from you", 'error');
                                 }
                                 if($groupBlocks) {
-                                    $this->flashError("{$user->name} has blocked invitations from {$group->title}");
+                                    $this->_helper->flashMessenger("{$user->name} has blocked invitations from {$group->title}", 'error');
                                 }
                             }
                         }
         
                     } else {
                         $nonUserEmails[] = $email;
-                        $this->flashError($email . " is not a member of the Omeka Commons.");
+                        $this->_helper->flashMessenger($email . " is not a member of the Omeka Commons.", 'error');
                         unset($emails[$index]);
                     }
                 }
                 $groupEmailsCount = count($groupEmails);
                 if($groupEmailsCount==0) {
-                    $this->flashSuccess('No invitations sent to ' . $group->title);
+                    $this->_helper->flashMessenger('No invitations sent to ' . $group->title, 'success');
                 } else {
                     try {
                         $group->sendInvitationEmail($groupEmails, $message, $sender);
-                        $this->flashSuccess($groupEmailsCount . " invitation(s) to {$group->title} sent");
+                        $this->_helper->flashMessenger($groupEmailsCount . " invitation(s) to {$group->title} sent", 'success');
                     } catch(Exception $e) {
                         _log($e);
-                        $this->flashError("Couldn't send email");
+                        $this->_helper->flashMessenger("Couldn't send email", 'error');
                     }
                 }
             }
         }
-        
     }
     
     private function handleMembershipStatus()
@@ -598,6 +591,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
         }        
     }
+    
     private function handleUnblocks()
     {
         
@@ -613,9 +607,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 $block = $blocks[0];
                 $block->delete();
             }
-            
-            
         }
-        
     }
 }

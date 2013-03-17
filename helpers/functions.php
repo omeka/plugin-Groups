@@ -12,7 +12,7 @@ function groups_tags_list_for_group($group = null)
     if(!$group) {
         $group = groups_get_current_group();
     }
-    $tags = groups_tags_for_group($group);
+    $tags = $group->Tags;
     $html = "<ul class='tags'>";
     foreach($tags as $tag) {
         $html .= "<li>{$tag->name}</li>";
@@ -32,7 +32,9 @@ function groups_tags_string_for_group($group, $uri = true)
 {
     $tags = $group->Tags;
     if($uri) {
-        $link = url('groups/browse?tags=');
+        $link = 'groups/browse';
+    } else {
+        $link = null;
     }
     return tag_string($tags, $link);
 }
