@@ -22,6 +22,8 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function browseAction()
     {        
         $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
+        //$view->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
+        $this->view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
         $this->view->tags = $tags;
         parent::browseAction();
     }

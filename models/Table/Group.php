@@ -10,7 +10,11 @@ class GroupTable extends Omeka_Db_Table
             $this->filterBySearch($select, $params['groupsSearch']);
         }
 
-        if (isset($params['tags'])) {
+        if (isset($params['tag'])) {
+            $this->filterByTags($select, $params['tag']);
+        }
+        
+        if(isset($params['tags'])) {
             $this->filterByTags($select, $params['tags']);
         }
 
@@ -46,10 +50,12 @@ class GroupTable extends Omeka_Db_Table
         $db = $this->getDb();
         //copied from ItemTable::filterByTags
         foreach ($tags as $tagName) {
+            
             $subSelect = new Omeka_Db_Select;
-            $subSelect->from(array('taggings'=>$db->Taggings), array('id'=>'taggings.relation_id'))
-                ->joinInner(array('tag'=>$db->Tag), 'tag.id = taggings.tag_id', array())
-                ->where('tag.name = ? AND taggings.`type` = "Group"', trim($tagName));
+            $subSelect->from(array('records_tags'=>$db->RecordsTags), array('items.id'=>'records_tags.record_id'))
+            ->joinInner(array('tags'=>$db->Tag), 'tags.id = records_tags.tag_id', array())
+            ->where('tags.name = ? AND records_tags.`record_type` = "Group"', trim($tagName));
+            $select->where('groups.id IN (' . (string) $subSelect . ')');            
         }
         $select->where('groups.id IN (' . (string) $subSelect . ')');
     }

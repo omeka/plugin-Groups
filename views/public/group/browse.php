@@ -1,15 +1,16 @@
 <?php
 echo head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
+
 ?>
 
+<?php echo $this->partial('group-manage-nav.php'); ?>
+
+<?php echo $this->groupSearchFilters(); ?>
 
 <div id='primary'>
-<?php if(is_allowed('Groups_Group', 'add')): ?>
-<p><a href='<?php echo url('/groups/add'); ?>'>Add a group</a></p>
-<?php endif; ?>
 
 <h1>All Tags</h1>
-<?php echo tag_cloud($this->tags, 'browse'); ?>
+<?php echo tag_cloud($this->tags, 'groups/browse'); ?>
 
 <div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
 <div style="clear:left;"></div>
