@@ -11,6 +11,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'define_acl',
         'define_routes',
         'public_head',
+        'public_items_show',
         //'admin_navigation_main',
         'commenting_append_to_form',
         'comment_browse_sql'
@@ -187,13 +188,20 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         record_relations_delete_relations(array('subject_record_type'=>'Group'));
     }
 
-    public function hookPublicHead()
+    public function hookPublicHead($args)
     {
+        $view = $args['view'];
+        $view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
         queue_js_file('groups');
         queue_css_file('groups');
         queue_js_file('tiny_mce', 'javascripts/vendor/tiny_mce');
     }
 
+    public function hookPublicItemsShow($args)
+    {
+        $view = $args['view'];
+        echo $view->groupAddItem();
+    }
 
     public function hookDefineAcl($args)
     {

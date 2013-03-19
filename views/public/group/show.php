@@ -5,15 +5,16 @@ echo head(array('title'=>$group->title));
 ?>
 
 <?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
-
+<?php echo flash(); ?>
 <div id='primary'>
-    <?php echo flash(); ?>
     
+    <h1><?php echo $group->title;?></h1>
     <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
     <?php echo $group->visibilityText(); ?>
     </p>
     <div class='groups-description'><?php echo $group->description; ?></div>
     <div class='groups-tags'>
+        <h2>Tags</h2>
         <?php echo groups_tags_string_for_group($group); ?>            
     </div>
 
