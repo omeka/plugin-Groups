@@ -14,7 +14,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
             return;
         }
         $html = "<div class='groups-add-item'>";
-        $html .= "<h2>Add " . metadata($this->_item, array('Dublin Core', 'Title')) . " to groups</h2>";
+        $html .= "<h2>" . metadata($this->_item, array('Dublin Core', 'Title')) . " in your groups</h2>";
         $html .= "<ul id='groups-add-item'>";
         foreach($this->_groups as $group) {
             if($group->hasItem($this->_item)) {

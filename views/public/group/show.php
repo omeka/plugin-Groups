@@ -62,14 +62,10 @@ echo head(array('title'=>$group->title));
                 <p>From <?php // echo sites_link_to_site_for_item(); ?></p>
             </div>
             <?php endif; ?>
-        <?php if (item_has_thumbnail()): ?>
-            <div class="item-img">
-                <?php echo link_to_item(item_square_thumbnail()); ?>
-            </div>
-        <?php endif; ?>
+        <?php echo item_image_gallery(); ?>
             <div class="groups-comments">
-                <?php $item = get_current_item(); ?>
-                <?php echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
+                <?php $item = get_current_record('item'); ?>
+                <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
             </div>
         </div>
         <?php endforeach; ?>

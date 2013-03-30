@@ -206,7 +206,10 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookPublicItemsShow($args)
     {
         $view = $args['view'];
-        echo $view->groupAddItem();
+        if($user = current_user()) {
+            $params = array('user_id'=>$user->id);
+            echo $view->groupAddItem($params);
+        }
     }
     
     public function hookPublicContentTop($args)

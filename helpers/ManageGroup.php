@@ -12,7 +12,6 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
         $user = current_user();
         $html = "<div class='groups-manage-group'>";
         $html .= "<h3>" . __('Manage group ') . metadata($group, 'title') . "</h3>";
-        $html .= "<p class='groups-type'>" . __('Type ') . metadata($group, 'visibility') . "</p>";
         
         if($group->hasMember($user) ) {
             if(is_allowed($group, 'approve-request')) {

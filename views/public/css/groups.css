@@ -19,6 +19,12 @@ label.groups {
 
 li.groups-item-add { cursor: pointer; }
 
+
+li.groups-item-exists:after {
+	content: ' (added)';	
+}
+
+
 .groups-join-button { cursor: pointer; }
 
 
