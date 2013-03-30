@@ -23,6 +23,7 @@ Omeka.Groups = {
     join: function() {
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
+        console.log(groupId);
         jQuery.post(Omeka.webRoot + '/groups/join/' + groupId, null, Omeka.Groups.joinResponse);
     },
 

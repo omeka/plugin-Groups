@@ -80,7 +80,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         }                                
 
         if(get_class($resource) == 'Group') {
-            $membership = $resource->getMembership(array('user'=>$role));
+            $membership = $resource->getMembership(array('user_id'=>$role->id));
            // $membership = groups_get_membership($resource, $role);
             $blockTable = $db->getTable('GroupBlock');
             if($role->id) {
@@ -134,7 +134,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 
                 case 'quit':
                     //don't let owners quit on their flock
-                    if($membership->owner_id == 1) {
+                    if($resource->getOwner()->id == $role->id) {
                         return false;
                     }
                     break;

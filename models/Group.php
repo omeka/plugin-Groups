@@ -51,7 +51,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function removeMember($user)
     {
         if($user instanceof User) {
-            $membership = $this->getMembership($user);
+            $membership = $this->getMembership(array('user_id'=>$user->id));
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }        
@@ -61,7 +61,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function approveMember($user)
     {
         if($user instanceof User) {
-            $membership = $this->getMembership($user);
+            $membership = $this->getMembership(array('user_id'=>$user->id));
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }
@@ -73,7 +73,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function denyMembership($user)
     {
         if($user instanceof User) {
-            $membership = $this->getMembership($user);
+            $membership = $this->getMembership(array('user_id'=>$user->id));
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }        
@@ -378,7 +378,6 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         if(!isset($params['group_id'])) {
             $params['group_id'] = $this->id;
         }
-
         $array = $this->getTable('GroupMembership')->findBy($params, 1);
         return isset($array[0]) ? $array[0] : false;
     }

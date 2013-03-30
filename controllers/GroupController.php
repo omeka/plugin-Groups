@@ -117,7 +117,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function joinAction()
     {
         $user =  current_user();
-        $group = $this->findById();        
+        $group = $this->_helper->db->findById(); 
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
         $to = $group->getMembersForNotification('notify_member_joined');        
@@ -133,7 +133,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function quitAction()
     {
         $user =  current_user();
-        $group = $this->findById();
+        $group = $this->_helper->db->findById();
         $group->removeMember($user);        
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
@@ -151,7 +151,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function requestAction()
     {
         $user =  current_user();
-        $group = $this->findById();
+        $group = $this->_helper->db->findById();
         try {
             $group->addMember($user, 1);
             $responseArray = array('status'=>'ok');
@@ -170,7 +170,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
 
     public function joinOthersAction($user)
     {
-        $group= $this->findById();
+        $group= $this->_helper->db->findById();
         $group->addMember($user);
         $response = array('status'=>'ok');
         $this->_helper->json($response);
@@ -194,7 +194,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     {
         $userId = $this->getRequest()->getParam('user');
         $user = get_db()->getTable('User')->find($userId);
-        $group= $this->findById();
+        $group= $this->_helper->db->findById();
         $group->removeMember($user);
         $response = array('status'=>'ok');        
         $to = $group->getMembersForNotification('notify_member_left');
@@ -205,7 +205,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function removeCommentAction()
     {
         $commentId = $this->getRequest()->getParam('comment');
-        $group = $this->findById();
+        $group = $this->_helper->db->findById();
         $group->removeComment($commentId);     
         $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);   
     }
@@ -218,8 +218,10 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         );     
 
         if(!empty($_POST['blocks'])) {
+            $groupInvitationTable = $this->_helper->db->getTable('GroupInvitation');
             foreach($_POST['blocks'] as $id=>$values) {
-                $invitation = $this->findById($id, 'GroupInvitation');
+                
+                $invitation = $groupInvitationTable->find($id);
                 foreach($values as $value) {
                     switch($value) {
                         case 'block-user':
@@ -244,9 +246,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
         }        
         
-        if(!empty($_POST['invitations'])) {      
+        if(!empty($_POST['invitations'])) {
+            $groupInvitationTable = $this->_helper->db->getTable('GroupInvitation');
             foreach($_POST['invitations'] as $id=>$value) {
-                $invitation = $this->findById($id, 'GroupInvitation');
+                
+                $invitation = $groupInvitationTable->find($id);
                 switch($value) {
                     case 'join':
                         $invitation->Group->addMember($user);
@@ -319,14 +323,15 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     
     private function handleAdministration()
     {
-        $confirmationTable = get_db()->getTable('GroupConfirmation');
+        $confirmationTable = $this->_helper->db->getTable('GroupConfirmation');
         $user = current_user();
         $blockTable = $this->_helper->db->getTable('GroupBlock');
+        $groupMembershipTable = $this->_helper->db->getTable('GroupMembership');
         if(!empty($_POST)) {
             if(isset($_POST['block'])) {
                 foreach($_POST['block'] as $groupId=>$memberships) {
                     foreach($memberships as $membershipId=>$action) {
-                        $membership = $this->findById($membershipId, 'GroupMembership');
+                        $membership = $groupMembershipTable->find($membershipId);
                         switch($action) {
                             case 'block':
                                 $block = new GroupBlock;
@@ -354,9 +359,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
             if(isset($_POST['membership'])) {                
                 foreach($_POST['membership'] as $groupId=>$memberships) {
-                    $group = $this->findById($groupId);
+                    $group = $this->_helper->db->findById($groupId);
                     foreach($memberships as $membershipId=>$action) {                       
-                        $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
+                        $membership = $groupMembershipTable->find($membershipId);
                         switch($action) {
                             case 'remove':
                                 $group->removeMember($membership);
@@ -529,7 +534,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         if(!empty($_POST['groups'])) {
         
             foreach($_POST['groups'] as $id=>$options) {                
-                $group = $this->findById($id);
+                $group = $this->_helper->db->findById($id);
                 $membership = groups_get_membership($group);
                 $membership->unsetOptions();
                 foreach($options as $option=>$value) {

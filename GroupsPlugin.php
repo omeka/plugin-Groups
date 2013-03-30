@@ -565,15 +565,22 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function filterPublicNavigationMain($nav)
     {
+        $nav['Browse Groups'] = array('label'=>__('Browse Groups'), 'uri'=>url('groups/browse'));
+        
         if($user = current_user()) {
             $groups = groups_groups_for_user($user);
             $nav['Groups'] = array('label'=>__('My Groups'),
                     'uri'=> url('groups/my-groups'),
                     'pages' => array()
             );
-            foreach($groups as $group) {
-                $nav['Groups']['pages'][text_to_id($group->id, 'group')] = array('label'=>metadata($group, 'title'), 'uri'=>record_url($group, 'show'));
+            if(empty($groups)) {
+                $nav['Groups']['pages'][] = array('label'=> __('Create a group'), 'uri'=>url('groups/add'));
+            } else {
+                foreach($groups as $group) {
+                    $nav['Groups']['pages'][text_to_id($group->id, 'group')] = array('label'=>$group->title, 'uri'=>record_url($group, 'show'));
+                }                
             }
+
         }
         return $nav;    
     }
