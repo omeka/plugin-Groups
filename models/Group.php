@@ -127,9 +127,9 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
     }
 
-    public function getMembers($sort = array())
+    public function getMembers($sort = array(), $pending = false)
     {
-        return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>false), $sort);
+        return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>$pending), $sort);
     }    
 
     public function getProperty($property)
@@ -176,7 +176,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         return true;
     }
 
-    public function memberRequests()
+    public function getMemberRequests()
     {
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>true));
     }
@@ -235,7 +235,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         $subject = "A new item has been added to {$this->title} on " . get_option('site_title');
         $body = "{$user->name} ({$user->username}) has added an item to the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . get_option('site_title');
-        $body .= "<a href='" . abs_item_uri($item) . "'>" . item('Dublin Core', 'Title', array(), $item) . "</a>";
+        $body .= "<a href='" . absolute_url(link_to($item, 'show', metadata($item, array('Dublin Core', 'Title')))) . "'></a>";
         $this->sendEmails($to, $body, $subject);
     }
 

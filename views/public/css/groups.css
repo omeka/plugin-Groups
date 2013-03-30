@@ -2,8 +2,6 @@
 #section-nav, #section-nav ul {
     font-family: "Arvo",sans-serif;
     list-style-type: none;
-    margin: -20px 0 16px;
-    padding: 0;
 }
 
 
@@ -46,6 +44,7 @@ div.groups-group > h3 {
     float: left;
     width: 90px;
     margin-top: 0;
+    margin-bottom: 3px;
 }
 
 div.group-options {

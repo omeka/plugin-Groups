@@ -120,7 +120,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $group = $this->findById();        
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
-        $to = $group->findMembersForNotification('notify_member_joined');        
+        $to = $group->getMembersForNotification('notify_member_joined');        
         try {
             $group->sendNewMemberEmail($user, $to);
         } catch (Exception $e) {            
@@ -138,7 +138,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
 
-        $to = $group->findMembersForNotification('notify_member_left');
+        $to = $group->getMembersForNotification('notify_member_left');
         try {
             $group->sendMemberLeftEmail($user, $to);
         } catch (Exception $e) {
@@ -197,7 +197,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $group= $this->findById();
         $group->removeMember($user);
         $response = array('status'=>'ok');        
-        $to = $group->findMembersForNotification('notify_member_left');
+        $to = $group->getMembersForNotification('notify_member_left');
         $group->sendMemberLeftEmail($user, $to);
         $this->_helper->json($response);
     }
@@ -250,7 +250,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 switch($value) {
                     case 'join':
                         $invitation->Group->addMember($user);
-                        $to = $invitation->Group->findMembersForNotification('notify_member_joined');
+                        $to = $invitation->Group->getMembersForNotification('notify_member_joined');
                         $invitation->Group->sendNewMemberEmail($user, $to);                            
                         break;
                         
@@ -312,7 +312,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }
         $response = json_encode($responseJson);
         
-        $to = $group->findMembersForNotification('notify_item_new');  
+        $to = $group->getMembersForNotification('notify_item_new');  
         $group->sendNewItemEmail($item, $to, current_user());        
         $this->_helper->json($response);
     }
@@ -360,7 +360,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                         switch($action) {
                             case 'remove':
                                 $group->removeMember($membership);
-                                $to = $group->findMembersForNotification('notify_member_left');
+                                $to = $group->getMembersForNotification('notify_member_left');
                                 $group->sendMemberLeftEmail($membership->User, $to);
                                 break;
         
@@ -372,7 +372,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         
                             case 'approve':
                                 $group->approveMember($membership);
-                                $to = $group->findMembersForNotification('notify_member_joined');
+                                $to = $group->getMembersForNotification('notify_member_joined');
                                 $group->sendNewMemberEmail($membership->User, $to);
                                 break;
                         }
@@ -566,7 +566,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             if($value != 'decline') {
                                 //make the previous owner no longer the owner
                                 if($value == 'is_owner') {
-                                    $owner = $group->findOwnerMembership();
+                                    $owner = $group->getOwnerMembership();
                                     $owner->is_owner = 0;
                                     $owner->is_admin = 1;
                                     $owner->save();

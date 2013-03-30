@@ -2,10 +2,11 @@
 echo head(array('title'=> 'Manage ' . $group->title));
 ?>
 
+<?php echo $this->partial('groups-navigation.php'); ?>
+<h1><?php echo metadata($group, 'title'); ?></h1>
 <?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
-
-<div id='primary'>
 <?php echo flash(); ?>
+<div id='primary'>
 
 <form method="post">
     <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />

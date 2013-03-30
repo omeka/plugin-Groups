@@ -12,6 +12,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'define_routes',
         'public_head',
         'public_items_show',
+        'public_content_top',
         //'admin_navigation_main',
         'commenting_append_to_form',
         'comment_browse_sql'
@@ -20,12 +21,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array(
         'define_action_contexts',
         'guest_user_widgets',
-        'guest_user_links'
+        'guest_user_links',
+        'public_navigation_main',
       //  'blocks_notifications'
     );
 
     public function setUp()
     {
+        //connection to Commenting is for Commons 2.0
         if(plugin_is_active('Commenting')) {
          //   $this->_hooks[] = 'before_save_form_comment';
          //   $this->_hooks[] = 'comment_browse_sql';
@@ -192,6 +195,9 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
+        $js = "if(typeof(Omeka) == 'undefined') {Omeka = {};}";
+        $js .= "if(typeof(Omeka.webRoot) == 'undefined') {Omeka.webRoot = '" . WEB_ROOT . "';}";
+        queue_js_string($js); 
         queue_js_file('groups');
         queue_css_file('groups');
         queue_js_file('tiny_mce', 'javascripts/vendor/tiny_mce');
@@ -201,6 +207,11 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         echo $view->groupAddItem();
+    }
+    
+    public function hookPublicContentTop($args)
+    {
+        // @TODO: used to use UserGroups helper here. check that it is still used before release
     }
 
     public function hookDefineAcl($args)
@@ -527,8 +538,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $nav['Groups'] = array('label'=>'My Groups',
                 'uri'=> url('groups/my-groups')
         );
-        
-        return $nav;        
+        return $nav; 
     }
     
     public function filterGuestUserWidgets($widgets)
@@ -551,5 +561,20 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $contexts['show'] = array('rss2', 'atom');
         return $contexts;
+    }
+    
+    public function filterPublicNavigationMain($nav)
+    {
+        if($user = current_user()) {
+            $groups = groups_groups_for_user($user);
+            $nav['Groups'] = array('label'=>__('My Groups'),
+                    'uri'=> url('groups/my-groups'),
+                    'pages' => array()
+            );
+            foreach($groups as $group) {
+                $nav['Groups']['pages'][text_to_id($group->id, 'group')] = array('label'=>metadata($group, 'title'), 'uri'=>record_url($group, 'show'));
+            }
+        }
+        return $nav;    
     }
 }
