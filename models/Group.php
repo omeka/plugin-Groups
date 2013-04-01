@@ -127,9 +127,12 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         return (bool) get_db()->getTable('RecordRelationsRelation')->count($params);
     }
 
-    public function getMembers($sort = array(), $pending = false)
+    public function getMembers($params = array(), $sort = array())
     {
-        return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>$pending), $sort);
+        if(!isset($params['group_id'])) {
+            $params['group_id'] = $this->id;
+        }
+        return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id), $sort);
     }    
 
     public function getProperty($property)

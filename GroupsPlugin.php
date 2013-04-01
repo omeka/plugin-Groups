@@ -215,6 +215,10 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookPublicContentTop($args)
     {
         // @TODO: used to use UserGroups helper here. check that it is still used before release
+        $view = $args['view'];
+        $html = '';
+        $html .= $view->groupNotifications();
+        echo $html;
     }
 
     public function hookDefineAcl($args)

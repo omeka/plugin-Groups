@@ -104,9 +104,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 $membership->notify_item_deleted = 0;
                 $membership->save();
             }        
-            $this->handleMembershipStatus();
-            $this->handleAdministration();
-            $this->handleUnblocks();
+            $this->_handleMembershipStatus();
+            $this->_handleAdministration();
+            $this->_handleUnblocks();
             $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);            
         }
         $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
@@ -158,7 +158,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         } catch (Exception $e) {
             $responseArray = array('status'=>'error');
         }
-        $to = $group->findAdmins();
+        $to = $group->getMembers(array('is_admin'=>true));
         try {
             $group->sendPendingMemberEmail($user, $to);
         } catch (Exception $e) {
@@ -271,7 +271,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
         }
 
-        $this->handleMembershipStatus();
+        $this->_handleMembershipStatus();
 
         $groups = $this->_helper->db->getTable('Group')->findBy($params);        
         $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));        
@@ -282,8 +282,8 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function administrationAction()
     {
         $user = current_user();
-        $this->handleUnblocks();
-        $this->handleAdministration();
+        $this->_handleUnblocks();
+        $this->_handleAdministration();
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0, 'admin_or_owner'=>true));
         $this->view->groups = $groups;        
     }
@@ -297,7 +297,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 unset($groups[$key]);
             }
         }
-        $this->handleInvitations();
+        $this->_handleInvitations();
         $this->view->groups = $groups;        
     }
     
@@ -321,7 +321,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $this->_helper->json($response);
     }
     
-    private function handleAdministration()
+    private function _handleAdministration()
     {
         $confirmationTable = $this->_helper->db->getTable('GroupConfirmation');
         $user = current_user();
@@ -403,7 +403,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                         if($confirmation->exists()) {
                                             switch($confirmation->type) {
                                                 case 'is_admin':
-                                                    $this->flash("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
+                                                    $this->_helper->flashMessenger("You have already asked {$membership->User->name} to become an administrator of {$membership->Group->title}");
                                                     break;
                                                     //make_admin is when the user requests being made an admin
                                                 case 'make_admin':
@@ -417,7 +417,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                             $confirmation->group_id = $groupId;
                                             $confirmation->membership_id = $membershipId;
                                             $confirmation->type = 'is_admin';                                             
-                                            $this->flash($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
+                                            $this->_helper->flashMessenger($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
                                             $confirmation->save();                                            
                                         }                                     
                                     }
@@ -449,7 +449,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }        
     }
     
-    private function handleInvitations()
+    private function _handleInvitations()
     {
         $sender = current_user();
         if(isset($_POST['emails'])) {
@@ -529,17 +529,15 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }
     }
     
-    private function handleMembershipStatus()
+    private function _handleMembershipStatus()
     {
         if(!empty($_POST['groups'])) {
-        
             foreach($_POST['groups'] as $id=>$options) {                
                 $group = $this->_helper->db->findById($id);
-                $membership = groups_get_membership($group);
+                $membership = $group->getMembership(array('user_id'=>current_user()->id));
                 $membership->unsetOptions();
                 foreach($options as $option=>$value) {
                     switch($option) {
-        
                         case "status":
                             switch($value) {
                                 case 'quit':
@@ -599,7 +597,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }        
     }
     
-    private function handleUnblocks()
+    private function _handleUnblocks()
     {
         
         if(!empty($_POST['unblocks'])) {

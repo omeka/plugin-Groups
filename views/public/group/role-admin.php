@@ -1,3 +1,7 @@
+
+<?php $adminConfirm = groups_role_confirm($group, $user_membership, 'is_admin'); ?>
+<?php $ownerConfirm = groups_role_confirm($group, $user_membership, 'is_owner'); ?>
+<?php $role = metadata($user_membership, 'role'); ?>
 <?php if($user_membership->is_owner): ?>
     <?php $memberships = $group->getMemberships(); ?>
     <?php if(count($memberships) > 1): ?>
@@ -5,15 +9,16 @@
     <?php endif;?>
 <?php else: ?>
     <label class='groups' for="groups[<?php echo $group->id ?>][status]">Membership</label>
-    <input type='checkbox' value='quit' name="groups[<?php echo $group->id ?>][status]" />Leave<br/>  
-    <input type='checkbox' value='make_admin' name="groups[<?php echo $group->id ?>][status]" />Request Admin Privileges<br/>  
+    <input type='checkbox' value='quit' name="groups[<?php echo $group->id ?>][status]" />Leave<br/>
+    <?php if(!$adminConfirm && $role !='Admin'): ?>  
+    <input type='checkbox' value='make_admin' name="groups[<?php echo $group->id ?>][status]" />Request admin privileges<br/>
+    <?php endif; ?>  
 <?php endif; ?>
                 
 
-<?php $adminConfirm = groups_role_confirm($group, $user_membership, 'is_admin'); ?>
-<?php $ownerConfirm = groups_role_confirm($group, $user_membership, 'is_owner'); ?>
 <?php if($adminConfirm || $ownerConfirm ): ?>
-    <label class='groups' for="groups[<?php echo $group->id ?>][role]">Role</label>
+    <label class='groups' for="groups[<?php echo $group->id ?>][role]"><?php echo __('Group role:')?> </label>
+    <span><?php echo $role; ?></span>
     <?php if($adminConfirm) :?>
         <p>An administrator of this group has asked you to become an administrator. Check here to accept.</p>
         <input type='radio' value='is_admin' name="groups[<?php echo $group->id ?>][admin]" />Accept
@@ -26,8 +31,7 @@
     <?php endif; ?>
 
 <?php else: ?>
-    <?php $role = metadata($user_membership, 'role'); ?>
-    <p>Role: <?php echo $role  ?></p>
+    <p><?php echo __('Group role:')?> <?php echo $role  ?></p>
     <?php if($role == 'Admin'): ?>
         <input type='checkbox' value='decline' name="groups[<?php echo $group->id ?>][admin]" />Stop being an admin
     <?php endif; ?>

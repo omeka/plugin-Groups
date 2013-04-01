@@ -1,11 +1,12 @@
 <?php
-$title = __('Administer groups');
+$title = __('Administer group members');
 echo head(array('title'=>$title));
 ?>
 <?php 
 echo $this->partial('groups-navigation.php');
 ?>
 <h1><?php echo $title; ?></h1>
+<?php echo flash(); ?>
 <div id='primary'>
 <?php if(empty($groups)) :?>
 <p>You do not have permission to administer any groups.</p>

@@ -6,9 +6,10 @@ class Table_GroupConfirmation extends Omeka_Db_Table
     public function applySearchFilters($select, $params)
     {
         if(array_key_exists('user_id', $params)) {            
-            $membershipTable = $this->getDb()->getTable('GroupMembership');
+            $db = $this->getDb();
+            $membershipTable = $db->getTable('GroupMembership');
             $mtAlias = $membershipTable->getTableAlias();
-            $select->join(array($mtAlias, $membershipTable),
+            $select->join(array($mtAlias=>$db->GroupMembership),
                            "$mtAlias.id = group_confirmations.membership_id", array()
                             );
             $select->where( "$mtAlias.user_id = {$params['user_id']}");

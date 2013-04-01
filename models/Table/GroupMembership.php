@@ -1,6 +1,6 @@
 <?php
 
-class GroupMembershipTable extends Omeka_Db_Table
+class Table_GroupMembership extends Omeka_Db_Table
 {
     public function applySearchFilters($select, $params)
     {

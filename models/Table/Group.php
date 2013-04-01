@@ -1,6 +1,6 @@
 <?php
 
-class GroupTable extends Omeka_Db_Table
+class Table_Group extends Omeka_Db_Table
 {
     protected $_relationTable;
     

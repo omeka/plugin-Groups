@@ -49,7 +49,7 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
                 ";
                 $html .= "</script>";
             } else {
-                if($group->hasPendingMember($currUser)) {
+                if($group->hasPendingMember($user)) {
                     $html .= "<p class='groups-pending'>Membership request is pending</p>";
         
                 } else {

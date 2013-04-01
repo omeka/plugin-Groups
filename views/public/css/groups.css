@@ -4,12 +4,15 @@
     list-style-type: none;
 }
 
+#groups-section-nav-label {
+	float: left;
+	padding-right: 6px;
+	line-height: 24px;
+}
 
 #section-nav li {
     display: inline-block;
 }
-
-
 
 label.groups {
     display: inline;
@@ -54,14 +57,19 @@ div.groups-group > h3 {
 }
 
 div.group-options {
-    padding-left: 90px;
-    clear:both;
+    padding-left: 120px;
+    position: relative;
+    top: -20px;
 }
 
 
 div.groups-group div.groups-admin-actions {
     padding-left: 90px;
-    padding-top: 20px;
+}
+
+div.groups-admin-actions h4 {
+	margin-bottom: 0;
+	max-width: 110px;
 }
 
 div.groups-group {
