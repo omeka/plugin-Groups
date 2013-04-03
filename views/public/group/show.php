@@ -59,10 +59,10 @@ echo head(array('title'=>$group->title));
         <h2><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h2>
             <?php if(plugin_is_active('Sites')): ?>
             <div class="sites-site-title">
-                <p>From <?php // echo sites_link_to_site_for_item(); ?></p>
+                <p>From <?php  echo sites_link_to_site_for_item(); ?></p>
             </div>
             <?php endif; ?>
-        <?php echo item_image_gallery(); ?>
+        <?php echo item_image_gallery(array('wrapper'=>array('class'=>'item-images'))); ?>
             <div class="groups-comments">
                 <?php $item = get_current_record('item'); ?>
                 <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>

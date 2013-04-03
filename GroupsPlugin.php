@@ -258,7 +258,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                             'remove-comment'
                             );
         
-        $acl->allow($roles, 'Groups_Group', $privileges, new GroupsAclAssertion);
+        $acl->allow(null, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
     public function hookDefineRoutes($args)

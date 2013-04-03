@@ -64,6 +64,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            $privilege = null)
     {    
         $db = get_db();
+        
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
@@ -80,10 +81,11 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         }                                
 
         if(get_class($resource) == 'Group') {
-            $membership = $resource->getMembership(array('user_id'=>$role->id));
-           // $membership = groups_get_membership($resource, $role);
-            $blockTable = $db->getTable('GroupBlock');
-            if($role->id) {
+            $arrayName = '_' . $resource->visibility . "Privileges";
+
+            if($role) {
+                $membership = $resource->getMembership(array('user_id'=>$role->id));
+                $blockTable = $db->getTable('GroupBlock');
                 $blockParams = array(
                         'blocked_id'=>$role->id,
                         'blocked_type'=>'User',
@@ -91,6 +93,10 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                         'blocker_type'=>'Group'
                 );
                 $block = $blockTable->count($blockParams);
+            } else {
+                if(in_array('items', $this->$arrayName)) {
+                    return true;
+                }
             }
 
             switch($privilege) {
@@ -140,7 +146,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                     break;
                             
             }
-            //$membership = groups_get_membership($resource, $role);
                  
             if($membership) {                      
                 if($membership->is_admin) {
@@ -151,8 +156,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 }
                 return in_array($privilege, $this->_memberPrivileges);
             }
-            $arrayName = '_' . $resource->visibility . "Privileges";
-            return in_array($privilege, $this->$arrayName);
+
+            return in_array($privilege, $arrayName);
         }
         //check to see if there is a potential reason to give access. the controller will sort out details with has_permission()
         //rough pass, if user and is a member of any group

@@ -14,11 +14,11 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
             return;
         }
         $html = "<div class='groups-add-item'>";
-        $html .= "<h2>" . metadata($this->_item, array('Dublin Core', 'Title')) . " in your groups</h2>";
+        $html .= "<h2>" . metadata($this->_item, array('Dublin Core', 'Title')) . " groups</h2>";
         $html .= "<ul id='groups-add-item'>";
         foreach($this->_groups as $group) {
             if($group->hasItem($this->_item)) {
-                $html .= "<li id='groups-id-{$group->id}' class='groups-item-exists'>{$group->title}</li>";
+                $html .= "<li id='groups-id-{$group->id}' class='groups-item-exists'>" . link_to($group, 'show', $group->title) . "</li>";
             } else {
                 $html .= "<li id='groups-id-{$group->id}' class='groups-item-add'>{$group->title}</li>";
             }

@@ -20,8 +20,13 @@ label.groups {
 
 .groups-button { cursor: pointer; }
 
-li.groups-item-add { cursor: pointer; }
+li.groups-item-add { 
+	cursor: pointer;
+}
 
+li.groups-item-add:after {
+	content: ' (add)';
+}
 
 li.groups-item-exists:after {
 	content: ' (added)';	
@@ -58,8 +63,6 @@ div.groups-group > h3 {
 
 div.group-options {
     padding-left: 120px;
-    position: relative;
-    top: -20px;
 }
 
 
@@ -75,6 +78,15 @@ div.groups-admin-actions h4 {
 div.groups-group {
     border-top: 1px solid grey;
     margin-top: 40px;
+}
+
+div.item-images > div {
+	float: left;
+	margin: 6px;
+}
+
+div.groups-item {
+	clear:both;
 }
 
 div.groups-block-entities {

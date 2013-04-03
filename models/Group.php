@@ -157,7 +157,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     
     public function hasMember($user)
     {
-        if(!$user->id) {
+        if(!$user) {
             return false;
         }
         $count = get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>0, 'user_id'=>$user->id));
@@ -169,7 +169,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
 
     public function hasPendingMember($user)
     {
-        if(!$user->id) {
+        if(!$user) {
             return false;
         }
         $count = get_db()->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>true, 'user_id'=>$user->id));

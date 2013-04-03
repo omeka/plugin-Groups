@@ -16,8 +16,10 @@ Omeka.Groups = {
     addItemResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
         if(responseJson.groupId) {
-            originalText = jQuery('li#groups-id-' + responseJson.groupId).html(); 
-            jQuery('li#groups-id-' + responseJson.groupId).html('Successfully added to ' + originalText);
+            li = jQuery('li#groups-id-' + responseJson.groupId);
+            li.attr('class', 'groups-item-exists');
+            originalText = li.html(); 
+            jQuery('li#groups-id-' + responseJson.groupId).html("<a href='" + Omeka.webRoot + "/groups/show/" + responseJson.groupId + "'>" + originalText + "</a>");
         }
     },
 
