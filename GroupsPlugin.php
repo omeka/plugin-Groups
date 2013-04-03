@@ -557,7 +557,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $widget['content'] .= "<p><a href='" . url('groups/my-groups') . "'>Manage your groups</a></p>";
         foreach($groups as $group) {
             $widget['content'] .= "<h3>";
-            $widget['content'] .= link_to($group);
+            $widget['content'] .= link_to($group, 'show', $group->title);
             $widget['content'] .= "</h3>";
         }
         $widgets[] = $widget;
