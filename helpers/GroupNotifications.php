@@ -11,6 +11,9 @@ class Group_View_Helper_GroupNotifications extends Zend_View_Helper_Abstract
             $html .= "<ul class='group-confirmations'>";
             //first, look up confirmations to become admin or owner
             $confirmations = get_db()->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));
+            if(empty($confirmations)) {
+                return false;
+            }
             foreach($confirmations as $confirmation) {
                 $html .= '<li>';
                 $group = $confirmation->Group;
