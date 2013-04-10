@@ -10,6 +10,9 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
     public function manageGroup($group)
     {
         $user = current_user();
+        if(!$user) {
+            return;
+        }
         $html = "<div class='groups-manage-group'>";
         $html .= "<h3>" . __('Manage group ') . metadata($group, 'title') . "</h3>";
         
