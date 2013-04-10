@@ -82,7 +82,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
         if(get_class($resource) == 'Group') {
             $arrayName = '_' . $resource->visibility . "Privileges";
-
             if($role) {
                 $membership = $resource->getMembership(array('user_id'=>$role->id));
                 $blockTable = $db->getTable('GroupBlock');
@@ -94,8 +93,14 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 );
                 $block = $blockTable->count($blockParams);
             } else {
-                if(in_array('items', $this->$arrayName)) {
-                    return true;
+                
+                switch($privilege) {
+                    case 'items':
+                    case 'view':
+                        return true;
+                        break;
+                    default:
+                        return false;
                 }
             }
 
@@ -124,7 +129,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 
                 case 'invitations':
                     //can send an invitation if group is open, or user is owner or admin
-                    if($resource->visibility == 'open') {
+                    if($membership && $resource->visibility == 'open') {
                         return true;                    
                     } else {
                          if($membership) {
@@ -147,7 +152,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                             
             }
                  
-            if($membership) {                      
+            if($membership) {                  
                 if($membership->is_admin) {
                     return in_array($privilege, $this->_adminPrivileges);
                 }
@@ -167,6 +172,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if(count($groups) != 0) {
             return true;
         }
+        debug('a');
         return false;
     }
 }
