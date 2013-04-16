@@ -20,15 +20,13 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
 
     protected $_filters = array(
         'define_action_contexts',
-        'guest_user_widgets',
-        'guest_user_links',
         'public_navigation_main',
       //  'blocks_notifications'
     );
 
     public function setUp()
     {
-        //connection to Commenting is for Commons 2.0
+        //connection to Commenting is for Omeka Commons 2.0
         if(plugin_is_active('Commenting')) {
          //   $this->_hooks[] = 'before_save_form_comment';
          //   $this->_hooks[] = 'comment_browse_sql';
@@ -36,6 +34,11 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
          //   $this->_filters[] = 'commenting_comment';
             //$this->_filters[] = 'commenting_prepend_to_comments';
         }        
+        
+        if(plugin_is_active('GuestUser')) {
+            $this->_filters[] = 'guest_user_widgets';
+            $this->_filters[] = 'guest_user_links';
+        }
         
         parent::setUp();
     }

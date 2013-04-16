@@ -5,6 +5,12 @@ require_once(GROUPS_PLUGIN_DIR . '/helpers/functions.php');
 class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 {
 
+    private $_mygroupPrivileges = array(
+            'items',
+            'add-item',
+            'delete'
+            );
+    
     private $_openPrivileges = array(
                 'items',
                 'join',
@@ -172,7 +178,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if(count($groups) != 0) {
             return true;
         }
-        debug('a');
         return false;
     }
 }

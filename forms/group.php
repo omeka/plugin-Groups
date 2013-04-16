@@ -13,6 +13,9 @@ class GroupForm extends Omeka_Form
             'closed'=>'Closed -- Approval is required to join; items only visible to members',
             'public'=>'Public -- Anyone can see items, but approval is required to join');
 
+        if(isset($group) && $group->visibility == 'private') {
+            
+        }
         $this->addElement('select', 'visibility', array('label'=>'Visibility', 'multiOptions'=>$options));
         $this->addElement('submit', 'submit');
     }
