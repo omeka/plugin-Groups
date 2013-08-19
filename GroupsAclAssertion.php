@@ -70,7 +70,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                            $privilege = null)
     {    
         $db = get_db();
-        
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
@@ -84,7 +83,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         //always get to my-groups
         if($privilege == 'my-groups') {
             return true;
-        }                                
+        }                      
 
         if(get_class($resource) == 'Group') {
             $arrayName = '_' . $resource->visibility . "Privileges";
@@ -99,7 +98,6 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 );
                 $block = $blockTable->count($blockParams);
             } else {
-                
                 switch($privilege) {
                     case 'items':
                     case 'view':
@@ -167,8 +165,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 }
                 return in_array($privilege, $this->_memberPrivileges);
             }
-
-            return in_array($privilege, $arrayName);
+            return in_array($privilege, $this->$arrayName);
         }
         //check to see if there is a potential reason to give access. the controller will sort out details with has_permission()
         //rough pass, if user and is a member of any group

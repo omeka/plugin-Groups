@@ -237,7 +237,6 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         if($acl->hasRole('guest')) {
             $roles[] = 'guest';
         }
-
         $acl->deny(null, 'Groups_Group', array('edit', 'manage'));
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
         $acl->allow($roles, 'Groups_Group', array('add', 'editSelf') );

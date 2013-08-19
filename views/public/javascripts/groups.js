@@ -27,11 +27,12 @@ Omeka.Groups = {
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
         console.log(groupId);
-        jQuery.post(Omeka.webRoot + '/groups/join/' + groupId, null, Omeka.Groups.joinResponse);
+        jQuery.post(Omeka.webRoot + '/groups/join/' + groupId, {'groupId' : groupId}, Omeka.Groups.joinResponse);
     },
 
     joinResponse: function(response, a, b) {
         var responseJson = JSON.parse(response);
+        //reloading to show change in membership
         window.location.reload(true);
     },
 
@@ -161,6 +162,7 @@ jQuery(document).ready(function() {
         jQuery('#groups_comment_form').toggle('slow');    
     });
     jQuery('#groups_comment_form').hide();
+    jQuery('p.groups-join-button').click(Omeka.Groups.join);
 });
 
 

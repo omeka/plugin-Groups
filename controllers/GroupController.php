@@ -32,6 +32,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             //$view->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
             $this->view->tags = $tags;
         }
+        $this->view->user = current_user();
         parent::browseAction();
     }
 
