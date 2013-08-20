@@ -5,10 +5,11 @@ require_once(GROUPS_PLUGIN_DIR . '/helpers/functions.php');
 class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 {
 
-    private $_mygroupPrivileges = array(
+    private $_privatePrivileges = array(
             'items',
             'add-item',
-            'delete'
+            'delete',
+            'show'
             );
     
     private $_openPrivileges = array(
@@ -84,7 +85,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if($privilege == 'my-groups') {
             return true;
         }                      
-
+        
         if(get_class($resource) == 'Group') {
             $arrayName = '_' . $resource->visibility . "Privileges";
             if($role) {
@@ -97,6 +98,12 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                         'blocker_type'=>'Group'
                 );
                 $block = $blockTable->count($blockParams);
+                
+                //forbid all but owner to private groups
+                if($resource->visibility == 'private' && ($resource->getOwner()->id != $role->id)) {
+                    return false;
+                }
+                
             } else {
                 switch($privilege) {
                     case 'items':
@@ -155,20 +162,25 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                     break;
                             
             }
-                 
+                
             if($membership) {                  
+                if($membership->is_owner) {
+                    if($resource->visibility == 'private') {
+                        return in_array($privilege, $this->_privatePrivileges);
+                    }
+                    return in_array($privilege, $this->_ownerPrivileges);
+                }
                 if($membership->is_admin) {
                     return in_array($privilege, $this->_adminPrivileges);
                 }
-                if($membership->is_owner) {    
-                    return in_array($privilege, $this->_ownerPrivileges);                    
-                }
+
                 return in_array($privilege, $this->_memberPrivileges);
             }
             return in_array($privilege, $this->$arrayName);
         }
         //check to see if there is a potential reason to give access. the controller will sort out details with has_permission()
         //rough pass, if user and is a member of any group
+        
         
         $groups = groups_groups_for_user($role);
         

@@ -245,6 +245,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $privileges = array('add-item',
                             'remove-item',
                             'items',
+                            'show',
                             'join',
                             'join-others',
                             'remove-member',

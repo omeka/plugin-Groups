@@ -6,7 +6,7 @@ foreach($memberships as $membership):
 ?>
     <?php 
         $current_user = current_user();                
-        if(count($memberships) == 1): ?>
+        if($group->visibility != 'private' && (count($memberships) == 1)): ?>
             <div class='group-membership'>
             <p>There are no members in your group! Why not <a href="<?php echo url('groups/invitations'); ?>">invite some friends</a>?</p>
             
