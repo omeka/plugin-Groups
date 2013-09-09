@@ -559,9 +559,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function filterGuestUserLinks($nav)
     {
+        $user = current_user();
+        $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $nav['Groups'] = array('label'=>'My Groups',
                 'uri'=> url('groups/my-groups')
         );
+        foreach($groups as $group) {
+            $nav[$group->title] = array('label'=>$group->title, 'uri'=>record_url($group, 'show'));
+        }
         return $nav; 
     }
     
