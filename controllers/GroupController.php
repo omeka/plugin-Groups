@@ -3,10 +3,15 @@
 
 class Groups_GroupController extends Omeka_Controller_AbstractActionController
 {
-    protected $_browseRecordsPerPage = 10;
 
     public function init()
     {
+        if(is_admin_theme()) {
+            $this->_browseRecordsPerPage = get_option('per_page_public');
+        } else {
+            $this->_browseRecordsPerPage = get_option('per_page_admin');
+        }
+        
         $this->_helper->db->setDefaultModelName('Group');
 //@TODO: check if I really need to muck about with the contexts
         $ajaxContext = $this->_helper->getHelper('AjaxContext');
@@ -20,11 +25,14 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     }
 
     public function browseAction()
-    {        
-        $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
-        //$view->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
+    {   
         $this->view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
-        $this->view->tags = $tags;
+        if(get_option('groups_taggable')) {
+            $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
+            //$view->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
+            $this->view->tags = $tags;
+        }
+        $this->view->user = current_user();
         parent::browseAction();
     }
 
@@ -62,7 +70,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $form = new GroupForm();
         $group = $this->_helper->db->findById();
         $defaults = $group->toArray();
-        $defaults['tags'] = groups_tags_string_for_group($group, false);
+        if(get_option('groups_taggable')) {
+            $defaults['tags'] = groups_tags_string_for_group($group, false);
+        }
         $form->setDefaults($defaults);
         $this->view->form = $form;
         $this->view->group = $group;    
