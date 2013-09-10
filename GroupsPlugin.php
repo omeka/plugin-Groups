@@ -239,7 +239,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         }
         $acl->deny(null, 'Groups_Group', array('edit', 'manage'));
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
-        $acl->allow($roles, 'Groups_Group', array('add', 'editSelf') );
+        $acl->allow($roles, 'Groups_Group', array('add', 'editSelf', 'show') );
         $acl->allow($roles, 'Groups_Group', 'edit', new Omeka_Acl_Assert_Ownership);
 
         $privileges = array('add-item',
