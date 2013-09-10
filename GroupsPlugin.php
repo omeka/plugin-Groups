@@ -15,7 +15,9 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'public_content_top',
         //'admin_navigation_main',
         'commenting_append_to_form',
-        'comment_browse_sql'
+        'comment_browse_sql',
+        'config',
+        'config_form'
     );
 
     protected $_filters = array(
@@ -235,7 +237,6 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         if($acl->hasRole('guest')) {
             $roles[] = 'guest';
         }
-
         $acl->deny(null, 'Groups_Group', array('edit', 'manage'));
         $acl->allow(null, 'Groups_Group', array('browse', 'index', 'show'));
         $acl->allow($roles, 'Groups_Group', array('add', 'editSelf') );
@@ -244,6 +245,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $privileges = array('add-item',
                             'remove-item',
                             'items',
+                            'show',
                             'join',
                             'join-others',
                             'remove-member',
@@ -265,6 +267,17 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $acl->allow(null, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
+    public function hookConfig($args) 
+    {
+        $post = $args['post'];
+        set_option('groups_taggable', $post['groups_taggable']);
+    }
+    
+    public function hookConfigForm($args)
+    {
+        include(GROUPS_PLUGIN_DIR . '/config_form.php');    
+    }
+    
     public function hookDefineRoutes($args)
     {      
         $router = $args['router'];
@@ -546,9 +559,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function filterGuestUserLinks($nav)
     {
+        $user = current_user();
+        $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $nav['Groups'] = array('label'=>'My Groups',
                 'uri'=> url('groups/my-groups')
         );
+        foreach($groups as $group) {
+            $nav[$group->title] = array('label'=>$group->title, 'uri'=>record_url($group, 'show'));
+        }
         return $nav; 
     }
     
