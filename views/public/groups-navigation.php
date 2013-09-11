@@ -5,7 +5,7 @@ if(current_user()) {
             'Create' => array( 'label'=>__('Create a group') , 'uri'=>url('groups/add') ),
             );
     if(is_allowed('Groups_Group', 'administration')) {
-        $navArray['Admin'] = array('label'=>__('Administer group members'), 'uri'=>url('groups/administration'));
+        $navArray['Admin'] = array('label'=>__('Administer groups'), 'uri'=>url('groups/administration'));
     }
     
     if(is_allowed('Groups_Group', 'invitations')) {
