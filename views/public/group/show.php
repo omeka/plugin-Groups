@@ -1,30 +1,39 @@
 <?php
 queue_js_file('groups');
 $this->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
-echo head(array('title'=>$group->title));
+echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 ?>
-
-<?php echo $this->partial('groups-navigation.php'); ?>
 
 <h1><?php echo metadata($group, 'title'); ?></h1>
 
 <?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
 <?php echo flash(); ?>
 
-<div id='primary'>
-    
+<div id="sidebar">
+
     <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
     <?php echo $group->visibilityText(); ?>
     </p>
-    <div class='groups-description'><?php echo $group->description; ?></div>
+
     <?php echo $this->manageGroup($group); ?>
+
+    <p class="items"><span class="number"><?php echo metadata($group, 'items_count'); ?></span> items</p>
+
+    <p class="members"><span class="number"><?php echo metadata($group, 'members count');?></span> members</p>
+
+    <p class="description"><?php echo $group->description; ?></p>
+
     <?php if(get_option('groups_taggable')): ?>
-    <div class='groups-tags'>
-        <h2>Tags</h2>
-        <?php echo groups_tags_string_for_group($group); ?>            
-    </div>
+    <p class="tags">
+        Tags: 
+        <span class="tag"><?php echo groups_tags_string_for_group($group); ?></span>
+    </p>
     <?php endif; ?>
 
+</div>
+
+<div id="primary">
+    
     <!--  Members list -->
     <?php $memberships = $group->getMemberships(); ?>
     <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
@@ -42,6 +51,7 @@ echo head(array('title'=>$group->title));
             <li>
                 <?php  
                     if(plugin_is_active('UserProfiles')) {
+                        $member_email = $membership->User->email;
                         echo $this->linkToOwnerProfile(array('owner'=>$membership->User, 'text'=> '(' . metadata($membership, 'role') . ')' ));
                     } else {
                         if($membership->User->name) {

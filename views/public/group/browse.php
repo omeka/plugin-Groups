@@ -16,8 +16,9 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
     <div style="clear:left;"></div>
     <h1>Groups</h1>
     
+    <div class="groups">
     <?php foreach(loop('groups') as $group):  ?>
-        <div class="hentry">
+        <div class="group hentry">
         
         <h2><?php echo link_to($group, 'show', $group->title); ?></h2>
         
@@ -42,11 +43,12 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
             <?php endif;?>
         <?php endif; ?>
         
-        <p id='groups-member-count'>Members: <?php echo metadata($group, 'members_count'); ?></p>
-        <p id='groups-item-count'>Items: <?php echo metadata($group, 'items_count'); ?></p>
+        <p class="items"><span class="number"><?php echo metadata($group, 'items_count'); ?></span> items</p>
+        <p class="members"><span class="number"><?php echo metadata($group, 'members_count'); ?></span> members</p>
         
         </div>
     <?php endforeach; ?>
+    </div>
 
 <div class="tags">
     <h1>All Tags</h1>
