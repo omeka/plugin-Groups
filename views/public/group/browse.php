@@ -1,7 +1,8 @@
 <?php
 queue_js_file('groups');
-echo head(array('title'=>'Browse Groups', 'bodyclass' => 'browse'));
 echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
+?>
+
 <?php echo $this->partial('group-manage-nav.php'); ?>
 
 <?php echo $this->groupSearchFilters(); ?>
