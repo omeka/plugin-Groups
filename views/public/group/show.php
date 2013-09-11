@@ -1,12 +1,16 @@
 <?php
-
+queue_js_file('groups');
 $this->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
 echo head(array('title'=>$group->title));
 ?>
+
 <?php echo $this->partial('groups-navigation.php'); ?>
+
 <h1><?php echo metadata($group, 'title'); ?></h1>
+
 <?php echo $this->partial('group-manage-nav.php', array('group'=>$group)); ?>
 <?php echo flash(); ?>
+
 <div id='primary'>
     
     <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
@@ -14,10 +18,12 @@ echo head(array('title'=>$group->title));
     </p>
     <div class='groups-description'><?php echo $group->description; ?></div>
     <?php echo $this->manageGroup($group); ?>
+    <?php if(get_option('groups_taggable')): ?>
     <div class='groups-tags'>
         <h2>Tags</h2>
         <?php echo groups_tags_string_for_group($group); ?>            
     </div>
+    <?php endif; ?>
 
     <!--  Members list -->
     <?php $memberships = $group->getMemberships(); ?>
