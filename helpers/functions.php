@@ -15,7 +15,8 @@ function groups_tags_list_for_group($group = null)
     $tags = $group->Tags;
     $html = "<ul class='tags'>";
     foreach($tags as $tag) {
-        $html .= "<li>{$tag->name}</li>";
+        $tagName = $tag->name;
+        $html .= "<li><a href='".url('groups/browse?tags='.$tagName)."'>".$tagName."</a></li>";
     }
     $html .= "</ul>";
     return $html;
