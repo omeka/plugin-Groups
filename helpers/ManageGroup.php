@@ -14,7 +14,6 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
             return;
         }
         $html = "<div class='groups-manage-group'>";
-        $html .= "<h3>" . __('Manage group ') . metadata($group, 'title') . "</h3>";
         
         if($group->hasMember($user) ) {
             if(is_allowed($group, 'approve-request')) {
@@ -67,6 +66,7 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
                 }
             }
         }
+        $html .= "</div>";
         return $html;
     }
     
