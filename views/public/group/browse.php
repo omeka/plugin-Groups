@@ -25,9 +25,6 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
         <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
         <?php echo $group->visibilityText(); ?>
         </p>
-        <?php if($user && $group->visibility == 'open' && !$group->hasMember($user) && !$group->hasPendingMember($user)): ?>
-            <p class='groups-join-button groups-button' id='groups-id-<?php echo $group->id; ?>'>Join</p>
-        <?php endif; ?>
         
         <h3>Description</h3>
         <div class='groups-description'><?php echo $group->description; ?></div>
@@ -45,6 +42,8 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
         
         <p class="items"><span class="number"><?php echo metadata($group, 'items_count'); ?></span> items</p>
         <p class="members"><span class="number"><?php echo metadata($group, 'members_count'); ?></span> members</p>
+        
+        <?php echo $this->manageGroup($group); ?>
         
         </div>
     <?php endforeach; ?>
