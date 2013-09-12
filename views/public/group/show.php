@@ -50,15 +50,16 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
         <?php foreach($memberships as $membership): ?>
             <li>
                 <?php  
+                    $member_name = ($membership->User->name) ? $membership->User->name : $membership->User->username;
+                    $gravatar_hash = md5(strtolower(trim($membership->User->email)));
+                    $gravatar_url = "http://www.gravatar.com/avatar/$gravatar_hash";
+                    $gravatar_tag = '<img src="' . $gravatar_url . '" alt="' . $member_name . ' (' . metadata($membership, 'role') . ')">';
                     if(plugin_is_active('UserProfiles')) {
-                        $member_email = $membership->User->email;
-                        echo $this->linkToOwnerProfile(array('owner'=>$membership->User, 'text'=> '(' . metadata($membership, 'role') . ')' ));
+                        echo '<a href="' . url('user-profiles/profiles/user/id/' . $membership->User->id) . '">';
+                        echo $gravatar_tag;
+                        echo '</a>';
                     } else {
-                        if($membership->User->name) {
-                            echo $membership->User->name;
-                        } else {
-                            echo $membership->User->username;
-                        }
+                        echo $gravatar_tag;
                     }
                 ?>
             </li>        
