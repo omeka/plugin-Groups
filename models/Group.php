@@ -426,13 +426,13 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         switch(metadata($this, 'visibility')) {
             case 'Open':
-                return " -- Anyone may join and see all items";
+                return "Anyone may join and see all items";
                 break;
             case 'Public':
-                return " -- Anyone can see items, but approval is required to join";
+                return "Approval is required to join; items visible to everyone";
                 break;
             case 'Closed':
-                return " -- Approval is required to join; items only visible to members";
+                return "Approval is required to join; items only visible to members";
                 break;
         }        
     }
