@@ -149,20 +149,20 @@ Omeka.Groups.wysiwyg = function (params) {
 
 
 
-
-jQuery(document).ready(function() {
-    jQuery('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
-    jQuery('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
-    jQuery('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
-    jQuery('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
-    jQuery('#groups-commenting-copy').click(Omeka.Groups.copyComment);
-    Omeka.Groups.wysiwyg();
-    Omeka.Groups.wysiwyg({elements: 'groups_commenting_body', width: "100%"});
-    jQuery('#groups-commenting > label').click(function() {
-        jQuery('#groups_comment_form').toggle('slow');    
+(function($) {
+    $(document).ready(function() {
+        $('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
+        $('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
+        $('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
+        $('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);
+        $('#groups-commenting-copy').click(Omeka.Groups.copyComment);
+        Omeka.Groups.wysiwyg();
+        Omeka.Groups.wysiwyg({elements: 'groups_commenting_body', width: "100%"});
+        $('#groups-commenting > label').click(function() {
+            $('#groups_comment_form').toggle('slow');    
+        });
+        $('#groups_comment_form').hide();
+        $('p.groups-join-button').click(Omeka.Groups.join);
+        $('.visibility').after('<span class="more-info">?</span>');
     });
-    jQuery('#groups_comment_form').hide();
-    jQuery('p.groups-join-button').click(Omeka.Groups.join);
-});
-
-
+})(jQuery)

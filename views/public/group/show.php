@@ -51,9 +51,10 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
             <li>
                 <?php  
                     $member_name = ($membership->User->name) ? $membership->User->name : $membership->User->username;
+                    $alt_text = $member_name . ' (' . metadata($membership, 'role') . ')';
                     $gravatar_hash = md5(strtolower(trim($membership->User->email)));
                     $gravatar_url = "http://www.gravatar.com/avatar/$gravatar_hash";
-                    $gravatar_tag = '<img src="' . $gravatar_url . '" alt="' . $member_name . ' (' . metadata($membership, 'role') . ')">';
+                    $gravatar_tag = '<img src="' . $gravatar_url . '" title="' . $alt_text . '"' . ' alt="' . $alt_text . '">';
                     if(plugin_is_active('UserProfiles')) {
                         echo '<a href="' . url('user-profiles/profiles/user/id/' . $membership->User->id) . '">';
                         echo $gravatar_tag;
