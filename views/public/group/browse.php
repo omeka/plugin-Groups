@@ -21,10 +21,14 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
         <div class="group hentry">
         
         <h2><?php echo link_to($group, 'show', $group->title); ?></h2>
+        <?php $visibility = metadata($group, 'visibility'); ?>
+        <?php if($visibility !== "Open"): ?>
+        <div class='groups-type <?php echo strtolower($visibility); ?>'>
+            <span class="visibility" title="<?php echo $group->visibilityText(); ?>"><?php echo $visibility; ?></span>
+            <span class="visibility-description"><?php echo $group->visibilityText(); ?></span>
+        </div>
+        <?php endif; ?>
         
-        <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
-        <?php echo $group->visibilityText(); ?>
-        </p>
         
         <h3>Description</h3>
         <div class='groups-description'><?php echo $group->description; ?></div>
