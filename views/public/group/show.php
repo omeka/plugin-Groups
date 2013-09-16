@@ -11,9 +11,13 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 
 <div id="sidebar">
 
-    <p class='groups-type'>Type: <?php echo metadata($group, 'visibility'); ?>
-    <?php echo $group->visibilityText(); ?>
-    </p>
+    <?php $visibility = metadata($group, 'visibility'); ?>
+    <?php if($visibility !== "Open"): ?>
+    <div class='groups-type <?php echo strtolower($visibility); ?>'>
+        <span class="visibility" title="<?php echo $group->visibilityText(); ?>"><?php echo $visibility; ?></span>
+        <span class="visibility-description"><?php echo $group->visibilityText(); ?></span>
+    </div>
+    <?php endif; ?>
 
     <?php echo $this->manageGroup($group); ?>
 
@@ -69,24 +73,37 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
     <?php endif; ?>
     
     <!--  Items list -->
-    <h2>Items (<?php echo metadata($group, 'items_count'); ?>)</h2>
+    <h2>Recent Items Saved to <?php echo metadata($group, 'title'); ?></h2>
     <?php if(is_allowed($group, 'items')): ?>
         
         <?php foreach(loop('item') as $item): ?>
         <div class='groups-item'>
-        <h2><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h2>
+            <?php $item_files = $item->getFiles(); ?>
+            <?php foreach ($item_files as $item_file): ?>
+                <?php $stop = 0; ?>
+                <?php if ($item_file->has_derivative_image == 1): ?>
+                    <div class="image" style="background-image: url('<?php echo file_display_url($item_file); ?>')"></div>
+                    <?php $stop = 1; ?>
+                <?php endif; ?>
+                <?php if ($stop == 1) { break; } ?>
+            <?php endforeach; ?>
+            <?php if (count($item_files) < 1): ?>
+                <div class="image"></div>
+            <?php endif; ?>
+
+            <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
             <?php if(plugin_is_active('Sites')): ?>
             <div class="sites-site-title">
-                <p>From <?php  echo sites_link_to_site_for_item(); ?></p>
+                <p>From <?php echo sites_link_to_site_for_item(); ?></p>
             </div>
             <?php endif; ?>
-        <?php echo item_image_gallery(array('wrapper'=>array('class'=>'item-images'))); ?>
             <div class="groups-comments">
                 <?php $item = get_current_record('item'); ?>
                 <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
             </div>
         </div>
         <?php endforeach; ?>
+        <p class="view-all-items-link">View all <?php echo metadata($group, 'items_count'); ?> items</p>
     <?php endif; ?>
 </div>
 <?php echo foot(); ?>
