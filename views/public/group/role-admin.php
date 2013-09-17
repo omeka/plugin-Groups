@@ -1,7 +1,7 @@
-
 <?php $adminConfirm = groups_role_confirm($group, $user_membership, 'is_admin'); ?>
 <?php $ownerConfirm = groups_role_confirm($group, $user_membership, 'is_owner'); ?>
 <?php $role = metadata($user_membership, 'role'); ?>
+
 <?php if($user_membership->is_owner): ?>
     <?php $memberships = $group->getMemberships(); ?>
     <?php if(count($memberships) > 1): ?>
@@ -9,9 +9,9 @@
     <?php endif;?>
 <?php else: ?>
     <label class='groups' for="groups[<?php echo $group->id ?>][status]">Membership</label>
-    <input type='checkbox' value='quit' name="groups[<?php echo $group->id ?>][status]" />Leave<br/>
+    <input type='checkbox' value='quit' name="groups[<?php echo $group->id ?>][status]" />Leave
     <?php if(!$adminConfirm && $role !='Admin'): ?>  
-    <input type='checkbox' value='make_admin' name="groups[<?php echo $group->id ?>][status]" />Request admin privileges<br/>
+        <input type='checkbox' value='make_admin' name="groups[<?php echo $group->id ?>][status]" />Request admin privileges
     <?php endif; ?>  
 <?php endif; ?>
                 

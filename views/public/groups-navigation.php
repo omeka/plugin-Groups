@@ -1,4 +1,4 @@
-<nav id="section-nav" class="navigation vertical groups-section-nav">
+<nav class="groups-section-nav navigation">
 <?php 
 if(current_user()) {
     $navArray = array(

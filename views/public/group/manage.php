@@ -1,5 +1,5 @@
 <?php
-echo head(array('title'=> 'Manage ' . $group->title));
+echo head(array('title'=> 'Manage ' . $group->title, 'bodyclass' => 'groups manage'));
 ?>
 
 <?php echo $this->partial('groups-navigation.php'); ?>

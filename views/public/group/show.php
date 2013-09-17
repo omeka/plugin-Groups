@@ -3,6 +3,7 @@ queue_js_file('groups');
 $this->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
 echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 ?>
+<?php echo $this->partial('groups-navigation.php'); ?>
 
 <h1><?php echo metadata($group, 'title'); ?></h1>
 
@@ -94,7 +95,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
             <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
             <?php if(plugin_is_active('Sites')): ?>
             <div class="sites-site-title">
-                <p>From <?php echo sites_link_to_site_for_item(); ?></p>
+                <p><?php echo sites_link_to_site_for_item($item); ?></p>
             </div>
             <?php endif; ?>
             <div class="groups-comments">

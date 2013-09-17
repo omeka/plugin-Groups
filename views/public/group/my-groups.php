@@ -1,6 +1,6 @@
 <?php
 $title = __('My groups');
-echo head(array('title'=>$title));
+echo head(array('title'=>$title, 'bodyclass' => 'groups my-groups'));
 ?>
 
 <?php 
@@ -13,7 +13,7 @@ echo $this->partial('groups-navigation.php');
 <div id='primary'>
     <form method="post">
     <?php if(!(empty($groups) && empty($invitations))) :?>
-        <button>Submit</button>
+        <button>Save changes</button>
     <?php endif; ?>
         <?php if(!empty($invitations)): ?>
         <h2>Invitations</h2>
@@ -44,27 +44,29 @@ echo $this->partial('groups-navigation.php');
         <?php endforeach; ?>
         <?php endif; ?>
     <?php if(empty($groups)) : ?>
-    <p>You are not a member of any groups. Why not <a href="<?php echo url('groups/browse'); ?>">browse for interesting groups</a>?</p>
+        <p>You are not a member of any groups. Why not <a href="<?php echo url('groups/browse'); ?>">browse for interesting groups</a>?</p>
+    <?php else: ?>
+        <h2>My Memberships</h2>
     <?php endif; ?>
+
     <?php foreach(loop('groups') as $group): ?>
-    <div class='groups-group'>
+        <div class='groups-group'>
         <?php $user_membership = $group->getMembership(array('user_id' => current_user()->id));?>
         <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
-
+  
         
         <div class='group-options'>
             <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
             <div class='group-status'>
-                <h4>Membership and Role</h4>
                 <?php include('role-admin.php'); ?>
             </div>
-
             <?php include('notifications-admin.php'); ?>
         </div>        
     </div>
     <?php endforeach; ?>
+
     <?php if(!(empty($groups) && empty($invitations))) :?>
-        <button>Submit</button>
+        <button>Save changes</button>
     <?php endif; ?>
     </form>
 

@@ -1,6 +1,5 @@
 
 #section-nav, #section-nav ul {
-    font-family: "Arvo",sans-serif;
     list-style-type: none;
 }
 
@@ -32,7 +31,6 @@ li.groups-item-exists:after {
 	content: ' (added)';	
 }
 
-
 .groups-join-button { cursor: pointer; }
 
 
@@ -54,25 +52,12 @@ li.groups-comment-group {
     padding-left: 6px;
 }
 
-div.groups-group > h3 {
-    float: left;
-    width: 90px;
-    margin-top: 0;
-    margin-bottom: 3px;
-}
-
-div.group-options {
-    padding-left: 120px;
-}
-
-
 div.groups-group div.groups-admin-actions {
     padding-left: 90px;
 }
 
 div.groups-admin-actions h4 {
-	margin-bottom: 0;
-	max-width: 110px;
+    margin-bottom: 0;
 }
 
 div.groups-group {
@@ -97,6 +82,38 @@ div.pending {
     display:none;
 }
 
+.groups input[type=checkbox],
+.groups input[type=radio] {
+    margin: 0 5px 0 15px;
+}
+
+.groups input:first-of-type {
+    margin-left: 0;
+}
+
+.groups input[type=text],
+.groups input[type=password],
+.groups textarea {
+    display: block;
+    margin-bottom: 1em;
+    width: 50%;
+}
+
+.group-notifications {
+    margin-bottom: 1em;
+}
+
+.inputs {
+    margin-bottom: 1em;
+}
+
+.group-status {
+    margin-bottom: 1em;
+}
+
+.group-status p {
+    margin-bottom: 0;
+}
 
 /* commenting integration */
 
