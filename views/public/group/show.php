@@ -40,71 +40,75 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 <div id="primary">
     
     <!--  Members list -->
-    <?php $memberships = $group->getMemberships(); ?>
-    <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
-    <?php $owner = $group->getOwner(); ?>
-    <?php if($owner->name) {
-        $name = $owner->name;
-    } else {
-        $name = $owner->username;
-    }     
-    ?>
-    <p id='groups-owner'>Owner: <?php echo $name; ?></p>
-    <?php if(is_allowed($group, 'items')): ?>
-    <ul class='groups-members'>
-        <?php foreach($memberships as $membership): ?>
-            <li>
-                <?php  
-                    $member_name = ($membership->User->name) ? $membership->User->name : $membership->User->username;
-                    $alt_text = $member_name . ' (' . metadata($membership, 'role') . ')';
-                    $gravatar_hash = md5(strtolower(trim($membership->User->email)));
-                    $gravatar_url = "http://www.gravatar.com/avatar/$gravatar_hash";
-                    $gravatar_tag = '<img src="' . $gravatar_url . '" title="' . $alt_text . '"' . ' alt="' . $alt_text . '">';
-                    if(plugin_is_active('UserProfiles')) {
-                        echo '<a href="' . url('user-profiles/profiles/user/id/' . $membership->User->id) . '">';
-                        echo $gravatar_tag;
-                        echo '</a>';
-                    } else {
-                        echo $gravatar_tag;
-                    }
-                ?>
-            </li>        
-        <?php endforeach; ?>
-    </ul>
-    <?php endif; ?>
     
-    <!--  Items list -->
-    <h2>Recent Items Saved to <?php echo metadata($group, 'title'); ?></h2>
-    <?php if(is_allowed($group, 'items')): ?>
-        
-        <?php foreach(loop('item') as $item): ?>
-        <div class='groups-item'>
-            <?php $item_files = $item->getFiles(); ?>
-            <?php foreach ($item_files as $item_file): ?>
-                <?php $stop = 0; ?>
-                <?php if ($item_file->has_derivative_image == 1): ?>
-                    <div class="image" style="background-image: url('<?php echo file_display_url($item_file); ?>')"></div>
-                    <?php $stop = 1; ?>
-                <?php endif; ?>
-                <?php if ($stop == 1) { break; } ?>
+    <div class="members">
+        <?php $memberships = $group->getMemberships(); ?>
+        <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
+        <?php $owner = $group->getOwner(); ?>
+        <?php if($owner->name) {
+            $name = $owner->name;
+        } else {
+            $name = $owner->username;
+        }     
+        ?>
+        <p id='groups-owner'>Owner: <?php echo $name; ?></p>
+        <?php if(is_allowed($group, 'items')): ?>
+        <ul class='groups-members'>
+            <?php foreach($memberships as $membership): ?>
+                <li>
+                    <?php  
+                        $member_name = ($membership->User->name) ? $membership->User->name : $membership->User->username;
+                        $alt_text = $member_name . ' (' . metadata($membership, 'role') . ')';
+                        $gravatar_hash = md5(strtolower(trim($membership->User->email)));
+                        $gravatar_url = "http://www.gravatar.com/avatar/$gravatar_hash";
+                        $gravatar_tag = '<img src="' . $gravatar_url . '" title="' . $alt_text . '"' . ' alt="' . $alt_text . '">';
+                        if(plugin_is_active('UserProfiles')) {
+                            echo '<a href="' . url('user-profiles/profiles/user/id/' . $membership->User->id) . '">';
+                            echo $gravatar_tag;
+                            echo '</a>';
+                        } else {
+                            echo $gravatar_tag;
+                        }
+                    ?>
+                </li>        
             <?php endforeach; ?>
-            <?php if (count($item_files) < 1): ?>
-                <div class="image"></div>
-            <?php endif; ?>
-
-            <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
-            <?php if(plugin_is_active('Sites')): ?>
-            <div class="sites-site-title">
-                <p><?php echo sites_link_to_site_for_item($item); ?></p>
+        </ul>
+        <?php endif; ?>
+    </div>
+    
+    <div class="recent-items">
+        <!--  Items list -->
+        <h2>Recent Items Saved to <?php echo metadata($group, 'title'); ?></h2>
+        <?php if(is_allowed($group, 'items')): ?>
+            <?php foreach(loop('item') as $item): ?>
+            <div class='groups-item'>
+                <?php $item_files = $item->getFiles(); ?>
+                <?php foreach ($item_files as $item_file): ?>
+                    <?php $stop = 0; ?>
+                    <?php if ($item_file->has_derivative_image == 1): ?>
+                        <div class="image" style="background-image: url('<?php echo file_display_url($item_file); ?>')"></div>
+                        <?php $stop = 1; ?>
+                    <?php endif; ?>
+                    <?php if ($stop == 1) { break; } ?>
+                <?php endforeach; ?>
+                <?php if (count($item_files) < 1): ?>
+                    <div class="image"></div>
+                <?php endif; ?>
+    
+                <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
+                <?php if(plugin_is_active('Sites')): ?>
+                <div class="sites-site-title">
+                    <p><?php echo sites_link_to_site_for_item($item); ?></p>
+                </div>
+                <?php endif; ?>
+                <div class="groups-comments">
+                    <?php $item = get_current_record('item'); ?>
+                    <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
+                </div>
             </div>
-            <?php endif; ?>
-            <div class="groups-comments">
-                <?php $item = get_current_record('item'); ?>
-                <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
-            </div>
-        </div>
-        <?php endforeach; ?>
-        <p class="view-all-items-link">View all <?php echo metadata($group, 'items_count'); ?> items</p>
-    <?php endif; ?>
+            <?php endforeach; ?>
+            <p class="view-all-items-link">View all <?php echo metadata($group, 'items_count'); ?> items</p>
+        <?php endif; ?>
+    </div>
 </div>
 <?php echo foot(); ?>
