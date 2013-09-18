@@ -56,7 +56,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
         <ul class='groups-members'>
             <?php foreach($memberships as $membership): ?>
                 <li>
-                    <?php  
+                    <?php
                         $member_name = ($membership->User->name) ? $membership->User->name : $membership->User->username;
                         $alt_text = $member_name . ' (' . metadata($membership, 'role') . ')';
                         $gravatar_hash = md5(strtolower(trim($membership->User->email)));
