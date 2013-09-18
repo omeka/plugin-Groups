@@ -92,7 +92,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
                     <?php if ($stop == 1) { break; } ?>
                 <?php endforeach; ?>
                 <?php if (count($item_files) < 1): ?>
-                    <div class="image"></div>
+                    <div class="no image"></div>
                 <?php endif; ?>
     
                 <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
