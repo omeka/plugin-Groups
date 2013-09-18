@@ -1,6 +1,6 @@
 <?php
 $title = __('Group invitations');
-echo head(array('title'=>'Group Invitations'));
+echo head(array('title'=>'Group Invitations', 'bodyclass' => 'groups invitations'));
 ?>
 <?php 
 echo $this->partial('groups-navigation.php');
@@ -13,19 +13,21 @@ echo $this->partial('groups-navigation.php');
 <p><?php echo __('You do not have permission to invite people to any of your groups.'); ?></p>
 <?php else: ?>
 <form method="post">
-    <div>
+    <div class="emails">
         <label for='emails'><?php echo __('Email addresses of people to invite to join groups (comma-separated)'); ?></label>
-        <input type='text' name='emails' />
+        <textarea rows='6' cols='40' type='text' name='emails'></textarea>
     </div>
-    <div>
+    <div class="groups">
         <label for='invite_groups[]'><?php echo __('Groups to invite the above people to'); ?></label>
         <?php foreach($groups as $group): ?>
-            <input name='invite_groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
+            <div class="group">
+                <input name='invite_groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
+            </div>
         
         <?php endforeach; ?>
     </div>
     
-    <div>
+    <div class="message">
         <label for='message'><?php echo __('Message'); ?></label>
         <textarea rows='6' cols='40' name='message'></textarea>
     </div>

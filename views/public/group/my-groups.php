@@ -1,5 +1,5 @@
 <?php
-$title = __('My groups');
+$title = __('My memberships');
 echo head(array('title'=>$title, 'bodyclass' => 'groups my-groups'));
 ?>
 
@@ -21,9 +21,12 @@ echo $this->partial('groups-navigation.php');
         <div class='groups-group'>    
             <h3><a href="<?php echo url('groups/group/show/id/' . $invitation->group_id); ?>"><?php echo $invitation->Group->title; ?></a></h3>
             <div class='group-options'>
-                <p><?php echo $invitation->Sender->name; ?> has invited you to join this group: </p>
-                <p><?php echo $invitation->message; ?></p>    
-                <?php if( is_allowed($invitation->Group, 'join') ): ?>
+                <p><?php echo $invitation->Sender->name; ?> has invited you to join this group. </p>
+                <?php if($invitation->message): ?>
+                <p class="invite-message">"<?php echo $invitation->message; ?>"</p>    
+                <?php endif; ?>
+
+                <?php if( is_allowed($invitation->group, 'join') ): ?>
                     <input type='radio' class='groups-invitation-action invitation-<?php echo $invitation->id ?>' name="invitations[<?php echo $invitation->id ?>]" value='join' />                
                     <label class='groups' for="invitations[<?php echo $invitation->id ?>]">Join</label>
                 <?php else: ?>
