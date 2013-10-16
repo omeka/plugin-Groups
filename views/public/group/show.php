@@ -43,7 +43,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
     
     <div class="members">
         <?php $memberships = $group->getMemberships(); ?>
-        <h2>Members (<?php echo metadata($group, 'members count');?>)</h2>
+        <h2><?php echo __('Members'); ?> (<?php echo metadata($group, 'members count');?>)</h2>
         <?php $owner = $group->getOwner(); ?>
         <?php if($owner->name) {
             $name = $owner->name;
@@ -76,12 +76,12 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
         <?php endif; ?>
     </div>
     
-    <div class="recent-items">
+    <div class="items-list with-images">
         <!--  Items list -->
-        <h2>Recent Items Saved to <?php echo metadata($group, 'title'); ?></h2>
+        <h2><?php echo __('Recent items saved to ') . metadata($group, 'title'); ?> (<?php echo metadata($group, 'items count') . __(' total'); ?>)</h2>
         <?php if(is_allowed($group, 'items')): ?>
             <?php foreach(loop('item') as $item): ?>
-            <div class='groups-item'>
+            <div class='group item'>
                 <?php $item_files = $item->getFiles(); ?>
                 <?php foreach ($item_files as $item_file): ?>
                     <?php $stop = 0; ?>
