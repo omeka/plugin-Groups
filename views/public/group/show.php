@@ -107,7 +107,9 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
                 </div>
             </div>
             <?php endforeach; ?>
-            <p class="view-all-items-link">View all <?php echo metadata($group, 'items_count'); ?> items</p>
+            <?php if (metadata($group, 'items_count')): ?>
+            <p class="view-all-items-link button">View all <?php echo metadata($group, 'items_count'); ?> items</p>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

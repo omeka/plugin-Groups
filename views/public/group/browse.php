@@ -14,7 +14,7 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
     <?php endif; ?>
     <div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
     <div style="clear:left;"></div>
-    <h1>Groups</h1>
+    <h1>Groups (<?php echo total_records('groups'); ?> total)</h1>
     
     <div class="groups">
     <?php foreach(loop('groups') as $group):  ?>

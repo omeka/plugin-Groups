@@ -143,7 +143,7 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     }
     
     if(!$membership) {
-        $membership = groups_get_membership($group);
+        $membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
     
     $confirmationTable = get_db()->getTable('GroupConfirmation');
@@ -154,7 +154,7 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     $count =  $confirmationTable->count(array('group_id'=>$group->id,
                                             'membership_id'=>$membership->id,
                                             'type'=>$role            
-            ));
+    ));
     return $count;
 }
 
