@@ -23,6 +23,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array(
         'define_action_contexts',
         'public_navigation_main',
+        'search_record_types'
       //  'blocks_notifications'
     );
 
@@ -611,5 +612,11 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
 
         }
         return $nav;    
+    }
+    
+    public function filterSearchRecordTypes($searchableRecordTypes)
+    {
+        $searchableRecordTypes['Group'] = __('Group');
+        return $searchableRecordTypes;
     }
 }
