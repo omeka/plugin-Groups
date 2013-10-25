@@ -145,16 +145,16 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     if(!$membership) {
         $membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
+    if(!$membership) {
+        return false;
+    }
     
     $confirmationTable = get_db()->getTable('GroupConfirmation');
-    $select = $confirmationTable->getSelectForCount();
-    $select->where("group_id = ?", $group->id);
-    $select->where("membership_id = ?", $membership->id);
-    $select->where("type =?", $role);
-    $count =  $confirmationTable->count(array('group_id'=>$group->id,
-                                            'membership_id'=>$membership->id,
-                                            'type'=>$role            
+    $count = $confirmationTable->count(array('group_id'      => $group->id,
+                                             'membership_id' => $membership->id,
+                                             'type'          => $role            
     ));
+
     return $count;
 }
 
