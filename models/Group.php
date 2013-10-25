@@ -109,6 +109,19 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $rel->save();
     }
 
+    public function getRecordUrl($action = 'show')
+    {
+        if ('show' == $action) {
+            return url('groups/show/' . $this->id);
+        }
+        return array(
+            'module' => 'Group',
+            'controller' => 'Group',
+            'action' => $action,
+            'id' => $this->id,
+        );
+    }
+
     public function getItems()
     {
         $params = $this->buildParams('Item', DCTERMS, 'references');
