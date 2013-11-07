@@ -10,7 +10,7 @@ echo head(array('title'=> 'Manage ' . $group->title, 'bodyclass' => 'groups mana
 
     <form method="post">
         <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
-        <h2>Membership and Role</h2>
+        <h2><?php echo __('Membership and Role'); ?></h2>
         <div>
             <?php include('role-admin.php'); ?>
         </div>
