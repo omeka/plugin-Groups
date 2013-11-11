@@ -20,7 +20,9 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
                 if (metadata($group, 'visibility') != 'open') {
                     $users = $group->getMemberRequests();
                     if(count($users) == 0) {
-                        $html .= "<p>No pending membership requests</p>";
+                        $html .= "<p class=\"my-group\">";
+                        $html .= __('I am a member');
+                        $html .= "</p>";
                     } else {
                         $html .= "<p>Pending Membership Requests</p>";
                         $html .= "<ul class='groups-pending-requests'>";
