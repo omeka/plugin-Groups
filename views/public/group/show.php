@@ -108,7 +108,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
             </div>
             <?php endforeach; ?>
             <?php if (metadata($group, 'items_count') > get_option('per_page_public')): ?>
-            <p class="view-all-items-link button">View all <?php echo metadata($group, 'items_count'); ?> items</p>
+            <p><?php echo link_to_items_browse(__('View All %s Items', metadata($group, 'items_count')), array('group_id' => $group->id), array('class' => 'view-all-items-link button')); ?></p>
             <?php endif; ?>
         <?php endif; ?>
     </div>
