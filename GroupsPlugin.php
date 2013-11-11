@@ -13,6 +13,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'public_head',
         'public_items_show',
         'public_content_top',
+        'items_browse_sql',
         //'admin_navigation_main',
         'commenting_append_to_form',
         'comment_browse_sql',
@@ -215,6 +216,21 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         if($user = current_user()) {
             $params = array('user_id'=>$user->id);
             echo $view->groupAddItem($params);
+        }
+    }
+    
+    public function hookItemsBrowseSql($args)
+    {
+        $select = $args['select'];
+        $params = $args['params'];
+        $db = get_db();
+        if(!empty($params['group_id'])) {
+            $select->join(array('record_relations_relation'=>$db->RecordRelationsRelation),
+                    'record_relations_relation.object_id = items.id', array()
+            );
+            $select->where("record_relations_relation.subject_id = ?", $params['group_id']);
+            $select->where("record_relations_relation.object_record_type = 'Item'");
+            $select->where("record_relations_relation.subject_record_type = 'Group'");
         }
     }
     
