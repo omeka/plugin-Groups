@@ -393,7 +393,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $ownerMembership->user_id = $currentUser->id;
             $ownerMembership->is_owner = 1;
             $ownerMembership->is_pending = 0;
-            $ownerMembership->id = 0;
+            $ownerMembership->id = null;
             return $ownerMembership;
         }
         
