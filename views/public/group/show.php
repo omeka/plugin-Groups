@@ -26,8 +26,6 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 
     <p class="members"><span class="number"><?php echo metadata($group, 'members count');?></span> members</p>
 
-    <p class="description"><?php echo $group->description; ?></p>
-
     <?php if(get_option('groups_taggable')): ?>
     <p class="tags">
         Tags: 
@@ -35,10 +33,6 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
     </p>
     <?php endif; ?>
 
-</div>
-
-<div id="primary">
-    
     <!--  Members list -->
     
     <div class="members">
@@ -75,42 +69,50 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
         </ul>
         <?php endif; ?>
     </div>
-    
-    <div class="items-list with-images">
-        <!--  Items list -->
-        <h2><?php echo __('Recent items saved to ') . metadata($group, 'title'); ?> (<?php echo metadata($group, 'items count') . __(' total'); ?>)</h2>
-        <?php if(is_allowed($group, 'items')): ?>
-            <?php foreach(loop('item') as $item): ?>
-            <div class='group item'>
-                <?php $item_files = $item->getFiles(); ?>
-                <?php foreach ($item_files as $item_file): ?>
-                    <?php $stop = 0; ?>
-                    <?php if ($item_file->has_derivative_image == 1): ?>
-                        <div class="image" style="background-image: url('<?php echo file_display_url($item_file); ?>')"></div>
-                        <?php $stop = 1; ?>
-                    <?php endif; ?>
-                    <?php if ($stop == 1) { break; } ?>
-                <?php endforeach; ?>
-                <?php if (count($item_files) < 1): ?>
-                    <div class="no image"></div>
-                <?php endif; ?>
-    
-                <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
-                <?php if(plugin_is_active('Sites')): ?>
-                <div class="sites-site-title">
-                    <p><?php echo sites_link_to_site_for_item($item); ?></p>
-                </div>
-                <?php endif; ?>
-                <div class="groups-comments">
-                    <?php $item = get_current_record('item'); ?>
-                    <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-            <?php if (metadata($group, 'items_count') > get_option('per_page_public')): ?>
-            <p><?php echo link_to_items_browse(__('View All %s Items', metadata($group, 'items_count')), array('group_id' => $group->id), array('class' => 'view-all-items-link button')); ?></p>
-            <?php endif; ?>
-        <?php endif; ?>
-    </div>
+
 </div>
+
+<div id="primary">
+    
+    <p class="description"><?php echo $group->description; ?></p>
+    
+</div>
+
+<div id="recent-items" class="items-list with-images">
+    <!--  Items list -->
+    <h2><?php echo __('Recent items saved to ') . metadata($group, 'title'); ?> (<?php echo metadata($group, 'items count') . __(' total'); ?>)</h2>
+    <?php if(is_allowed($group, 'items')): ?>
+        <?php foreach(loop('item') as $item): ?>
+        <div class='group item'>
+            <?php $item_files = $item->getFiles(); ?>
+            <?php foreach ($item_files as $item_file): ?>
+                <?php $stop = 0; ?>
+                <?php if ($item_file->has_derivative_image == 1): ?>
+                    <div class="image" style="background-image: url('<?php echo file_display_url($item_file); ?>')"></div>
+                    <?php $stop = 1; ?>
+                <?php endif; ?>
+                <?php if ($stop == 1) { break; } ?>
+            <?php endforeach; ?>
+            <?php if (count($item_files) < 1): ?>
+                <div class="no image"></div>
+            <?php endif; ?>
+
+            <h3><?php echo link_to_item(metadata('item', array('Dublin Core', 'Title')), array('class'=>'permalink')); ?></h3>
+            <?php if(plugin_is_active('Sites')): ?>
+            <div class="sites-site-title">
+                <p><?php echo sites_link_to_site_for_item($item); ?></p>
+            </div>
+            <?php endif; ?>
+            <div class="groups-comments">
+                <?php $item = get_current_record('item'); ?>
+                <?php // @TODO:  commenting integration is for Commons 2.0 echo CommentingPlugin::showComments(array('comments'=>$group->getComments($item))); ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        <?php if (metadata($group, 'items_count') > get_option('per_page_public')): ?>
+        <p><?php echo link_to_items_browse(__('View All %s Items', metadata($group, 'items_count')), array('group_id' => $group->id), array('class' => 'view-all-items-link button')); ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>
+
 <?php echo foot(); ?>

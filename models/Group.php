@@ -112,7 +112,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function getItems()
     {
         $params = $this->buildParams('Item', DCTERMS, 'references');
-        return $this->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params);
+        return $this->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array('limit' => get_option('per_page_public')));
     }
 
     public function hasItem($item)
@@ -344,8 +344,8 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $this->addSearchText($this->description);
     }
 
-    private function buildParams($record, $prefix, $localpart){
-
+    private function buildParams($record, $prefix, $localpart)
+    {
         $pred = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName($prefix, $localpart);
         $params = array();
         $params['subject_id'] = $this->id;
