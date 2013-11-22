@@ -4,9 +4,9 @@
 }
 
 #groups-section-nav-label {
-	float: left;
-	padding-right: 6px;
-	line-height: 24px;
+    float: left;
+    padding-right: 6px;
+    line-height: 24px;
 }
 
 #section-nav li {
@@ -20,19 +20,14 @@ label.groups {
 .groups-button { cursor: pointer; }
 
 li.groups-item-add { 
-	cursor: pointer;
-}
-
-li.groups-item-add:after {
-	content: ' (add)';
-}
-
-li.groups-item-exists:after {
-	content: ' (added)';	
+    cursor: pointer;
 }
 
 .groups-join-button { cursor: pointer; }
 
+.groups-item-exists input[type="checkbox"] {
+    display: none;
+}
 
 .groups-quit-button { cursor: pointer; }
 
@@ -66,12 +61,12 @@ div.groups-group {
 }
 
 div.item-images > div {
-	float: left;
-	margin: 6px;
+    float: left;
+    margin: 6px;
 }
 
 div.groups-item {
-	clear:both;
+    clear:both;
 }
 
 div.groups-block-entities {

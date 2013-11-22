@@ -4,6 +4,17 @@ if(typeof Omeka === 'undefined') {
 
 Omeka.Groups = {
 
+    toggleGroupSelection: function(e) {
+        e.preventDefault();
+        var groupCheckbox = jQuery(this).siblings('input[type=checkbox]');
+        if (groupCheckbox.is(":checked")) {
+            groupCheckbox.removeAttr('checked');
+        } else {
+            groupCheckbox.prop('checked', true);
+        }
+        jQuery(this).parent().toggleClass('checked');
+    },
+
     removeItemFromGroup: function() {
         console.log(this.parentNode.id);
         splitId = this.id.split('-');
@@ -14,20 +25,29 @@ Omeka.Groups = {
         
     },
         
-    addItemToGroup: function() {
-        splitId = this.id.split('-');
+    addItemToGroup: function(item) {
+        var groupId = item.attr('id');
+        splitId = groupId.split('-');
         splitUrl = window.location.pathname.split('/');
         groupId = splitId[splitId.length - 1];
         itemId = splitUrl[splitUrl.length - 1];
         jQuery.post(Omeka.webRoot + '/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
     },
+    
+    addItemsToGroup: function() {
+        jQuery('#user-groups .checked').each(function() {
+            Omeka.Groups.addItemToGroup(jQuery(this));
+        });
+    },
 
-    addItemResponse: function(responseJson, a, b) {
+    addItemResponse: function(responseJson, a, b, c) {
         if(responseJson.groupId) {
             li = jQuery('li#groups-id-' + responseJson.groupId);
             li.attr('class', 'groups-item-exists');
-            originalText = li.html(); 
-            jQuery('li#groups-id-' + responseJson.groupId).html("<a href='" + Omeka.webRoot + "/groups/show/" + responseJson.groupId + "'>" + originalText + "</a>");
+            liName = li.find('a').first().text();
+            li.html(liName);
+            jQuery('#item-user-groups').append("<li id='groups-id-" + responseJson.groupId + "'><a href='" + Omeka.webRoot + "/groups/show/" + responseJson.groupId + "'>" + liName + "</a>");
+            jQuery('.empty').removeClass('empty');
         }
     },
 
@@ -159,7 +179,9 @@ Omeka.Groups.wysiwyg = function (params) {
 
 (function($) {
     $(document).ready(function() {
-        $('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
+        $('li.groups-add-item a').click(Omeka.Groups.toggleGroupSelection);
+        $('.add-to-groups').click(Omeka.Groups.addItemsToGroup);
+        // $('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
         $('span.groups-item-remove').click(Omeka.Groups.removeItemFromGroup);
         $('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
         $('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);

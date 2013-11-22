@@ -13,7 +13,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         if(!$this->_user || empty($this->_groups) || !$this->_item) {
             return;
         }
-        $html = "<div class='groups-add-item'>";
+        /* $html = "<div class='groups-add-item'>";
         $html .= "<h2>" . metadata($this->_item, array('Dublin Core', 'Title')) . " groups</h2>";
         $html .= "<ul id='groups-add-item'>";
         debug(count($this->_groups));
@@ -30,7 +30,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
             }
         }
         $html .= "</ul></div>";
-        return $html;
+        return $html; */
     }
 
     protected function _setOptions($options)

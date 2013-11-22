@@ -111,7 +111,7 @@ function groups_membership_requested_admin($membership, $group)
 function groups_groups_for_item($item = null)
 {
     if(!$item) {
-        $item = get_current_item();
+        $item = get_current_record('item');
     }
     $db = get_db();
     $params = array(
