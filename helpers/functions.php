@@ -68,26 +68,26 @@ function groups_invitations_for_user($user = null)
     if(!$user) {
         $user = current_user();
     }
-    
+
     if(!$user) {
         return array();
     }
 
     $db = get_db();
     return $db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));
-    
+
 }
 
 function groups_confirmations_for_user($user = null)
 {
     if(!$user) {
         $user = current_user();
-    }    
+    }
     if(!$user) {
         return array();
-    }    
+    }
     $db = get_db();
-    return $db->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));        
+    return $db->getTable('GroupConfirmation')->findBy(array('user_id'=>$user->id));
 }
 
 function groups_membership_requested_admin($membership, $group)
@@ -96,7 +96,7 @@ function groups_membership_requested_admin($membership, $group)
     $params = array('membership_id'=>$membership->id,
                     'group_id'=>$group->id,
                     'type'=>'make_admin');
-    
+
     $confirmations = $db->getTable('GroupConfirmation')->findBy($params);
     return !empty($confirmations);
 }
@@ -118,22 +118,18 @@ function groups_groups_for_item($item = null)
         'hasItem'=>$item
     );
     $groups = $db->getTable('Group')->findBy($params);
-
     //need to filter out permissions to view items in the group
     //if you can't see the items in the group, you shouldn't see a link to the group from an item
     //can't see a way to do it via filters on the sql
     $currentUser = current_user();
-    $acl = Omeka_Context::getInstance()->acl;
+    $acl = Zend_Registry::get('bootstrap')->getResource('Acl');
     $assertion = new GroupsAclAssertion;
     foreach($groups as $index=>$group) {
-
         if(! $assertion->assert($acl, $currentUser, $group, 'items')) {
             unset($groups[$index]);
         }
     }
     return $groups;
-
-
 }
 
 function groups_role_confirm($group = null, $membership=null, $role = 'admin')
@@ -141,18 +137,18 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     if(!$group) {
         $group = groups_get_current_group();
     }
-    
+
     if(!$membership) {
         $membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
     if(!$membership->exists()) {
         return false;
     }
-    
+
     $confirmationTable = get_db()->getTable('GroupConfirmation');
     $count = $confirmationTable->count(array('group_id'      => $group->id,
                                              'membership_id' => $membership->id,
-                                             'type'          => $role            
+                                             'type'          => $role
     ));
 
     return $count;
