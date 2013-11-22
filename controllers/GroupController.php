@@ -11,7 +11,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         } else {
             $this->_browseRecordsPerPage = get_option('per_page_admin');
         }
-        
+
         $this->_helper->db->setDefaultModelName('Group');
 //@TODO: check if I really need to muck about with the contexts
         $ajaxContext = $this->_helper->getHelper('AjaxContext');
@@ -25,7 +25,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     }
 
     public function browseAction()
-    {   
+    {
         $this->view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
         if(get_option('groups_taggable')) {
             $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
@@ -41,14 +41,14 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
         $form = new GroupForm();
         $this->view->form = $form;
-           
+
         // Check if the form was submitted.
         if ($this->getRequest()->isPost()) {
             $group = new Group();
             $group->setPostData($_POST);
             $currentUser = current_user();
             $group->owner_id = $currentUser->id;
-            
+
             // Save the record. Passing false prevents thrown exceptions.
             if ($group->save(false)) {
                 $group->addMember($currentUser, false, 'is_owner');
@@ -61,9 +61,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             } else {
                 $this->_helper->flashMessenger($group->getErrors());
             }
-        }        
+        }
     }
-    
+
     public function editAction()
     {
         require_once GROUPS_PLUGIN_DIR . '/forms/group.php';
@@ -75,7 +75,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }
         $form->setDefaults($defaults);
         $this->view->form = $form;
-        $this->view->group = $group;    
+        $this->view->group = $group;
         if($this->getRequest()->isPost()) {
             $group->setPostData($_POST);
             $group->save();
@@ -99,12 +99,12 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function manageAction()
     {
         $group = $this->_helper->db->findById();
-        
+
         if(!empty($_POST)) {
             if(!empty($_POST['emails'])) {
                 $this->handleInvitations();
             }
-                        
+
             if(empty($_POST['groups'])) {
                 //all the notifications have been unchecked
                 $membership = groups_get_membership($group);
@@ -113,27 +113,27 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 $membership->notify_member_left = 0;
                 $membership->notify_item_deleted = 0;
                 $membership->save();
-            }        
+            }
             $this->_handleMembershipStatus();
             $this->_handleAdministration();
             $this->_handleUnblocks();
-            $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);            
+            $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);
         }
         $this->view->blocked_users = $this->_helper->db->getTable('GroupBlock')->findBy(array('blocker_id'=>$group->id, 'blocker_type'=>'Group'));
         $this->view->group = $group;
         $this->view->user_membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
-    
+
     public function joinAction()
     {
         $user =  current_user();
-        $group = $this->_helper->db->findById(); 
+        $group = $this->_helper->db->findById();
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
-        $to = $group->getMembersForNotification('notify_member_joined');        
+        $to = $group->getMembersForNotification('notify_member_joined');
         try {
             $group->sendNewMemberEmail($user, $to);
-        } catch (Exception $e) {            
+        } catch (Exception $e) {
             $responseArray = array('status'=>'error');
         }
         $group->addMember($user);
@@ -144,7 +144,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     {
         $user =  current_user();
         $group = $this->_helper->db->findById();
-        $group->removeMember($user);        
+        $group->removeMember($user);
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
 
@@ -154,7 +154,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         } catch (Exception $e) {
             $responseArray = array('status'=>'error');
         }
-        
+
         $this->_helper->json($response);
     }
 
@@ -173,7 +173,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             $group->sendPendingMemberEmail($user, $to);
         } catch (Exception $e) {
             $responseArray = array('status'=>'error');
-        }        
+        }
         $response = json_encode($responseArray);
         $this->_helper->json($response);
     }
@@ -190,12 +190,12 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     {
         $userId = $_POST['userId'];
         $groupId = $_POST['groupId'];
-        $user = $this->_helper->db->getTable('User')->find($userId);        
-        $group = $this->_helper->db->getTable()->find($groupId);        
+        $user = $this->_helper->db->getTable('User')->find($userId);
+        $group = $this->_helper->db->getTable()->find($groupId);
         $group->approveMember($user);
         $responseArray = array('status'=>'ok');
         $response = json_encode($responseArray);
-        
+
         $group->sendMemberApprovedEmail($user);
         $this->_helper->json($response);
     }
@@ -206,7 +206,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $user = get_db()->getTable('User')->find($userId);
         $group= $this->_helper->db->findById();
         $group->removeMember($user);
-        $response = array('status'=>'ok');        
+        $response = array('status'=>'ok');
         $to = $group->getMembersForNotification('notify_member_left');
         $group->sendMemberLeftEmail($user, $to);
         $this->_helper->json($response);
@@ -216,8 +216,19 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     {
         $commentId = $this->getRequest()->getParam('comment');
         $group = $this->_helper->db->findById();
-        $group->removeComment($commentId);     
-        $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);   
+        $group->removeComment($commentId);
+        $this->_helper->redirector->gotoUrl('groups/show/' . $group->id);
+    }
+
+    public function removeItemAction()
+    {
+        $responseJson = array();
+        $itemId = $this->getRequest()->getParam('itemId');
+        $groupId = $this->getRequest()->getParam('groupId');
+        $group = $this->_helper->db->getTable()->find($groupId);
+        $item = $this->_helper->db->getTable('Item')->find($itemId);
+        $group->removeItem($itemId);
+        $this->_helper->json($responseJson);
     }
 
     public function myGroupsAction()
@@ -225,12 +236,12 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $user = current_user();
         $params = array(
                 'user' => $user
-        );     
+        );
 
         if(!empty($_POST['blocks'])) {
             $groupInvitationTable = $this->_helper->db->getTable('GroupInvitation');
             foreach($_POST['blocks'] as $id=>$values) {
-                
+
                 $invitation = $groupInvitationTable->find($id);
                 foreach($values as $value) {
                     switch($value) {
@@ -242,7 +253,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             $block->blocker_type = 'User';
                             $block->save();
                             break;
-                    
+
                         case 'block-group':
                             $block = new GroupBlock();
                             $block->blocked_id = $invitation->group_id;
@@ -250,29 +261,29 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             $block->blocked_type = 'Group';
                             $block->blocker_type = 'User';
                             $block->save();
-                            break;     
-                    }                    
+                            break;
+                    }
                 }
             }
-        }        
-        
+        }
+
         if(!empty($_POST['invitations'])) {
             $groupInvitationTable = $this->_helper->db->getTable('GroupInvitation');
             foreach($_POST['invitations'] as $id=>$value) {
-                
+
                 $invitation = $groupInvitationTable->find($id);
                 switch($value) {
                     case 'join':
                         $invitation->Group->addMember($user);
                         $to = $invitation->Group->getMembersForNotification('notify_member_joined');
-                        $invitation->Group->sendNewMemberEmail($user, $to);                            
+                        $invitation->Group->sendNewMemberEmail($user, $to);
                         break;
-                        
-                    case 'decline':                        
+
+                    case 'decline':
                         $to = $this->getTable('User')->find($invitation->sender_id);
-                        $invitation->Group->sendInvitationDeclinedEmail($user, $to);                                                    
-                        break;          
-                                
+                        $invitation->Group->sendInvitationDeclinedEmail($user, $to);
+                        break;
+
                     case 'request':
                         $invitation->Group->addMember($user, 1);
                         break;
@@ -283,19 +294,19 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
 
         $this->_handleMembershipStatus();
 
-        $groups = $this->_helper->db->getTable('Group')->findBy($params);        
-        $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));        
+        $groups = $this->_helper->db->getTable('Group')->findBy($params);
+        $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));
         $this->view->groups = $groups;
         $this->view->invitations = $invitations;
     }
-    
+
     public function administrationAction()
     {
         $user = current_user();
         $this->_handleUnblocks();
         $this->_handleAdministration();
         $groups = $this->_helper->db->getTable('GroupMembership')->findGroupsBy(array('user_id'=>$user->id, 'is_pending'=>0, 'admin_or_owner'=>true));
-        $this->view->groups = $groups;        
+        $this->view->groups = $groups;
     }
 
     public function invitationsAction()
@@ -308,9 +319,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
         }
         $this->_handleInvitations();
-        $this->view->groups = $groups;        
+        $this->view->groups = $groups;
     }
-    
+
     public function addItemAction()
     {
         $responseJson = array();
@@ -324,13 +335,12 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         } else {
             $responseJson['status'] = 'fail';
         }
-        $response = json_encode($responseJson);
-        
-        $to = $group->getMembersForNotification('notify_item_new');  
-        $group->sendNewItemEmail($item, $to, current_user());        
-        $this->_helper->json($response);
+
+        $to = $group->getMembersForNotification('notify_item_new');
+        $group->sendNewItemEmail($item, $to, current_user());
+        $this->_helper->json($responseJson);
     }
-    
+
     private function _handleAdministration()
     {
         $confirmationTable = $this->_helper->db->getTable('GroupConfirmation');
@@ -349,9 +359,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                 $block->blocked_type = 'User';
                                 $block->blocker_id = $groupId;
                                 $block->blocker_type = 'Group';
-                                $block->save();                                
+                                $block->save();
                                 break;
-                                
+
                             case 'unblock':
                                 $blocks = $blockTable->findBy(array('blocked_id'=>$user_id,
                                                           'blocked_type'=>'User',
@@ -367,10 +377,10 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
 
                 }
             }
-            if(isset($_POST['membership'])) {                
+            if(isset($_POST['membership'])) {
                 foreach($_POST['membership'] as $groupId=>$memberships) {
                     $group = $this->_helper->db->findById($groupId);
-                    foreach($memberships as $membershipId=>$action) {                       
+                    foreach($memberships as $membershipId=>$action) {
                         $membership = $groupMembershipTable->find($membershipId);
                         switch($action) {
                             case 'remove':
@@ -378,13 +388,13 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                 $to = $group->getMembersForNotification('notify_member_left');
                                 $group->sendMemberLeftEmail($membership->User, $to);
                                 break;
-        
+
                             case 'deny':
                                 $group->denyMembership($membership);
                                 $to = $membership->User;
                                 $group->sendMemberDeniedEmail($to);
                                 break;
-        
+
                             case 'approve':
                                 $group->approveMember($membership);
                                 $to = $group->getMembersForNotification('notify_member_joined');
@@ -394,19 +404,19 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                     }
                 }
             }
-        
+
             if(isset($_POST['status'])) {
                 foreach($_POST['status'] as $groupId=>$memberships) {
                     foreach($memberships as $membershipId=>$action) {
                         $membership = $this->_helper->db->getTable('GroupMembership')->find($membershipId);
-                        if($membership) {   
-                                                                             
+                        if($membership) {
+
                             switch($action) {
                                 case 'member':
                                     $membership->is_admin = 0;
                                     $membership->is_owner = 0;
                                     break;
-        
+
                                 case 'admin':
                                     if(!$membership->is_admin) {
                                         $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId));
@@ -421,18 +431,18 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                                     $confirmation->delete();
                                                     break;
                                             }
-                                            
-                                            
+
+
                                         } else {
                                             $confirmation->group_id = $groupId;
                                             $confirmation->membership_id = $membershipId;
-                                            $confirmation->type = 'is_admin';                                             
+                                            $confirmation->type = 'is_admin';
                                             $this->_helper->flashMessenger($membership->User->name . " must accept becoming an administrator for the changes to take effect.");
-                                            $confirmation->save();                                            
-                                        }                                     
+                                            $confirmation->save();
+                                        }
                                     }
                                     break;
-        
+
                                 case 'owner':
                                     if(!$membership->is_owner) {
                                         $confirmation = $confirmationTable->findOrNew(array('group_id'=>$groupId, 'membership_id'=>$membershipId, 'type'=>'is_owner'));
@@ -451,14 +461,14 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             if($confirmation && !$confirmation->exists()) {
                                 $membership->Group->sendChangeStatusEmail($membership->User, $action);
                             }
-                            
+
                         }
                     }
                 }
-            }        
-        }        
+            }
+        }
     }
-    
+
     private function _handleInvitations()
     {
         $sender = current_user();
@@ -470,11 +480,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             $blocksTable = $this->_helper->db->getTable('GroupBlock');
             $nonUserEmails = array();
             $alreadyMemberEmails = array();
-            foreach($_POST['invite_groups'] as $groupId) {             
+            foreach($_POST['invite_groups'] as $groupId) {
                 $group = $this->_helper->db->getTable()->find($groupId);
                 $groupEmails = array();
                 foreach($emails as $index=>$email) {
-                    $email = trim($email);        
+                    $email = trim($email);
                     $user = $userTable->findByEmail(trim($email));
                     if(!$user) {
                         //$email might actually be a username
@@ -482,21 +492,21 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                         $select->where("username = ?", $email);
                         $select->where("active = 1");
                         $select->limit(1);
-                        $user = $userTable->fetchObject($select);                        
+                        $user = $userTable->fetchObject($select);
                     }
                     if($user) {
                         if($group->hasMember($user)) {
-                            $this->_helper->flashMessenger("{$user->name} ({$user->username}) is already a member of {$group->title}.", 'error');     
+                            $this->_helper->flashMessenger("{$user->name} ({$user->username}) is already a member of {$group->title}.", 'error');
                         } else {
                             if($invitationTable->findInvitationToGroup($groupId, $user->id, $sender->id)) {
                                 $this->_helper->flashMessenger("You have already invited {$user->name} ({$user->username}) to {$group->title}", 'error');
-                            } else {                
-                                $userBlocks = $blocksTable->count(array('blocker_id'=>$user->id, 
-                                                                        'blocked_id'=>$sender->id, 
+                            } else {
+                                $userBlocks = $blocksTable->count(array('blocker_id'=>$user->id,
+                                                                        'blocked_id'=>$sender->id,
                                                                         'blocked_type'=>'User',
                                                                         'blocker_type'=>'User'));
-                                $groupBlocks = $blocksTable->count(array('blocker_id'=>$user->id, 
-                                                                         'blocked_id'=>$group->id, 
+                                $groupBlocks = $blocksTable->count(array('blocker_id'=>$user->id,
+                                                                         'blocked_id'=>$group->id,
                                                                          'blocked_type'=>'Group',
                                                                          'blocker_type'=>'User'));
                                 if($userBlocks == 0 && $groupBlocks == 0) {
@@ -516,7 +526,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                 }
                             }
                         }
-        
+
                     } else {
                         $nonUserEmails[] = $email;
                         $this->_helper->flashMessenger($email . " is not a member of the Omeka Commons.", 'error');
@@ -538,11 +548,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
             }
         }
     }
-    
+
     private function _handleMembershipStatus()
     {
         if(!empty($_POST['groups'])) {
-            foreach($_POST['groups'] as $id=>$options) {                
+            foreach($_POST['groups'] as $id=>$options) {
                 $group = $this->_helper->db->findById($id);
                 $membership = $group->getMembership(array('user_id'=>current_user()->id));
                 $membership->unsetOptions();
@@ -561,21 +571,21 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                     $confirmation->save();
                                     break;
                             }
-                            
+
                             break;
-        
+
                         case "submitted":
                             //do nothing, just here to make the $_POST arrive when nothing is checked
                             break;
-        
-                            
+
+
                         case "admin":
-                        case "owner":                       
+                        case "owner":
                             //allow admins to quit being an admin
                             if($value == 'decline' && $option == 'admin') {
                                 $membership->is_admin = 0;
                             }
-                            
+
                             if($value != 'decline') {
                                 //make the previous owner no longer the owner
                                 if($value == 'is_owner') {
@@ -586,30 +596,30 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                 }
                                 $membership->$value = 1;
                             }
-                            
+
                             if($confirmation = $membership->getConfirmation('is_' . $option)) {
-                                $confirmation->delete();                                
-                            }    
-                            
-                            
+                                $confirmation->delete();
+                            }
+
+
                             break;
-                            
+
                         default:
                             $membership->$option = 1;
                             break;
                     }
-                }     
+                }
                 if($membership->exists()) {
                     $membership->save();
                 }
 
             }
-        }        
+        }
     }
-    
+
     private function _handleUnblocks()
     {
-        
+
         if(!empty($_POST['unblocks'])) {
             $blocksTable = $this->_helper->db->getTable('GroupBlock');
             foreach($_POST['unblocks'] as $groupId=>$userId) {

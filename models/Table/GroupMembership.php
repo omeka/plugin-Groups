@@ -10,18 +10,18 @@ class Table_GroupMembership extends Omeka_Db_Table
             $select->where("$alias.is_owner = 1 OR $alias.is_admin = 1");
         }
     }
-    
+
     /**
-     * 
-     * 
+     *
+     *
      * @param mixed $group Group or group id
-     * @param string $notification The name of an available notification. One of 
+     * @param string $notification The name of an available notification. One of
      *      notify_member_joined
      *      notify_item_new
      *      notify_member_pending
      *      notify_member_left
      *      notify_item_deleted
-     *  
+     *
      */
 
     public function findUsersForNotification($group, $notification)
@@ -32,21 +32,21 @@ class Table_GroupMembership extends Omeka_Db_Table
             $groupId = $group->id;
         }
         $alias = $this->getTableAlias();
-        $db = $this->getDb();        
+        $db = $this->getDb();
         $userTable = $this->getTable('User');
         $userTableAlias = $userTable->getTableAlias();
         $select = $userTable->getSelect();
         $select->join(array($alias=>$db->GroupMembership), "$userTableAlias.id = $alias.user_id", array());
         $select->where("$alias.group_id = $groupId");
-        $select->where("$alias.$notification = 1");                
-        return $userTable->fetchObjects($select);        
+        $select->where("$alias.$notification = 1");
+        return $userTable->fetchObjects($select);
     }
 
     /**
      * Find the Users corresponding to the GroupMemberships
      * @param array $params
      */
-    
+
     public function findUsersBy($params = array(), $sort = array())
     {
         $db = $this->getDb();
@@ -59,10 +59,10 @@ class Table_GroupMembership extends Omeka_Db_Table
         if(!empty($sort)) {
             $userTable->applySorting($select, $sort['sort_field'], $sort['sort_dir']);
         }
-        
+
         return $userTable->fetchObjects($select);
     }
-    
+
     public function findGroupsBy($params = array())
     {
         $db = $this->getDb();
@@ -73,7 +73,7 @@ class Table_GroupMembership extends Omeka_Db_Table
 
         $select->join(array($alias=>$db->GroupMembership), "$groupTableAlias.id = $alias.group_id", array());
         $this->applySearchFilters($select, $params);
-        return $groupTable->fetchObjects($select);        
-    }    
-    
+        return $groupTable->fetchObjects($select);
+    }
+
 }

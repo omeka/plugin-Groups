@@ -4,8 +4,17 @@ if(typeof Omeka === 'undefined') {
 
 Omeka.Groups = {
 
+    removeItemFromGroup: function() {
+        console.log(this.parentNode.id);
+        splitId = this.id.split('-');
+        splitUrl = window.location.pathname.split('/');
+        groupId = splitId[splitId.length - 1];
+        itemId = splitUrl[splitUrl.length - 1];
+        jQuery.post(Omeka.webRoot + '/groups/remove-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.removeItemResponse);        
+        
+    },
+        
     addItemToGroup: function() {
-
         splitId = this.id.split('-');
         splitUrl = window.location.pathname.split('/');
         groupId = splitId[splitId.length - 1];
@@ -13,8 +22,7 @@ Omeka.Groups = {
         jQuery.post(Omeka.webRoot + '/groups/add-item', {'groupId': groupId, 'itemId':itemId}, Omeka.Groups.addItemResponse);
     },
 
-    addItemResponse: function(response, a, b) {
-        var responseJson = JSON.parse(response);
+    addItemResponse: function(responseJson, a, b) {
         if(responseJson.groupId) {
             li = jQuery('li#groups-id-' + responseJson.groupId);
             li.attr('class', 'groups-item-exists');
@@ -152,6 +160,7 @@ Omeka.Groups.wysiwyg = function (params) {
 (function($) {
     $(document).ready(function() {
         $('li.groups-item-add').click(Omeka.Groups.addItemToGroup);
+        $('span.groups-item-remove').click(Omeka.Groups.removeItemFromGroup);
         $('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
         $('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
         $('input.groups-membership-options').click(Omeka.Groups.toggleSecondaryAdminOptions);

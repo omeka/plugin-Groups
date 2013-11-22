@@ -5,7 +5,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public $id;
     public $title;
     public $description;
-    public $visibility;    
+    public $visibility;
     public $owner_id;
 
     protected $_related = array('Tags' => 'getTags', 'Items'=>'getItems');
@@ -31,16 +31,16 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
                     $membership->is_admin = 1;
                     $membership->is_owner = 0;
                     break;
-                    
+
                 case 'is_owner':
                     $membership->is_admin = 1;
                     $membership->is_owner = 1;
                     break;
-                    
+
                 default:
                     $membership->is_admin = 0;
                     $membership->is_owner = 0;
-                break;   
+                break;
             }
             $membership->save();
             return $membership;
@@ -54,7 +54,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $membership = $this->getMembership(array('user_id'=>$user->id));
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
-        }        
+        }
         $membership->delete();
     }
 
@@ -65,7 +65,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
         }
-        
+
         $membership->is_pending = false;
         $membership->save();
     }
@@ -76,10 +76,10 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $membership = $this->getMembership(array('user_id'=>$user->id));
         } elseif($user instanceof GroupMembership) {
             $membership = $user;
-        }        
+        }
         $membership->delete();
     }
-    
+
     public function addItem($item)
     {
         if(is_numeric($item)) {
@@ -96,8 +96,11 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
 
     public function removeItem($item)
     {
+        if(is_numeric($item)) {
+            $item = $this->getTable('Item')->find($item);
+        }
         $params = $this->buildParams($item, DCTERMS, 'references');
-        $rel = get_db()->getTable('RecordRelationsRelation')->findOne($params);        
+        $rel = $this->getTable('RecordRelationsRelation')->findOne($params);
         $rel->delete();
     }
 
@@ -133,7 +136,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $params['group_id'] = $this->id;
         }
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id), $sort);
-    }    
+    }
 
     public function getProperty($property)
     {
@@ -141,20 +144,20 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             case 'members_count':
                 return $this->getTable('GroupMembership')->count(array('group_id'=>$this->id, 'is_pending'=>false));
                 break;
-            
+
             case 'items_count':
                 $params = $this->buildParams('Item', DCTERMS, 'references');
-                return get_db()->getTable('RecordRelationsRelation')->count($params);                
+                return get_db()->getTable('RecordRelationsRelation')->count($params);
                 break;
-                
+
             case 'visibility':
                 return ucfirst($this->visibility);
                 break;
-            default: 
+            default:
                 return parent::getProperty($property);
         }
     }
-    
+
     public function hasMember($user)
     {
         if(!$user) {
@@ -183,7 +186,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         return get_db()->getTable('GroupMembership')->findUsersBy(array('group_id'=>$this->id, 'is_pending'=>true));
     }
-    
+
     public function removeComment($commentId)
     {
         $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
@@ -193,7 +196,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
                     'object_record_type' => 'Comment',
                     'object_id' => $commentId,
                     'property_id' => $ownsComment->id
-                );        
+                );
         $rels = get_db()->getTable('RecordRelationsRelation')->findBy($params);
         $rel = $rels[0];
         $rel->delete();
@@ -217,21 +220,21 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         $subject = "A new member wants to join {$this->title} on " . get_option('site_title');
         $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
-        $this->sendEmails($to, $subject, $body);        
+        $this->sendEmails($to, $subject, $body);
     }
-    
+
     public function sendNewMemberEmail($user, $to=null)
     {
         $subject = "A new member has joined {$this->title} on " . get_option('site_title');
         $body = "A new member {$user->name} has joined the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on " . get_option('site_title');
-        $this->sendEmails($to, $body, $subject);     
+        $this->sendEmails($to, $body, $subject);
     }
 
     public function sendMemberLeftEmail($user, $to=null)
     {
         $subject = "A member has left {$this->title} on " . get_option('site_title');
         $body = "{$user->name} has left the <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on" . get_option('site_title');
-        $this->sendEmails($to, $body, $subject);                
+        $this->sendEmails($to, $body, $subject);
     }
 
     public function sendNewItemEmail($item, $to = null, $user)
@@ -247,35 +250,35 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $body = "Your request to join {$this->title} on Omeka Commons has been approved. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
         $subject = "Your request to join {$this->title} on Omeka Commons has been approved!";
-        $this->sendEmails($user, $body, $subject);        
+        $this->sendEmails($user, $body, $subject);
     }
 
-    public function sendMemberDeniedEmail($user) 
-    {        
+    public function sendMemberDeniedEmail($user)
+    {
         $body = "Your request to join {$this->title} on Omeka Commons has been denied. ";
         $body .= "<a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a>";
         $subject = "Your request to join {$this->title} on Omeka Commons has been denied";
-        $this->sendEmails($user, $body, $subject);       
+        $this->sendEmails($user, $body, $subject);
     }
-    
+
     public function sendChangeStatusEmail($to, $newStatus)
     {
         switch ($newStatus) {
             case 'member':
                 return;
                 break;
-                
+
             case 'admin':
                 $newStatus = 'administrator';
-                break;            
+                break;
         }
-        
+
         $body = "An administrator of {$this->title} on Omeka Commons has asked you to become an $newStatus.";
         $body .= "<a href='" . WEB_ROOT . "/groups/manage/" . $this->id . "'>{$this->title}</a>";
         $subject = "You have been asked to become an $newStatus in {$this->title}";
         $this->sendEmails($to, $body, $subject);
     }
-    
+
     public function sendInvitationEmail($to, $message, $sender)
     {
         $subject = "An invitation to join the group '{$this->title}' on " . get_option('site_title');
@@ -287,14 +290,14 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $this->sendEmails($email, $body, $subject);
         }
     }
-    
+
     public function sendInvitationDeclinedEmail($user, $to)
     {
         $body = "<p>{$user->name} has declined your invitation to join {$this->title} ";
         $subject = "You're invitation to {$user->name} to join {$this->title} was declined";
         $this->sendEmails($email, $body, $subject );
     }
-    
+
     private function sendEmail($to, $body, $subject)
     {
         if(is_string($to)) {
@@ -304,27 +307,27 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         if($to instanceOf User) {
             $email = $to->email;
             _log('is user');
-        }        
+        }
         if($to instanceOf GroupMember) {
             $email = $to->User->email;
             _log('is groupmember');
         }
         _log($email);
-        
+
         $mail = new Zend_Mail();
         $mail->addHeader('X-Mailer', 'PHP/' . phpversion());
         $mail->setFrom(get_option('administrator_email'), get_option('site_title'));
         $mail->addTo($email);
         $mail->setSubject($subject);
-        $mail->setBodyHtml($body);        
+        $mail->setBodyHtml($body);
         try {
             $mail->send();
         } catch(Exception $e) {
             _log($e);
         }
     }
-    
-    private function sendEmails($to, $body, $subject) 
+
+    private function sendEmails($to, $body, $subject)
     {
         if(is_array($to)) {
             foreach($to as $user) {
@@ -370,19 +373,19 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
      *      notify_member_left
      *      notify_item_deleted
      *
-     */    
-    
+     */
+
     public function getMembersForNotification($notification)
     {
         return get_db()->getTable('GroupMembership')->findUsersForNotification($this, $notification);
     }
-    
+
     public function getMembership($params=array())
     {
         if(!isset($params['group_id'])) {
             $params['group_id'] = $this->id;
         }
-        
+
         //if the current user has high enough role on the site (Super or Admin),
         //give an owner membership
         $currentUser = current_user();
@@ -396,28 +399,28 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $ownerMembership->id = null;
             return $ownerMembership;
         }
-        
+
         $array = $this->getTable('GroupMembership')->findBy($params, 1);
         return isset($array[0]) ? $array[0] : false;
     }
-    
+
     public function getMemberships($params = array())
     {
         if(!isset($params['group_id'])) {
             $params['group_id'] = $this->id;
         }
-        
+
         return $this->getTable('GroupMembership')->findBy($params);
     }
-    
+
     public function getBlockedUsers()
     {
         return $this->getTable('GroupBlock')->findBy(array('blocker_id'=>$this->id, 'blocker_type'=>'Group'));
     }
-    
-    public function getComments($record = null) 
+
+    public function getComments($record = null)
     {
-        
+
         $params = array(
                 'subject_record_type' => 'Group',
                 'object_record_type' => 'Comment',
@@ -429,15 +432,15 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         } else {
             $objectParams = array('groups_skip_hook'=>true);
         }
-        
-        return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), $objectParams);                
-    }    
-    
+
+        return get_db()->getTable('RecordRelationsRelation')->findObjectRecordsByParams($params, array(), $objectParams);
+    }
+
     public function getResourceId()
     {
         return 'Groups_Group';
     }
-    
+
     public function visibilityText()
     {
         switch(metadata($this, 'visibility')) {
@@ -450,6 +453,6 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             case 'Closed':
                 return "Approval is required to join; items only visible to members";
                 break;
-        }        
+        }
     }
 }

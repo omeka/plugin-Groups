@@ -11,7 +11,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'delete',
             'show'
             );
-    
+
     private $_openPrivileges = array(
                 'items',
                 'join',
@@ -22,7 +22,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
     private $_publicPrivileges = array(
                 'items',
-                'request'            
+                'request'
                 );
 
     private $_memberPrivileges = array(
@@ -31,7 +31,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                 'quit',
                 'manage'
                 );
-    
+
     private $_adminPrivileges = array(
             'add-item',
             'items',
@@ -45,7 +45,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'block',
             'unblock',
             'remove-comment',
-            'quit'
+            'quit',
+            'remove-item'
             );
 
     private $_ownerPrivileges = array(
@@ -63,29 +64,30 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             'block',
             'unblock',
             'remove-comment',
-    );    
-    
+            'remove-item'
+    );
+
     public function assert(Zend_Acl $acl,
                            Zend_Acl_Role_Interface $role = null,
                            Zend_Acl_Resource_Interface $resource = null,
                            $privilege = null)
-    {    
+    {
         $db = get_db();
         //if I'm passing in a groupId, dig that up to check permissions against that group
         //otherwise all that it checks against is the general 'Groups_Group' resource
 
         //sometimes we get a Group for the resource, sometimes just the Zend_Acl_Resource_Interface
         //AJAX requests like addItem pass up a groupId to check permissions on, so dig that up if it is set
-        
+
         if(isset($_POST['groupId'])) {
             $resource = $db->getTable('Group')->find($_POST['groupId']);
         }
-        
+
         //always get to my-groups
         if($privilege == 'my-groups') {
             return true;
-        }                      
-        
+        }
+
         if(get_class($resource) == 'Group') {
             $arrayName = '_' . $resource->visibility . "Privileges";
             if($role) {
@@ -98,12 +100,12 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                         'blocker_type'=>'Group'
                 );
                 $block = $blockTable->count($blockParams);
-                
+
                 //forbid all but owner to private groups
                 if($resource->visibility == 'private' && ($resource->getOwner()->id != $role->id)) {
                     return false;
                 }
-                
+
             } else {
                 switch($privilege) {
                     case 'items':
@@ -116,7 +118,7 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
             }
 
             switch($privilege) {
-                
+
                 case 'join':
                     if($block) {
                         return false;
@@ -129,41 +131,41 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
                         if($senderMembership->is_owner || $senderMembership->is_admin) {
                             return true;
                         }
-                    }                
+                    }
                     break;
-                    
+
                 case 'request' :
                     if($block) {
                         return false;
                     }
                     break;
-                
+
                 case 'invitations':
                     //can send an invitation if group is open, or user is owner or admin
                     if($membership && $resource->visibility == 'open') {
-                        return true;                    
+                        return true;
                     } else {
                          if($membership) {
                              return $membership->is_admin || $membership->is_owner;
-                         }                     
+                         }
                     }
                     break;
-                
+
                 case 'manage':
                     //if user has a membership, they can manage it
                     return $membership;
                     break;
-                
+
                 case 'quit':
                     //don't let owners quit on their flock
                     if($resource->getOwner()->id == $role->id) {
                         return false;
                     }
                     break;
-                            
+
             }
-                
-            if($membership) {                  
+
+            if($membership) {
                 if($membership->is_owner) {
                     if($resource->visibility == 'private') {
                         return in_array($privilege, $this->_privatePrivileges);
@@ -180,10 +182,10 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         }
         //check to see if there is a potential reason to give access. the controller will sort out details with has_permission()
         //rough pass, if user and is a member of any group
-        
-        
+
+
         $groups = groups_groups_for_user($role);
-        
+
         if(count($groups) != 0) {
             return true;
         }
