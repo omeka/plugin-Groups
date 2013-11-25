@@ -16,7 +16,6 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         $html = "<div class='groups-add-item'>";
         $html .= "<h2>" . metadata($this->_item, array('Dublin Core', 'Title')) . " groups</h2>";
         $html .= "<ul id='groups-add-item'>";
-        debug(count($this->_groups));
         foreach($this->_groups as $group) {
             if($group->hasItem($this->_item)) {
                 if(is_allowed($group, 'remove-item')) {
