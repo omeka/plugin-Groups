@@ -41,6 +41,7 @@ Omeka.Groups = {
                 jQuery(this).addClass('groups-item-exists');
             } else {
                 jQuery(this).addClass('groups-item-ineditable');
+                jQuery(this).removeClass('checked');
             }
         });
         jQuery('li.groups-item-exists').not('.checked').each(function() {
@@ -62,11 +63,14 @@ Omeka.Groups = {
     },
 
     addItemResponse: function(responseJson, a, b) {
-        if(responseJson.groupId) {
-            li = jQuery('li#groups-id-' + responseJson.groupId);
-            li.addClass('groups-item-exists');
+        var groupId = responseJson.groupId;
+        if(groupId) {
+            li = jQuery('li#groups-id-' + groupId);
             liName = li.find('a').first().text();
-            jQuery('#item-user-groups').append("<li id='item-user-group-" + responseJson.groupId + "'><a href='" + Omeka.webRoot + "/groups/show/" + responseJson.groupId + "'>" + liName + "</a>");
+            jQuery('#item-user-groups').append("<li id='item-user-group-" + responseJson.groupId + "'><a href='" + Omeka.webRoot + "/groups/show/" + groupId + "'>" + liName + "</a>");
+            if (!li.hasClass('admin')) {
+                li.html(liName);
+            }
             jQuery('.empty').removeClass('empty');
         }
     },
