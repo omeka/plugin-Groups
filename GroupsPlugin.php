@@ -206,6 +206,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $js .= "if(typeof(Omeka.webRoot) == 'undefined') {Omeka.webRoot = '" . WEB_ROOT . "';}";
         queue_js_string($js); 
         queue_js_file('groups');
+        queue_js_file('jquery.modal.min');
         queue_css_file('groups');
         queue_js_file('tiny_mce', 'javascripts/vendor/tiny_mce');
     }

@@ -22,7 +22,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 
     <?php echo $this->manageGroup($group); ?>
 
-    <p class="items"><span class="number"><?php echo metadata($group, 'items_count'); ?></span> items</p>
+    <p class="items"><?php echo link_to_items_browse(metadata($group, 'items_count'), array('group_id' => $group->id), array('class' => 'number')); ?> items</p>
 
     <p class="members"><span class="number"><?php echo metadata($group, 'members count');?></span> members</p>
 

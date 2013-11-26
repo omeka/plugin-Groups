@@ -227,7 +227,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $groupId = $this->getRequest()->getParam('groupId');
         $group = $this->_helper->db->getTable()->find($groupId);
         $item = $this->_helper->db->getTable('Item')->find($itemId);
-        $group->removeItem($itemId);
+        $responseJson['itemId'] = $itemId;
+        $responseJson['groupId'] = $groupId;
+        $group->removeItem($item);
         $this->_helper->json($responseJson);
     }
 
@@ -329,12 +331,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $groupId = $_POST['groupId'];
         $group = $this->_helper->db->getTable()->find($groupId);
         $item = $this->_helper->db->getTable('Item')->find($itemId);
-        if($group->addItem($itemId)) {
-            $responseJson['itemId'] = $itemId;
-            $responseJson['groupId'] = $groupId;
-        } else {
-            $responseJson['status'] = 'fail';
-        }
+        $responseJson['itemId'] = $itemId;
+        $responseJson['groupId'] = $groupId;
+        $group->addItem($item);
 
         $to = $group->getMembersForNotification('notify_item_new');
         $group->sendNewItemEmail($item, $to, current_user());
