@@ -7,12 +7,9 @@ Omeka.Groups = {
     toggleGroupSelection: function(e) {
         e.preventDefault();
         var groupCheckbox = jQuery(this).siblings('input[type=checkbox]');
-        console.log('click');
         if (groupCheckbox.is(":checked")) {
-            console.log('checked');
             groupCheckbox.removeAttr('checked');
         } else {
-            console.log('not checked');
             groupCheckbox.prop('checked', true);
         }
         jQuery(this).parent().toggleClass('checked');
@@ -28,7 +25,6 @@ Omeka.Groups = {
     },
     
     addItemToGroup: function(item) {
-        console.log('adding to groups');
         var groupId = item.attr('id');
         splitId = groupId.split('-');
         splitUrl = window.location.pathname.split('/');
@@ -52,12 +48,10 @@ Omeka.Groups = {
             jQuery(this).removeClass('groups-item-exists').addClass('groups-item-add');
         });
         jQuery('.groups-item-add a, .groups-item-exists a').unbind("click");
-        console.log('modified');
     },
     
     removeItemResponse: function(responseJson, a, b) {
         if(responseJson.groupId) {
-            console.log(responseJson);
             jQuery('#item-user-group-' + responseJson.groupId).remove();
             jQuery('.empty').removeClass('empty');
             var groupList = jQuery('#item-user-groups');
@@ -68,7 +62,6 @@ Omeka.Groups = {
     },
 
     addItemResponse: function(responseJson, a, b) {
-        console.log(responseJson);
         if(responseJson.groupId) {
             li = jQuery('li#groups-id-' + responseJson.groupId);
             li.addClass('groups-item-exists');
@@ -81,7 +74,6 @@ Omeka.Groups = {
     join: function() {
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
-        console.log(groupId);
         jQuery.post(Omeka.webRoot + '/groups/join/' + groupId, {'groupId' : groupId}, Omeka.Groups.joinResponse);
     },
 
@@ -241,13 +233,11 @@ Omeka.Groups.wysiwyg = function (params) {
         $('.launch-add-item').on('click', function() {
             currentStateClone = $('#user-groups').clone();
             $('.groups-item-add a, .groups-item-exists a').bind("click", Omeka.Groups.toggleGroupSelection);
-            console.log('actions bound');
         });
         
         $('.modal-header .close-button').on('click', function() {
             $('#user-groups').replaceWith(currentStateClone);
             $('.groups-item-add a, .groups-item-exists a').unbind("click");
-            console.log('success');
         });
     });
 })(jQuery)

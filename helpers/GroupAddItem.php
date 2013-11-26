@@ -29,7 +29,8 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         
         /* JS will use the empty class to determine which heading to show. */
         $emptyCheck = (count($itemUserGroups) < 1) ? 'empty' : '';
-        $html  = "<div class='groups-item-status {$emptyCheck}'>";
+        $html  = "<div id='group-actions'>";
+        $html .= "<div class='groups-item-status {$emptyCheck}'>";
         $html .= "<h3>" . __('%s is in your groups:', $itemTitle) . "</h3>";
         $html .= "<div class='item-user-groups'>";
         $html .= "<ul id='item-user-groups'>";
@@ -71,7 +72,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         }
         $html .= "</ul>";
         $html .= "<button class='add-to-groups close-button'>" . __('Select Groups') . "</button>";
-        $html .= "</div></div>";
+        $html .= "</div></div></div>";
         return $html;
     }
 
