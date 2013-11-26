@@ -212,32 +212,34 @@ Omeka.Groups.wysiwyg = function (params) {
         $('p.groups-join-button').click(Omeka.Groups.join);
         $('.visibility').after('<span class="more-info">?</span>');
 
-        $('.launch-add-item').modal({
-            trigger: '.launch-add-item',
-            olay:'div.overlay',             // id or class of overlay
-            animationSpeed: 400,            // speed of overlay in milliseconds | default=400
-            moveModalSpeed: 'slow',         // speed of modal movement when window is resized | slow or fast | default=false
-            background: '000000',           // hexidecimal color code - DONT USE #
-            opacity: 0.5,                   // opacity of modal |  0 - 1 | default = 0.8
-            openOnLoad: false,              // open modal on page load | true or false | default=false
-            docClose: false,                 // click document to close | true or false | default=true    
-            closeByEscape: true,            // close modal by escape key | true or false | default=true
-            moveOnScroll: true,             // move modal when window is scrolled | true or false | default=false
-            resizeWindow: true,             // move modal when window is resized | true or false | default=false
-            close:'.close-button'               // id or class of close button
-        });
-        
-        var currentStateClone = '';
-        $('.add-to-groups').bind("click", Omeka.Groups.modifyItemsInGroups);
-        
-        $('.launch-add-item').on('click', function() {
-            currentStateClone = $('#user-groups').clone();
-            $('.groups-item-add a, .groups-item-exists a').bind("click", Omeka.Groups.toggleGroupSelection);
-        });
-        
-        $('.modal-header .close-button').on('click', function() {
-            $('#user-groups').replaceWith(currentStateClone);
-            $('.groups-item-add a, .groups-item-exists a').unbind("click");
-        });
+        if ($('body').hasClass('items') && $('body').hasClass('show')) {
+            $('.launch-add-item').modal({
+                trigger: '.launch-add-item',
+                olay:'div.overlay',             // id or class of overlay
+                animationSpeed: 400,            // speed of overlay in milliseconds | default=400
+                moveModalSpeed: 'slow',         // speed of modal movement when window is resized | slow or fast | default=false
+                background: '000000',           // hexidecimal color code - DONT USE #
+                opacity: 0.5,                   // opacity of modal |  0 - 1 | default = 0.8
+                openOnLoad: false,              // open modal on page load | true or false | default=false
+                docClose: false,                 // click document to close | true or false | default=true    
+                closeByEscape: true,            // close modal by escape key | true or false | default=true
+                moveOnScroll: true,             // move modal when window is scrolled | true or false | default=false
+                resizeWindow: true,             // move modal when window is resized | true or false | default=false
+                close:'.close-button'               // id or class of close button
+            });
+            
+            var currentStateClone = '';
+            $('.add-to-groups').bind("click", Omeka.Groups.modifyItemsInGroups);
+            
+            $('.launch-add-item').on('click', function() {
+                currentStateClone = $('#user-groups').clone();
+                $('.groups-item-add a, .groups-item-exists a').bind("click", Omeka.Groups.toggleGroupSelection);
+            });
+            
+            $('.modal-header .close-button').on('click', function() {
+                $('#user-groups').replaceWith(currentStateClone);
+                $('.groups-item-add a, .groups-item-exists a').unbind("click");
+            });
+        }
     });
 })(jQuery)
