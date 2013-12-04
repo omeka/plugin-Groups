@@ -154,6 +154,12 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     return $count;
 }
 
+function get_random_featured_groups($num)
+{
+    return get_records('Group', array('featured' => 1, 'sort_field' => 'random'), $num);
+
+}
+
 /* Commenting-related functions */
 
 /**

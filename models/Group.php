@@ -7,6 +7,8 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public $description;
     public $visibility;
     public $owner_id;
+    public $public;
+    public $featured;
 
     protected $_related = array('Tags' => 'getTags', 'Items'=>'getItems');
 
@@ -15,6 +17,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $this->_mixins[] = new Mixin_Tag($this);
         $this->_mixins[] = new Mixin_Owner($this);
         $this->_mixins[] = new Mixin_Search($this);
+        $this->_mixins[] = new Mixin_PublicFeatured($this);
     }
 
     public function addMember($user, $pending = 0, $role = null)

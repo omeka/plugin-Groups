@@ -3,17 +3,29 @@
 class Table_Group extends Omeka_Db_Table
 {
     protected $_relationTable;
-    
+
+    public function applySorting($select, $sortField, $sortDir)
+    {
+        parent::applySorting($select, $sortField, $sortDir);
+        if ($sortField == 'random') {
+            $select->order('RAND()');
+        }
+    }
+
     public function applySearchFilters($select, $params)
     {
         if(isset($params['groupsSearch']) && !empty($params['groupsSearch'])) {
             $this->filterBySearch($select, $params['groupsSearch']);
         }
 
+        if(isset($params['featured'])) {
+            $select->where('featured = 1');
+        }
+
         if (isset($params['tag'])) {
             $this->filterByTags($select, $params['tag']);
         }
-        
+
         if(isset($params['tags'])) {
             $this->filterByTags($select, $params['tags']);
         }
@@ -50,12 +62,12 @@ class Table_Group extends Omeka_Db_Table
         $db = $this->getDb();
         //copied from ItemTable::filterByTags
         foreach ($tags as $tagName) {
-            
+
             $subSelect = new Omeka_Db_Select;
             $subSelect->from(array('records_tags'=>$db->RecordsTags), array('items.id'=>'records_tags.record_id'))
             ->joinInner(array('tags'=>$db->Tag), 'tags.id = records_tags.tag_id', array())
             ->where('tags.name = ? AND records_tags.`record_type` = "Group"', trim($tagName));
-            $select->where('groups.id IN (' . (string) $subSelect . ')');            
+            $select->where('groups.id IN (' . (string) $subSelect . ')');
         }
         $select->where('groups.id IN (' . (string) $subSelect . ')');
     }
@@ -75,12 +87,12 @@ class Table_Group extends Omeka_Db_Table
 
         $db = $this->getDb();
         $membershipAlias = $db->getTable('GroupMembership')->getTableAlias();
-        $alias = $this->getTableAlias();        
-        $select->join(array($membershipAlias=>$db->GroupMembership), 
+        $alias = $this->getTableAlias();
+        $select->join(array($membershipAlias=>$db->GroupMembership),
                         "$alias.id = $membershipAlias.group_id",
                         array()
                         );
-        $select->where("$membershipAlias.user_id = $userId");        
+        $select->where("$membershipAlias.user_id = $userId");
     }
 
     public function filterByHasItem($select, $item, $negate = false)
@@ -114,7 +126,7 @@ class Table_Group extends Omeka_Db_Table
         $select->where("MATCH (title, description) AGAINST ($quotedTerms)");
         //$tagsSelect = $this->getSelectForFindBy(array('tags'=>$terms));
         //copied from ItemTable::filterByTags
-        
+
 
         $tags = explode(get_option('tag_delimiter'), $terms);
         foreach ($tags as $tagName) {
@@ -125,5 +137,5 @@ class Table_Group extends Omeka_Db_Table
         }
         $select->orWhere('groups.id IN (' . (string) $subSelect . ')');
         */
-    }  
+    }
 }

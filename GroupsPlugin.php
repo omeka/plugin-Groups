@@ -8,13 +8,13 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_hooks = array(
         'install',
         'uninstall',
+        'upgrade',
         'define_acl',
         'define_routes',
         'public_head',
         'public_items_show',
         'public_content_top',
         'items_browse_sql',
-        //'admin_navigation_main',
         'commenting_append_to_form',
         'comment_browse_sql',
         'config',
@@ -24,7 +24,8 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array(
         'define_action_contexts',
         'public_navigation_main',
-        'search_record_types'
+        'search_record_types',
+        'admin_navigation_main',
       //  'blocks_notifications'
     );
 
@@ -37,13 +38,13 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
          //   $this->_hooks[] = 'commenting_form';
          //   $this->_filters[] = 'commenting_comment';
             //$this->_filters[] = 'commenting_prepend_to_comments';
-        }        
-        
+        }
+
         if(plugin_is_active('GuestUser')) {
             $this->_filters[] = 'guest_user_widgets';
             $this->_filters[] = 'guest_user_links';
         }
-        
+
         parent::setUp();
     }
 
@@ -62,7 +63,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                 ";
         $db->query($sql);
-        
+
         $sql = "
                 CREATE TABLE IF NOT EXISTS `$db->GroupMembership` (
                   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -78,10 +79,10 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                   PRIMARY KEY (`id`),
                   KEY `group_id` (`group_id`),
                   KEY `user_id` (`user_id`)
-                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci               
+                ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                 ";
         $db->query($sql);
-        
+
         $sql = "
                 CREATE TABLE IF NOT EXISTS `$db->GroupConfirmation` (
                   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -92,10 +93,10 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                         ";
         $db->query($sql);
-        
-        
+
+
         $sql = "
-            
+
             CREATE TABLE IF NOT EXISTS `$db->GroupBlock` (
               `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
               `blocked_id` int(11) NOT NULL,
@@ -106,7 +107,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
                         ";
         $db->query($sql);
-        
+
         $sql = "
         CREATE TABLE IF NOT EXISTS `$db->GroupInvitation` (
             `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -117,9 +118,9 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             `created` timestamp,
             PRIMARY KEY (`id`)
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-        ";        
+        ";
         $db->query($sql);
-        
+
         /*
         $blocksArray = array(
             'GroupsItemBlock',
@@ -130,7 +131,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         );
         blocks_register_blocks($blocksArray);
 */
-        
+
         $omekaMemberProps = array(
             array(
                 'name' => 'Omeka',
@@ -179,14 +180,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $db->query($sql);
 
         $sql = "DROP TABLE IF EXISTS `$db->GroupInvitation`;";
-        $db->query($sql);        
-        
+        $db->query($sql);
+
         $sql = "DROP TABLE IF EXISTS `$db->GroupConfirmation`;";
         $db->query($sql);
 
         $sql = "DROP TABLE IF EXISTS `$db->GroupMembership`;";
         $db->query($sql);
-                
+
         $blocksArray = array(
             'GroupsItemBlock',
             'GroupsAddItemBlock',
@@ -198,13 +199,24 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         record_relations_delete_relations(array('subject_record_type'=>'Group'));
     }
 
+    public function hookUpgrade($args)
+    {
+        $old = $args['old_version'];
+        $new = $args['new_version'];
+        $db = get_db();
+        if(version_compare($new, '1.0', '>')) {
+            $sql = "ALTER TABLE `$db->Group` ADD `public` BOOLEAN NULL DEFAULT '1', ADD `featured` BOOLEAN NULL DEFAULT '0'";
+            $db->query($sql);
+        }
+    }
+
     public function hookPublicHead($args)
     {
         $view = $args['view'];
         $view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
         $js = "if(typeof(Omeka) == 'undefined') {Omeka = {};}";
         $js .= "if(typeof(Omeka.webRoot) == 'undefined') {Omeka.webRoot = '" . WEB_ROOT . "';}";
-        queue_js_string($js); 
+        queue_js_string($js);
         queue_js_file('groups');
         queue_js_file('jquery.modal.min');
         queue_css_file('groups');
@@ -219,7 +231,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             echo $view->groupAddItem($params);
         }
     }
-    
+
     public function hookItemsBrowseSql($args)
     {
         $select = $args['select'];
@@ -234,7 +246,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             $select->where("record_relations_relation.subject_record_type = 'Group'");
         }
     }
-    
+
     public function hookPublicContentTop($args)
     {
         // @TODO: used to use UserGroups helper here. check that it is still used before release
@@ -280,23 +292,23 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                             'unblock',
                             'remove-comment'
                             );
-        
+
         $acl->allow(null, 'Groups_Group', $privileges, new GroupsAclAssertion);
     }
 
-    public function hookConfig($args) 
+    public function hookConfig($args)
     {
         $post = $args['post'];
         set_option('groups_taggable', $post['groups_taggable']);
     }
-    
+
     public function hookConfigForm($args)
     {
-        include(GROUPS_PLUGIN_DIR . '/config_form.php');    
+        include(GROUPS_PLUGIN_DIR . '/config_form.php');
     }
-    
+
     public function hookDefineRoutes($args)
-    {      
+    {
         $router = $args['router'];
         $router->addRoute(
             'group-show',
@@ -310,7 +322,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                 )
             )
         );
-                         
+
         $router->addRoute(
             'group-browse',
             new Zend_Controller_Router_Route(
@@ -322,13 +334,19 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                         'page' => '1'
                 )
             )
-        ); 
-    }    
-    
+        );
+    }
+
+    public function filterAdminNavigationMain($navArray)
+    {
+        $navArray['Groups'] = array('label'=>'Groups', 'uri'=>url('groups') );
+        return $navArray;
+    }
+
     public function hookBeforeSaveFormComment($args)
     {
         //build relations between comment and groups
-        //first save the actual comment 
+        //first save the actual comment
         $form = $args['form'];
         $data = $_POST;
         $valid = $form->isValid($_POST);
@@ -341,20 +359,20 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $bodyEmpty = false;
         if(trim(strip_tags($body)) == '' ) {
             $bodyEmpty = true;
-        }        
+        }
         if($bodyEmpty && $gbodyEmpty) {
             return;
-        }        
-        
+        }
+
         $data['body'] = $gbody;
         $data['ip'] = $_SERVER['REMOTE_ADDR'];
         $data['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
         $data['approved'] = has_permission('Commenting_Comment', 'noappcomment');
-        $data['flagged'] = 0;        
-        
+        $data['flagged'] = 0;
+
         if($form->isValid($data)) {
             $comment = new Comment();
-            //commenting uses saveForm, so don't use that here to avoid triggering this hook again            
+            //commenting uses saveForm, so don't use that here to avoid triggering this hook again
             $comment->setArray($data);
             $comment->save();
             $groupIds = array();
@@ -364,7 +382,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                     $groupIds[] = $splitKey[1];
                 }
             }
-            
+
             if(!empty($groupIds)) {
                 $groupTable = get_db()->getTable('Group');
                 $ownsComment = get_db()->getTable('RecordRelationsProperty')->findByVocabAndPropertyName('http://ns.omeka-commons.org/', 'ownsComment');
@@ -375,23 +393,23 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                     'object_id' => $comment->id,
                     'public' => true,
                     'property_id' => $ownsComment->id
-        
+
                 );
-                
+
                 foreach($groupIds as $id) {
                     $options['subject_id'] = $id;
                     $rel = new RecordRelationsRelation;
                     $rel->setProps($options);
                     $rel->save();
-                    
+
                     //make sure that, if record for comment is an Item, it is also in the group.
-                    if($comment->record_type = 'Item') {                        
+                    if($comment->record_type = 'Item') {
                         $group = $groupTable->find($id);
                         //addItem does it's own checking for duplicates
                         $group->addItem($comment->record_id);
-                    }                    
+                    }
                 }
-            }            
+            }
         }
     }
 
@@ -412,14 +430,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         if(isset($params['groups_skip_hook'])) {
             $filter = false;
         }
-        
+
         $user = current_user();
         if($user) {
             $userId = $user->id;
         } else {
             $userId = 0;
         }
-        
+
         if(has_permission('Commenting_Comment', 'updateapproved') || has_permission('Commenting_Comment', 'updatespam')) {
             $filter = false;
         }
@@ -433,18 +451,18 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             $select->distinct();
 
             //first, just get a connection to the relation
-            
+
             $rrTable = $db->getTable('RecordRelationsRelation');
             //there are a lot of crazy joins by the end of some queries, so
             //the 'a' is there to prevent assigning the same alias twice
             //gotta be a better way?
-            $rrAlias = $rrTable->getTableAlias() . 'a'; 
+            $rrAlias = $rrTable->getTableAlias() . 'a';
             $select->joinLeft(array('rr'=>$db->RecordRelationsRelation),
                             "rr.object_id = comments.id AND rr.object_record_type = 'Comment' ", array()
                             );
 
             if(isset($params['item_id'])) {
-                
+
             }
             $has_member = $db->getTable('RecordRelationsProperty')->findByVocabAndPropertyName(SIOC, 'has_member');
             $select->join(array($rrAlias=>$db->RecordRelationsRelation),
@@ -464,7 +482,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
      * Create a duplicate commenting form, just for group-specific comments
      * @param unknown_type $form
      */
-    
+
     public function hookCommentingAppendToForm($args)
     {
         $form = $args['form'];
@@ -483,18 +501,18 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             if(!empty($elements)) {
                 $form->addElement('textarea', 'groups_commenting_body',
                     array('required'=>false,
-                          'rows'=>5,                          
+                          'rows'=>5,
                           'filters'=> array(
                               array('StripTags', array('allowTags' => array('p', 'em', 'strong', 'a'))),
                             ),
                         )
                     );
                 $elements[] = 'groups_commenting_body';
-                $form->addDisplayGroup($elements, 'groups_commenting', 
+                $form->addDisplayGroup($elements, 'groups_commenting',
                        array(
                        'id'=>'groups_comment_form',
                        'description'=>"<label>Group-specific comment</label><p>Comments made here will only appear in the selected groups. <span id='groups-commenting-copy'>Copy comment</span></p>"
-                        
+
                       )
                 );
                 $displayGroup = $form->getDisplayGroup('groups_commenting');
@@ -504,7 +522,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
     }
-    
+
     public function filterBlocksNotifications($notifications)
     {
         $notification = array('title'=>'Groups Notifications');
@@ -514,10 +532,10 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             $html .= "<p><a href='" . public_uri('groups/my-groups') . "'>Manage Invitations</a></p>";
             $html .= "<ul>";
             foreach($invitations as $invitation) {
-                $html .= "<li>{$invitation->Sender->name} has invited you to join 
+                $html .= "<li>{$invitation->Sender->name} has invited you to join
                     <a href='" . record_uri($invitation->Group, 'show') . "'>{$invitation->Group->title}</a>";
             }
-            $html .= "</ul>";            
+            $html .= "</ul>";
         }
         $confirmations = groups_confirmations_for_user();
         if(!empty($confirmations)) {
@@ -526,14 +544,14 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                 if($confirmation->type != 'make_admin') {
                     $group = $confirmation->Group;
                     $type = substr($confirmation->type, 3);
-                    $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";                    
+                    $html .= "<li>You have been asked to be a $type of <a href='" . record_uri($group, 'manage') . "'>{$group->title}</a></li>";
                 }
             }
-            
+
             $html .= "</ul>";
-            
+
         }
-        
+
         $membershipsTable = get_db()->getTable('GroupMemberships');
         $groups = groups_groups_for_user(current_user(), true);
         $html .= "<ul>";
@@ -544,7 +562,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
         $html .= "</ul>";
-        
+
         $notification['html'] = $html;
         $notifications[] = $notification;
         return $notifications;
@@ -555,20 +573,20 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $comment = $args['comment'];
         $groups = groups_groups_for_comment($comment);
         $request = Zend_Controller_Front::getInstance()->getRequest();
-                
+
         $class = Inflector::classify($request->getControllerName());
         $id = $request->getParam('id');
         if(! ($class == $comment->record_type && $id = $comment->record_id)) {
             $html .= "<div class='groups-original-item'>";
             $html .= "<a href='" . WEB_ROOT . "{$comment->path}'>Source</a>";
-            $html .= "</div>";            
+            $html .= "</div>";
         }
 
         $group = groups_get_current_group();
         if($group && has_permission($group, 'remove-comment')) {
             $html .= "<div id='groups-comment-administration'>";
-            $html .= "<p><a href='" . WEB_ROOT . "/groups/group/remove-comment/id/{$group->id}/comment/{$comment->id}' class='groups-remove-comment' id='groups-remove-comment-{$comment->id}'>Remove from this group</a></p>";            
-            $html .= "</div>";            
+            $html .= "<p><a href='" . WEB_ROOT . "/groups/group/remove-comment/id/{$group->id}/comment/{$comment->id}' class='groups-remove-comment' id='groups-remove-comment-{$comment->id}'>Remove from this group</a></p>";
+            $html .= "</div>";
         }
 
         return $html;
@@ -584,9 +602,9 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         foreach($groups as $group) {
             $nav[$group->title] = array('label'=>$group->title, 'uri'=>record_url($group, 'show'));
         }
-        return $nav; 
+        return $nav;
     }
-    
+
     public function filterGuestUserWidgets($widgets)
     {
         $user = current_user();
@@ -608,11 +626,11 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $contexts['show'] = array('rss2', 'atom');
         return $contexts;
     }
-    
+
     public function filterPublicNavigationMain($nav)
     {
         $nav['Browse Groups'] = array('label'=>__('Browse Groups'), 'uri'=>url('groups/browse'));
-        
+
         if($user = current_user()) {
             $groups = groups_groups_for_user($user);
             $nav['Groups'] = array('label'=>__('My Groups'),
@@ -624,13 +642,13 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
             } else {
                 foreach($groups as $group) {
                     $nav['Groups']['pages'][text_to_id($group->id, 'group')] = array('label'=>$group->title, 'uri'=>record_url($group, 'show'));
-                }                
+                }
             }
 
         }
-        return $nav;    
+        return $nav;
     }
-    
+
     public function filterSearchRecordTypes($searchableRecordTypes)
     {
         $searchableRecordTypes['Group'] = __('Group');

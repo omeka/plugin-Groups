@@ -3,14 +3,29 @@ echo head(array('title' => 'Groups'));
 ?>
 
 <div id='primary'>
-<?php foreach(loop('group') as $group):?>
-<div>
-<?php $group = groups_get_current_group(); ?>
-<h2><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title; ?></a></h2>
+    <table>
+        <thead>
+        <tr><th>Group</th></tr>
+        </thead>
+        <tbody>
+            <?php $key = 0; ?>
+            <?php foreach(loop('group') as $group):?>
 
-</div>
-<?php endforeach; ?>
-
+            <tr class="item <?php if(++$key%2==1) echo 'odd'; else echo 'even'; ?>">
+            <?php if ($group->featured): ?>
+            <td class="featured">
+            <?php else: ?>
+            <td>
+            <?php endif; ?>
+                <a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title; ?></a>
+                <ul class="action-links group">
+                    <li><a href="<?php echo url('groups/group/edit/id/' . $group->id); ?>">Edit</a></li>
+                </ul>
+            </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 
 
