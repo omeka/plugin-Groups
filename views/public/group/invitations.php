@@ -32,7 +32,7 @@ echo $this->partial('groups-navigation.php');
         <textarea rows='6' cols='40' name='message'></textarea>
     </div>
     
-    <button class='submit'><?php echo __('Submit'); ?></button>
+    <button class='submit'><?php echo __('Send group invitations'); ?></button>
 </form>
 <?php endif; ?>
 </div>

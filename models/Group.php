@@ -458,4 +458,8 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
                 break;
         }
     }
+    
+    public function getRecordUrl($action = 'show') {
+        return public_url("groups/$action/{$this->id}");
+    }
 }

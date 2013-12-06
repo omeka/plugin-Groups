@@ -40,7 +40,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         $html .= "</ul>";
         $html .= "</div>";
         $html .= "<h3>" . __('%s is not in any of your groups.', $itemTitle) . "</h3>";
-        $html .= "<button class='launch-add-item'>" . __('Add to/remove from your groups', $itemTitle) . "</button>";
+        $html .= "<button class='launch-add-item'>" . __('Select groups for item') . "</button>";
         $html .= "</div>";
 
         /* Markup used for Popeasy jQuery plugin to launch modal for selecting groups. */
@@ -48,7 +48,7 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         $html .= "<div class='groups-add-item modal'>";
         $html .= "<div class='modal-header'>";
         $html .= "<a href='#' class='close-button'>" . __('Close') . "</a>";
-        $html .= "<h3>" . __('Modify %s In Your Groups', $itemTitle) . "</h3>";
+        $html .= "<h3>" . __('Select groups for item') . "</h3>";
         $html .= "</div>";
         $html .= "<div class='modal-content'>";
         $html .= "<p>" . __('Once you add an item to your group, only a group administrator can remove the item. If you want to later remove this item from a group, make sure you have sufficient privileges.') . "</p>";

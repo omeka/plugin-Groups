@@ -610,13 +610,16 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $user = current_user();
         $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $widget = array('label' => 'Groups');
-        $widget['content'] = "<p><a href='" . url('groups/add') . "'>Add a group</a></p>";
-        $widget['content'] .= "<p><a href='" . url('groups/my-groups') . "'>Manage your groups</a></p>";
+        $widget['content'] .= "<ul class='group-menu'>";
+        $widget['content'] .= "<li><a href='" . url('groups/add') . "'>Add a group</a></li>";
+        $widget['content'] .= "<li><a href='" . url('groups/my-groups') . "'>Manage your groups</a></li>";
+        $widget['content'] .= "<ul class='group-list'>";
         foreach($groups as $group) {
-            $widget['content'] .= "<h3>";
+            $widget['content'] .= "<li>";
             $widget['content'] .= link_to($group, 'show', $group->title);
-            $widget['content'] .= "</h3>";
+            $widget['content'] .= "</li>";
         }
+        $widget['content'] .= "</ul></ul>";
         $widgets[] = $widget;
         return $widgets;
     }
