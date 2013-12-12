@@ -4,6 +4,8 @@ if(typeof Omeka === 'undefined') {
 
 Omeka.Groups = {
 
+    clickedElement: null,
+        
     toggleGroupSelection: function(e) {
         e.preventDefault();
         var groupCheckbox = jQuery(this).siblings('input[type=checkbox]');
@@ -99,6 +101,7 @@ Omeka.Groups = {
     },
 
     request: function() {
+        Omeka.Groups.clickedElement = this;
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
         jQuery.post(Omeka.webRoot + '/groups/request/' + groupId, null, Omeka.Groups.requestResponse);
@@ -108,7 +111,7 @@ Omeka.Groups = {
         var responseJson = JSON.parse(response);
         if(responseJson.status === 'ok') {
             html = "<p class='groups-pending'>Membership request is pending</p>";
-            jQuery('.groups-request-button').replaceWith(html);
+            jQuery(Omeka.Groups.clickedElement).replaceWith(html);
         }
     },
 
