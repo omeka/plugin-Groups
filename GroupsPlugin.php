@@ -17,6 +17,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'items_browse_sql',
         'commenting_append_to_form',
         'comment_browse_sql',
+        'admin_dashboard',
         'config',
         'config_form'
     );
@@ -521,6 +522,23 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                 $dec = $displayGroup->getDecorator('description');
             }
         }
+    }
+
+    public function hookAdminDashboard($args)
+    {
+        $recentGroups = get_db()->getTable('Group')->findBy(array('sort_field' => 'id', 'sort_dir' => 'd'), 5);
+        $html = "<section class='five columns alpha'>";
+        $html .= "<div class='panel'>";
+        $html .= "<h2>Recent Groups</h2>";
+        $html .= "<ul>";
+        foreach($recentGroups as $group) {
+            $html .= "<li>" . link_to($group, 'show', metadata($group, 'title')) . "</li>";
+        }
+        $html .= "</ul>";
+        $html .= "<a href='" . url('groups') . "'>Browse All</a>";
+        $html .= "</div>";
+        $html .= "</section>";
+        echo $html;
     }
 
     public function filterBlocksNotifications($notifications)
