@@ -60,6 +60,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                   `visibility` tinytext NOT NULL,
                   `owner_id` int(10) unsigned NOT NULL,
                   `public` tinyint(1) NOT NULL,
+                  `featured` tinyint(1) NOT NULL,
                   PRIMARY KEY (`id`),
                   KEY `owner_id` (`owner_id`)
                 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
