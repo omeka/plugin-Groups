@@ -59,6 +59,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                   `description` text,
                   `visibility` tinytext NOT NULL,
                   `owner_id` int(10) unsigned NOT NULL,
+                  `public` tinyint(1) NOT NULL,
                   PRIMARY KEY (`id`),
                   KEY `owner_id` (`owner_id`)
                 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
@@ -623,7 +624,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $user = current_user();
         $groups = get_db()->getTable('Group')->findBy(array('user'=>$user));
         $widget = array('label' => 'Groups');
-        $widget['content'] .= "<ul class='group-menu'>";
+        $widget['content'] = "<ul class='group-menu'>";
         $widget['content'] .= "<li><a href='" . url('groups/add') . "'>Add a group</a></li>";
         $widget['content'] .= "<li><a href='" . url('groups/my-groups') . "'>Manage your groups</a></li>";
         $widget['content'] .= "<ul class='group-list'>";
