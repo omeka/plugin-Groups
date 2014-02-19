@@ -34,6 +34,7 @@ echo head(array('title'=>'Edit Group', 'bodyclass'=>'groups edit'));
 
 <section class="three columns omega">
     <div id="save" class="panel">
+        <?php echo link_to($group, 'delete-confirm', __('Delete'), array('class' => 'delete-confirm big red button')); ?>
         <?php echo $this->formSubmit('submit', __('Save Changes'), array('id'=>'save-changes', 'class'=>'submit big green button')); ?>
     </div>
 

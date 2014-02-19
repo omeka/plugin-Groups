@@ -3,6 +3,7 @@ echo head(array('title' => 'Groups'));
 ?>
 
 <div id='primary'>
+<?php echo pagination_links(); ?>
     <table>
         <thead>
         <tr><th>Group</th></tr>
@@ -17,7 +18,8 @@ echo head(array('title' => 'Groups'));
             <?php else: ?>
             <td>
             <?php endif; ?>
-                <a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title; ?></a>
+                <a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo metadata($group, 'title'); ?></a>
+                ( <?php echo metadata($group, 'visibility'); ?> )
                 <ul class="action-links group">
                     <li><a href="<?php echo url('groups/group/edit/id/' . $group->id); ?>">Edit</a></li>
                 </ul>
@@ -26,6 +28,7 @@ echo head(array('title' => 'Groups'));
             <?php endforeach; ?>
         </tbody>
     </table>
+<?php echo pagination_links(); ?>
 </div>
 
 

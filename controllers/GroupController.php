@@ -340,6 +340,13 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $this->_helper->json($responseJson);
     }
 
+    protected function _getBrowseRecordsPerPage()
+    {
+        if(is_admin_theme()) {
+            return 10;
+        }
+    }
+
     private function _handleAdministration()
     {
         $confirmationTable = $this->_helper->db->getTable('GroupConfirmation');

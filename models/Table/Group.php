@@ -22,6 +22,10 @@ class Table_Group extends Omeka_Db_Table
             $select->where('featured = 1');
         }
 
+        if( isset($params['flagged'])) {
+            $select->where('flagged = 1');
+        }
+
         if (isset($params['tag'])) {
             $this->filterByTags($select, $params['tag']);
         }
