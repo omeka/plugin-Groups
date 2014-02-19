@@ -22,19 +22,25 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 
     <?php echo $this->manageGroup($group); ?>
 
+    <?php if($group->flagged) :?>
+    <p class="groups-button flagged">Flagged</p>
+    <?php else: ?>
+    <p class="groups-button flag" id="group-<?php echo $group->id;?>">Flag Inappropriate</p>
+    <?php endif; ?>
+
     <p class="items"><?php echo link_to_items_browse(metadata($group, 'items_count'), array('group_id' => $group->id), array('class' => 'number')); ?> items</p>
 
     <p class="members"><span class="number"><?php echo metadata($group, 'members count');?></span> members</p>
 
     <?php if(get_option('groups_taggable')): ?>
     <p class="tags">
-        Tags: 
+        Tags:
         <span class="tag"><?php echo groups_tags_string_for_group($group); ?></span>
     </p>
     <?php endif; ?>
 
     <!--  Members list -->
-    
+
     <div class="members">
         <?php $memberships = $group->getMemberships(); ?>
         <h2><?php echo __('Members'); ?> (<?php echo metadata($group, 'members count');?>)</h2>
@@ -43,7 +49,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
             $name = $owner->name;
         } else {
             $name = $owner->username;
-        }     
+        }
         ?>
         <p id='groups-owner'>Owner: <?php echo $name; ?></p>
         <?php if(is_allowed($group, 'items')): ?>
@@ -64,7 +70,7 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
                             echo $gravatar_tag;
                         }
                     ?>
-                </li>        
+                </li>
             <?php endforeach; ?>
         </ul>
         <?php endif; ?>
@@ -73,9 +79,9 @@ echo head(array('title'=>$group->title, 'bodyclass'=>'groups show'));
 </div>
 
 <div id="primary">
-    
+
     <p class="description"><?php echo $group->description; ?></p>
-    
+
 </div>
 
 <div id="recent-items" class="items-list with-images">

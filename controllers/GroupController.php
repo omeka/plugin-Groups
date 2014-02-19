@@ -36,6 +36,15 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         parent::browseAction();
     }
 
+    public function flagAction() {
+        $groupId = $_POST['groupId'];
+        $group = $this->_helper->db->getTable('Group')->find($groupId);
+        $group->flagged = true;
+        $group->save();
+        $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flagged');
+        $this->_helper->json($response);
+    }
+
     public function addAction()
     {
         require_once GROUPS_PLUGIN_DIR . '/forms/group.php';

@@ -1,4 +1,9 @@
 <?php
+
+$css = "
+tr.flagged td {background-color: red}
+";
+queue_css_string($css);
 echo head(array('title' => 'Groups'));
 ?>
 
@@ -12,7 +17,7 @@ echo head(array('title' => 'Groups'));
             <?php $key = 0; ?>
             <?php foreach(loop('group') as $group):?>
 
-            <tr class="item <?php if(++$key%2==1) echo 'odd'; else echo 'even'; ?>">
+            <tr class="item <?php if(++$key%2==1) echo 'odd'; else echo 'even'; ?> <?php if($group->flagged ==1) echo 'flagged'  ?>">
             <?php if ($group->featured): ?>
             <td class="featured">
             <?php else: ?>

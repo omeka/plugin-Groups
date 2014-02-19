@@ -76,7 +76,22 @@ Omeka.Groups = {
             jQuery('.empty').removeClass('empty');
         }
     },
+    
+    flag: function() {
+        Omeka.Groups.clickedElement = this;
+        splitId = this.id.split('-');
+        groupId = splitId[splitId.length - 1];
+        jQuery.post(Omeka.webRoot + '/groups/flag/' + groupId, {'groupId' : groupId}, Omeka.Groups.flagResponse);        
+    },
 
+    flagResponse: function(responseJson, status, jqXHR) {
+        //var responseJson = JSON.parse(response);
+        if(responseJson.status === 'ok') {
+            var html = '<p class="groups-button flagged">Flagged</p>';
+            jQuery(Omeka.Groups.clickedElement).replaceWith(html);
+        }        
+    },
+    
     join: function() {
         splitId = this.id.split('-');
         groupId = splitId[splitId.length - 1];
@@ -205,6 +220,7 @@ Omeka.Groups.wysiwyg = function (params) {
 
 (function($) {
     $(document).ready(function() {
+        $('p.flag').click(Omeka.Groups.flag);
         $('span.groups-item-remove').click(Omeka.Groups.removeItemFromGroup);
         $('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
         $('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);
