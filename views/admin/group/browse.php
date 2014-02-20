@@ -15,7 +15,7 @@ echo head(array('title' => 'Groups'));
     <ul class="dropdown">
         <li><span class="quick-filter-heading"><?php echo __('Quick Filter') ?></span></li>
         <li><a href="<?php echo url('groups/browse'); ?>"><?php echo __('View All') ?></a></li>
-        <li><a href="<?php echo url('groups/browse', array('flagged' => 0)); ?>"><?php echo __('Flagged'); ?></a></li>
+        <li><a href="<?php echo url('groups/browse', array('flagged' => 1)); ?>"><?php echo __('Flagged'); ?></a></li>
         <li><a href="<?php echo url('groups/browse', array('featured' => 1)); ?>"><?php echo __('Featured'); ?></a></li>
     </ul>
     </li>
@@ -38,13 +38,13 @@ echo head(array('title' => 'Groups'));
                 <ul class="action-links group">
                     <li><a href="<?php echo url('groups/group/edit/id/' . $group->id); ?>">Edit</a></li>
                     <li><a href="<?php echo url('groups/group/delete-confirm/id/' . $group->id); ?>">Delete</a></li>
-                    <?php if($group->flagged): ?>
-                    <li class="flagged" style="color: rgb(78, 113, 129); cursor: pointer;" id="group-<?php echo $group->id; ?>">Unflag</li>
-                    <?php else: ?>
-                    <li class="flag" style="color: rgb(78, 113, 129); cursor: pointer;" id="group-<?php echo $group->id; ?>">Flag</li>
+                    <?php if(is_allowed($group, 'unflag')): ?>
+                        <?php if($group->flagged): ?>
+                        <li class="flagged" style="color: rgb(78, 113, 129); cursor: pointer;" id="group-<?php echo $group->id; ?>">Unflag</li>
+                        <?php else: ?>
+                        <li class="flag" style="color: rgb(78, 113, 129); cursor: pointer;" id="group-<?php echo $group->id; ?>">Flag</li>
+                        <?php endif; ?>
                     <?php endif; ?>
-                    
-                    <li><a href="<?php echo url('groups/group/feature/id/' . $group->id); ?>">Feature</a></li>
                 </ul>
             </td>
             <td>
