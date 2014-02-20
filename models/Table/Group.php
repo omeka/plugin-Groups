@@ -26,9 +26,10 @@ class Table_Group extends Omeka_Db_Table
             return $select;
         }
         
-        $membershipTable = $this->getDb()->getTable('GroupMembership');
+        $db = $this->getDb();
+        $membershipTable = $db->getTable('GroupMembership');
         $membershipAlias = $membershipTable->getTableAlias();
-        $select->join(array($membershipAlias => $membershipTable), "$alias.id = $memberShipAlias.group_id", array());
+        $select->join(array($membershipAlias => $db->GroupMembership), "$alias.id = $membershipAlias.group_id", array());
         $select->where("$membershipAlias.user_id = ?", $user->id);
         return $select;
     }
