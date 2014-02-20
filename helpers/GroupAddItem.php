@@ -53,7 +53,6 @@ class Group_View_Helper_GroupAddItem extends Zend_View_Helper_Abstract
         $html .= "<div class='modal-content'>";
         $html .= "<p>" . __('Once you add an item to your group, only a group administrator can remove the item. If you want to later remove this item from a group, make sure you have sufficient privileges.') . "</p>";
         $html .= "<ul id='user-groups'>";
-        debug(count($this->_groups));
         foreach($this->_groups as $group) {
             $groupId = $group->id;
             $adminState = ($user->id == $group->owner_id) ? 'admin' : '';
