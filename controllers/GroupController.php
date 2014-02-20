@@ -40,8 +40,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $groupId = $_POST['groupId'];
         $group = $this->_helper->db->getTable('Group')->find($groupId);
         $group->flagged = true;
-        $group->save();
-        $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flagged');
+        if($group->save()) {
+            $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flag');    
+        } else {
+            $response = array('status'=>'error', 'id'=>$groupId, 'action'=>'flag');
+        }
         $this->_helper->json($response);
     }
 

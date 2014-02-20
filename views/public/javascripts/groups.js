@@ -85,7 +85,6 @@ Omeka.Groups = {
     },
 
     flagResponse: function(responseJson, status, jqXHR) {
-        //var responseJson = JSON.parse(response);
         if(responseJson.status === 'ok') {
             var html = '<p class="groups-button flagged">Flagged</p>';
             jQuery(Omeka.Groups.clickedElement).replaceWith(html);
@@ -220,7 +219,7 @@ Omeka.Groups.wysiwyg = function (params) {
 
 (function($) {
     $(document).ready(function() {
-        $('p.flag').click(Omeka.Groups.flag);
+        $('.flag').click(Omeka.Groups.flag);
         $('span.groups-item-remove').click(Omeka.Groups.removeItemFromGroup);
         $('ul#groups-group-list li').click(Omeka.Groups.filterGroups);
         $('input.groups-invitation-action').click(Omeka.Groups.toggleSecondaryAdminOptions);

@@ -87,6 +87,16 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
         if($privilege == 'my-groups') {
             return true;
         }
+        
+        //anyone can flag
+        if($privilege == 'flag') {
+            return true;
+        }
+        
+        //only super can unflag
+        if($privilege == 'unflag') {
+            return false;
+        }
 
         if(get_class($resource) == 'Group') {
             $arrayName = '_' . $resource->visibility . "Privileges";
@@ -103,6 +113,11 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
                 //forbid all but owner to private groups
                 if($resource->visibility == 'private' && ($resource->getOwner()->id != $role->id)) {
+                    return false;
+                }
+                
+                
+                if($resource->flagged && !$membership) {
                     return false;
                 }
 

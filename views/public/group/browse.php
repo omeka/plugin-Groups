@@ -14,8 +14,7 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
     <?php endif; ?>
     <div id="pagination-top" class="pagination"><?php echo pagination_links(); ?></div>
     <div style="clear:left;"></div>
-    <h1>Groups (<?php echo total_records('groups'); ?> total)</h1>
-    
+    <h1>Groups (<?php echo total_records('Group'); ?> total)</h1>
     <div class="groups">
     <?php foreach(loop('groups') as $group):  ?>
         <div class="group hentry">
@@ -28,7 +27,9 @@ echo head(array('title'=>'Browse Groups', 'bodyclass' => 'groups browse'));
             <span class="visibility-description"><?php echo $group->visibilityText(); ?></span>
         </div>
         <?php endif; ?>
-        
+        <?php if($group->flagged): ?>
+        <div class='groups-type flagged'>Flagged</div>
+        <?php endif; ?>
         
         <h3>Description</h3>
         <div class='groups-description'><?php echo $group->description; ?></div>

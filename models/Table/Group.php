@@ -11,7 +11,28 @@ class Table_Group extends Omeka_Db_Table
             $select->order('RAND()');
         }
     }
-
+    
+    public function getSelect()
+    {
+        $select = parent::getSelect();
+        $user = current_user();
+        $alias = $this->getTableAlias();
+        if( !$user ) {
+            $select->where("$alias.flagged = 0");
+            return $select;
+        }
+        
+        if($user->role == 'super') {
+            return $select;
+        }
+        
+        $membershipTable = $this->getDb()->getTable('GroupMembership');
+        $membershipAlias = $membershipTable->getTableAlias();
+        $select->join(array($membershipAlias => $membershipTable), "$alias.id = $memberShipAlias.group_id", array());
+        $select->where("$membershipAlias.user_id = ?", $user->id);
+        return $select;
+    }
+    
     public function applySearchFilters($select, $params)
     {
         if(isset($params['groupsSearch']) && !empty($params['groupsSearch'])) {

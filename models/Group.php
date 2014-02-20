@@ -9,6 +9,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public $owner_id;
     public $public;
     public $featured;
+    public $flagged;
 
     protected $_related = array('Tags' => 'getTags', 'Items'=>'getItems');
 

@@ -61,7 +61,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                   `owner_id` int(10) unsigned NOT NULL,
                   `public` tinyint(1) NOT NULL,
                   `featured` tinyint(1) NOT NULL,
-                  `flagged` tinyint(1),
+                  `flagged` tinyint(1) NOT NULL DEFAULT 0,
                   PRIMARY KEY (`id`),
                   KEY `owner_id` (`owner_id`)
                 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
@@ -289,7 +289,9 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
                             'edit',
                             'block',
                             'unblock',
-                            'remove-comment'
+                            'remove-comment',
+                            'flag',
+                            'unflag'
                             );
 
         $acl->allow(null, 'Groups_Group', $privileges, new GroupsAclAssertion);
