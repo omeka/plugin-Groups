@@ -17,20 +17,22 @@ class Table_Group extends Omeka_Db_Table
         $select = parent::getSelect();
         $user = current_user();
         $alias = $this->getTableAlias();
+        //if no user, only get non-flagged groups
         if( !$user ) {
             $select->where("$alias.flagged = 0");
             return $select;
         }
-        
+        //don't filter for supers
         if($user->role == 'super') {
             return $select;
         }
-        
+        //if a user, get all non-flagged, plus where they're a member already
         $db = $this->getDb();
         $membershipTable = $db->getTable('GroupMembership');
         $membershipAlias = $membershipTable->getTableAlias();
         $select->join(array($membershipAlias => $db->GroupMembership), "$alias.id = $membershipAlias.group_id", array());
         $select->where("$membershipAlias.user_id = ?", $user->id);
+        $select->orWhere("$alias.flagged = 0");
         return $select;
     }
     

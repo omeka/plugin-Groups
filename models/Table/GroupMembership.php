@@ -71,7 +71,9 @@ class Table_GroupMembership extends Omeka_Db_Table
         $select = $groupTable->getSelect();
         $alias = $this->getTableAlias();
 
-        $select->join(array($alias=>$db->GroupMembership), "$groupTableAlias.id = $alias.group_id", array());
+        if(!$select->hasJoin($alias)) {
+            $select->join(array($alias=>$db->GroupMembership), "$groupTableAlias.id = $alias.group_id", array());
+        }
         $this->applySearchFilters($select, $params);
         return $groupTable->fetchObjects($select);
     }
