@@ -305,12 +305,14 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     public function sendFlaggedEmails()
     {
         $subject = "Group {$this->title} flagged in Omeka Commons";
-        $body = "A group you administer in Omeka Commons, <a href='" . record_url($this, 'show') . "'>{$this->title}</a>, has been flagged as not complying with the Omeka Commons ";
+        set_theme_base_url('public');
+        $url = absolute_url('groups/show/id/' . $this->id);
+        revert_theme_base_url();
+        $body = "A group you administer in Omeka Commons, <a href='$url'>{$this->title}</a>, has been flagged as not complying with the Omeka Commons ";
         $body .= "terms of service. An administrator is looking into it.";
         $to = $this->getMembers(array('is_admin'=>true));
         $this->sendEmails($to, $body, $subject);
-        
-        $body = "Group <a href='" . record_url($this, 'show') . "'>{$this->title}</a>, has been flagged as not complying with the Omeka Commons.";
+        $body = "Group <a href='$url'>{$this->title}</a>, has been flagged as not complying with the Omeka Commons.";
         $this->sendEmail(get_option('administrator_email'), $body, $subject);
     }
    
