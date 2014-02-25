@@ -72,6 +72,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         if ($this->getRequest()->isPost()) {
             $group = new Group();
             $group->setPostData($_POST);
+            $group->flagged = 0;
             $currentUser = current_user();
             $group->owner_id = $currentUser->id;
 
