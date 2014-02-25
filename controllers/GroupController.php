@@ -41,6 +41,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         $groupId = $_POST['groupId'];
         $group = $this->_helper->db->getTable('Group')->find($groupId);
         $group->flagged = true;
+        $group->sendFlaggedEmails();
         if($group->save()) {
             $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flag');    
         } else {
