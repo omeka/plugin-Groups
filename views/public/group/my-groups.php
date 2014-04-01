@@ -69,7 +69,7 @@ echo $this->partial('groups-navigation.php');
         </div>
         
         </div>
-        <?php endif; ?>
+        <?php endif; ?>..
     <?php endforeach; ?>
 
     <?php if(!(empty($groups) && empty($invitations))) :?>
