@@ -28,7 +28,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     {
         $this->view->addHelperPath(GROUPS_PLUGIN_DIR . '/helpers', 'Group_View_Helper_');
         if(get_option('groups_taggable')) {
-            $tags = get_db()->getTable('Tag')->findBy(array('type'=>'Group'));
+            $tags = $this->helper_db->getTable('Tag')->findBy(array('type'=>'Group'));
             //$view->addHelperPath(USER_PROFILES_DIR . '/helpers', 'UserProfiles_View_Helper_');
             $this->view->tags = $tags;
         }
@@ -308,7 +308,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                         break;
 
                     case 'decline':
-                        $to = $this->getTable('User')->find($invitation->sender_id);
+                        $to = $this->_helper->db->getTable('User')->find($invitation->sender_id);
                         $invitation->Group->sendInvitationDeclinedEmail($user, $to);
                         break;
 
