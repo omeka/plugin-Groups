@@ -264,6 +264,11 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function myGroupsAction()
     {
         $user = current_user();
+        if(!$user) {
+            $session = new Zend_Session_Namespace;
+            $session->redirect = 'groups/my-groups';
+            $this->_helper->redirector->gotoUrl('guest-user/user/login');
+        }
         $params = array();
 
         if(!empty($_POST['blocks'])) {
