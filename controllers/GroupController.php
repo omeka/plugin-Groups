@@ -264,9 +264,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
     public function myGroupsAction()
     {
         $user = current_user();
-        $params = array(
-                'user' => $user
-        );
+        $params = array();
 
         if(!empty($_POST['blocks'])) {
             $groupInvitationTable = $this->_helper->db->getTable('GroupInvitation');

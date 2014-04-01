@@ -141,7 +141,8 @@ function groups_role_confirm($group = null, $membership=null, $role = 'admin')
     if(!$membership) {
         $membership = $group->getMembership(array('user_id'=>current_user()->id));
     }
-    if(!$membership->exists()) {
+    debug($membership);
+    if(empty($membership) || !$membership->exists()) {
         return false;
     }
 

@@ -53,8 +53,10 @@ echo $this->partial('groups-navigation.php');
     <?php endif; ?>
 
     <?php foreach(loop('groups') as $group): ?>
-        <div class='groups-group'>
         <?php $user_membership = $group->getMembership(array('user_id' => current_user()->id));?>
+        <?php if($user_membership) : ?>
+        <div class='groups-group'>
+        
         <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
   
         
@@ -64,8 +66,10 @@ echo $this->partial('groups-navigation.php');
                 <?php include('role-admin.php'); ?>
             </div>
             <?php include('notifications-admin.php'); ?>
-        </div>        
-    </div>
+        </div>
+        
+        </div>
+        <?php endif; ?>
     <?php endforeach; ?>
 
     <?php if(!(empty($groups) && empty($invitations))) :?>
