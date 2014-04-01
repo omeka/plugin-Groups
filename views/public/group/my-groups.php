@@ -17,7 +17,7 @@ echo $this->partial('groups-navigation.php');
     <?php endif; ?>
         <?php if(!empty($invitations)): ?>
         <h2>Invitations</h2>
-        <?php foreach($invitations as $invitation):  ?>            
+        <?php foreach($invitations as $invitation):  ?>
         <div class='groups-group'>    
             <h3><a href="<?php echo url('groups/group/show/id/' . $invitation->group_id); ?>"><?php echo $invitation->Group->title; ?></a></h3>
             <div class='group-options'>
@@ -41,9 +41,8 @@ echo $this->partial('groups-navigation.php');
                     <input type='checkbox' name="blocks[<?php echo $invitation->id ?>][]" value='block-user' />                
                     <label class='groups' for="blocks[<?php echo $invitation->id ?>][]">Block invitations from this person.</label>                
                 </div>
-                                
             </div>
-        </div>        
+        </div>
         <?php endforeach; ?>
         <?php endif; ?>
     <?php if(empty($groups)) : ?>
@@ -56,10 +55,7 @@ echo $this->partial('groups-navigation.php');
         <?php $user_membership = $group->getMembership(array('user_id' => current_user()->id));?>
         <?php if($user_membership) : ?>
         <div class='groups-group'>
-        
         <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
-  
-        
         <div class='group-options'>
             <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
             <div class='group-status'>
@@ -69,7 +65,7 @@ echo $this->partial('groups-navigation.php');
         </div>
         
         </div>
-        <?php endif; ?>..
+        <?php endif; ?>
     <?php endforeach; ?>
 
     <?php if(!(empty($groups) && empty($invitations))) :?>
