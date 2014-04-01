@@ -1,6 +1,5 @@
 <div class='group-notifications field'>
     <label>Send email notifications to me when:</label>
-
     <div class="option">
         <input <?php if($user_membership->notify_member_joined) {echo "checked='checked'"; }?> type='checkbox' name="groups[<?php echo $group->id ?>][notify_member_joined]" />
         <label class='groups' for="groups[<?php echo $group->id ?>][notify_member_joined]">New Members Join</label>

@@ -55,15 +55,14 @@ echo $this->partial('groups-navigation.php');
         <?php $user_membership = $group->getMembership(array('user_id' => current_user()->id));?>
         <?php if($user_membership) : ?>
         <div class='groups-group'>
-        <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title?></a></h3>
-        <div class='group-options'>
-            <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
-            <div class='group-status'>
-                <?php include('role-admin.php'); ?>
+            <h3><a href="<?php echo url('groups/group/show/id/' . $group->id); ?>"><?php echo $group->title; ?></a></h3>
+            <div class='group-options'>
+                <input type='hidden' name="groups[<?php echo $group->id ?>][submitted]" />
+                <div class='group-status'>
+                    <?php include('role-admin.php'); ?>
+                </div>
+                <?php include('notifications-admin.php'); ?>
             </div>
-            <?php include('notifications-admin.php'); ?>
-        </div>
-        
         </div>
         <?php endif; ?>
     <?php endforeach; ?>

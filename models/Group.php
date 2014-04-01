@@ -404,22 +404,18 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             $params['group_id'] = $this->id;
         }
 
-        //if the current user has high enough role on the site (Super or Admin),
-        //give an owner membership
+
         $currentUser = current_user();
         $currentUserRole = metadata($currentUser, 'role');
+        $membership = get_record('GroupMembership', $params);
+        //if the current user has high enough role on the site (Super or Admin),
+        //give an owner membership
         if($currentUserRole == 'admin' || $currentUserRole == 'super') {
-            $ownerMembership = new GroupMembership;
-            $ownerMembership->group_id = $this->id;
-            $ownerMembership->user_id = $currentUser->id;
-            $ownerMembership->is_owner = 1;
-            $ownerMembership->is_pending = 0;
-            $ownerMembership->id = null;
-            return $ownerMembership;
+            $membership->is_owner = 1;
+            $membership->is_admin = 1;
+            $membership->is_pending = 0;
         }
-
-        $array = $this->getTable('GroupMembership')->findBy($params, 1);
-        return isset($array[0]) ? $array[0] : false;
+        return $membership;
     }
 
     public function getMemberships($params = array())

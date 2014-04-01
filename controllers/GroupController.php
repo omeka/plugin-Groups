@@ -637,8 +637,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             if($confirmation = $membership->getConfirmation('is_' . $option)) {
                                 $confirmation->delete();
                             }
-
-
                             break;
 
                         default:
@@ -646,10 +644,17 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                             break;
                     }
                 }
-                if($membership->exists()) {
-                    $membership->save();
+                if(! $membership->is_admin) {
+                    $membership->is_admin = 0;
                 }
-
+                if(! $membership->is_owner) {
+                    $membership->is_owner = 0;
+                }
+                try {
+                    $membership->save(true);
+                } catch(Exception $e) {
+                    _log($e);
+                }
             }
         }
     }
