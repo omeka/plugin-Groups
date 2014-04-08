@@ -36,27 +36,27 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         parent::browseAction();
     }
 
-    public function flagAction() 
+    public function flagAction()
     {
         $groupId = $_POST['groupId'];
         $group = $this->_helper->db->getTable('Group')->find($groupId);
         $group->flagged = true;
         $group->sendFlaggedEmails();
         if($group->save()) {
-            $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flag');    
+            $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'flag');
         } else {
             $response = array('status'=>'error', 'id'=>$groupId, 'action'=>'flag');
         }
         $this->_helper->json($response);
     }
-    
+
     public function unflagAction()
     {
         $groupId = $_POST['groupId'];
         $group = $this->_helper->db->getTable('Group')->find($groupId);
         $group->flagged = false;
         if($group->save()) {
-            $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'unflag');    
+            $response = array('status'=>'ok', 'id'=>$groupId, 'action'=>'unflag');
         } else {
             $response = array('status'=>'error', 'id'=>$groupId, 'action'=>'unflag');
         }
@@ -326,7 +326,6 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
         }
 
         $this->_handleMembershipStatus();
-
         $groups = $this->_helper->db->getTable('Group')->findBy($params);
         $invitations = $this->_helper->db->getTable('GroupInvitation')->findBy(array('user_id'=>$user->id));
         $this->view->groups = $groups;

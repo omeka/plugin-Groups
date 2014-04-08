@@ -11,7 +11,7 @@ class Table_Group extends Omeka_Db_Table
             $select->order('RAND()');
         }
     }
-    
+
     public function getSelect()
     {
         $select = parent::getSelect();
@@ -33,9 +33,10 @@ class Table_Group extends Omeka_Db_Table
         $select->join(array($membershipAlias => $db->GroupMembership), "$alias.id = $membershipAlias.group_id", array());
         $select->where("$membershipAlias.user_id = ?", $user->id);
         $select->orWhere("$alias.flagged = 0");
+        $select->distinct();
         return $select;
     }
-    
+
     public function applySearchFilters($select, $params)
     {
         if(isset($params['groupsSearch']) && !empty($params['groupsSearch'])) {
