@@ -2,7 +2,7 @@
 $title = __('Group invitations');
 echo head(array('title'=>'Group Invitations', 'bodyclass' => 'groups invitations'));
 ?>
-<?php 
+<?php
 echo $this->partial('groups-navigation.php');
 ?>
 
@@ -21,17 +21,21 @@ echo $this->partial('groups-navigation.php');
         <label for='invite_groups[]'><?php echo __('Groups to invite the above people to'); ?></label>
         <?php foreach($groups as $group): ?>
             <div class="group">
-                <input name='invite_groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
+                <?php if($group->visibility == 'private'): ?>
+                    <input name='invite_groups[]' disabled='disabled' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?> Make group not private to invite others
+                <?php else: ?>
+                    <input name='invite_groups[]' value='<?php echo $group->id; ?>' type='checkbox'/><?php echo $group->title; ?>
+                <?php endif; ?>
             </div>
-        
+
         <?php endforeach; ?>
     </div>
-    
+
     <div class="message">
         <label for='message'><?php echo __('Message'); ?></label>
         <textarea rows='6' cols='40' name='message'></textarea>
     </div>
-    
+
     <button class='submit'><?php echo __('Send group invitations'); ?></button>
 </form>
 <?php endif; ?>
