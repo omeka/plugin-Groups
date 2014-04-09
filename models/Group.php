@@ -315,7 +315,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $body = "Group <a href='$url'>{$this->title}</a>, has been flagged as not complying with the Omeka Commons.";
         $this->sendEmail(get_option('administrator_email'), $body, $subject);
     }
-   
+
     private function sendEmail($to, $body, $subject)
     {
         if(is_string($to)) {
@@ -409,8 +409,13 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $currentUserRole = metadata($currentUser, 'role');
         $membership = get_record('GroupMembership', $params);
         //if the current user has high enough role on the site (Super or Admin),
-        //give an owner membership
+        //give an owner membership (possibly fake, so admins can take care of monitoring, etc)
         if($currentUserRole == 'admin' || $currentUserRole == 'super') {
+            if(!$membership) {
+                $membership = new GroupMembership;
+                $membership->group_id = $this->id;
+                $membership->user_id = $currentUser->id;
+            }
             $membership->is_owner = 1;
             $membership->is_admin = 1;
             $membership->is_pending = 0;
@@ -469,7 +474,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
                 break;
         }
     }
-    
+
     public function getRecordUrl($action = 'show') {
         return public_url("groups/$action/{$this->id}");
     }
