@@ -31,8 +31,7 @@ class Table_Group extends Omeka_Db_Table
         $membershipTable = $db->getTable('GroupMembership');
         $membershipAlias = $membershipTable->getTableAlias();
         $select->join(array($membershipAlias => $db->GroupMembership), "$alias.id = $membershipAlias.group_id", array());
-        $select->where("$membershipAlias.user_id = ?", $user->id);
-        $select->orWhere("$alias.flagged = 0");
+        $select->where("$membershipAlias.user_id = {$user->id} OR $alias.flagged = 0");
         $select->distinct();
         return $select;
     }
