@@ -116,11 +116,6 @@ class Table_Group extends Omeka_Db_Table
 
         $db = $this->getDb();
         $membershipAlias = $db->getTable('GroupMembership')->getTableAlias();
-        $alias = $this->getTableAlias();
-        $select->join(array($membershipAlias=>$db->GroupMembership),
-                        "$alias.id = $membershipAlias.group_id",
-                        array()
-                        );
         $select->where("$membershipAlias.user_id = $userId");
     }
 
