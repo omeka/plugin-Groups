@@ -15,6 +15,7 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         'public_items_show',
         'public_content_top',
         'items_browse_sql',
+        'after_delete_user',
         'commenting_append_to_form',
         'comment_browse_sql',
         'admin_dashboard',
@@ -539,6 +540,15 @@ class GroupsPlugin extends Omeka_Plugin_AbstractPlugin
         $html .= "</div>";
         $html .= "</section>";
         echo $html;
+    }
+    
+    public function hookAfterDeleteUser($args) 
+    {
+        $user = $args['record'];
+        $memberships = get_db()->getTable('GroupMembership')->findBy(array('user_id' => $user->id));
+        foreach($memberships as $membership) {
+            $membership->delete();
+        }
     }
 
     public function filterBlocksNotifications($notifications)
