@@ -486,9 +486,9 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                                         $confirmation->membership_id = $membershipId;
                                         $confirmation->type = 'is_owner';
                                         if($confirmation->exists()) {
-                                            $this->flash("You have already asked {$membership->User->name} to become the owner of {$membership->Group->title}");
+                                            $this->_helper->flashMessenger("You have already asked {$membership->User->name} to become the owner of {$membership->Group->title}");
                                         }
-                                        $this->flash($membership->User->name . " must accept becoming the owner for the changes to take effect.");
+                                        $this->_helper->flashMessenger($membership->User->name . " must accept becoming the owner for the changes to take effect.");
                                         $confirmation->save();
                                     }
                                     break;
