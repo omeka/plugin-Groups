@@ -521,7 +521,7 @@ class Groups_GroupController extends Omeka_Controller_AbstractActionController
                 $groupEmails = array();
                 foreach($emails as $index=>$email) {
                     $email = trim($email);
-                    $user = $userTable->findByEmail(trim($email));
+                    $user = $userTable->findByEmail($email);
                     if(!$user) {
                         //$email might actually be a username
                         $select = $userTable->getSelect();

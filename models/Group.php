@@ -224,7 +224,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
     {
         $subject = "A new member wants to join {$this->title} on " . get_option('site_title');
         $body = "User {$user->name} has requested membership <a href='" . WEB_ROOT . "/groups/show/" . $this->id . "'>{$this->title}</a> group on Omeka Commons. You can log into Omeka Commons and manage memberships here: ";
-        $this->sendEmails($to, $subject, $body);
+        $this->sendEmails($to, $body, $subject);
     }
 
     public function sendNewMemberEmail($user, $to=null)
@@ -290,9 +290,7 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
         $body .= "<p>Here's their message</p>";
         $body .= "<p>$message</p>";
         $body .= "<p>You can join the group <a href='" . WEB_ROOT . '/groups/my-groups' . "'>here</a></p>";
-        foreach($to as $email) {
-            $this->sendEmails($email, $body, $subject);
-        }
+        $this->sendEmails($to, $body, $subject);
     }
 
     public function sendInvitationDeclinedEmail($user, $to)
