@@ -470,6 +470,8 @@ class Group extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Int
             case 'Closed':
                 return "Approval is required to join; items only visible to members";
                 break;
+            case 'Private':
+                return "Only the site owner has access";
         }
     }
 
