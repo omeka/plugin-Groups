@@ -25,6 +25,15 @@ class GroupInvitation extends Omeka_Record_AbstractRecord
     {
         return $this->getTable('User')->find($this->sender_id);
     }    
+    
+    public function senderIsOwnerOrAdmin()
+    {
+        $senderMembership = $this->getGroup()->getMembership(array('user_id' => $this->sender_id));
+        if($senderMembership->is_owner || $senderMembership->is_admin) {
+            return true;
+        }
+        return false;
+    }
         
     public function beforeInsert()
     {

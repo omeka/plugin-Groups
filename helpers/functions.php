@@ -78,6 +78,15 @@ function groups_invitations_for_user($user = null)
 
 }
 
+function groups_invitation_to_group($group, $user = null)
+{
+    if(!$user) {
+        $user = current_user();
+    }
+    
+    return get_db()->getTable('GroupInvitation')->findInvitationToGroup($group->id, $user->id);
+}
+
 function groups_confirmations_for_user($user = null)
 {
     if(!$user) {

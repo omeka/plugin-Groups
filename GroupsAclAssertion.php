@@ -141,11 +141,8 @@ class GroupsAclAssertion implements Zend_Acl_Assert_Interface
 
                     //to test for join permission, first see if current user has been invited by an owner or admin
                     $invitation = $db->getTable('GroupInvitation')->findInvitationToGroup($resource->id, $role->id);
-                    if($invitation) {
-                        $senderMembership = groups_get_membership($resource, $invitation->sender_id);
-                        if($senderMembership->is_owner || $senderMembership->is_admin) {
-                            return true;
-                        }
+                    if($invitation->senderIsOwnerOrAdmin()) {
+                        return true;
                     }
                     break;
 

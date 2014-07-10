@@ -13,6 +13,8 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
         if(!$user) {
             return;
         }
+        $invitation = get_db()->getTable('GroupInvitation')->findInvitationToGroup($group->id, $user->id);
+        
         $html = "<div class='groups-manage-group'>";
         
         if($group->hasMember($user) ) {
@@ -44,7 +46,12 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
         
         } else {
             if($group->visibility == 'open') {
-                $html .= "<p class='groups-join-button groups-button' id='groups-id-{$group->id}'>Join</p>";
+                if ($invitation) {
+                    $text = 'Accept Invitation';
+                } else {
+                    $text = 'Join';
+                }
+                $html .= "<p class='groups-join-button groups-button' id='groups-id-{$group->id}'>$text</p>";
                 $html .= "<script type='text/javascript'>";
                 $html .= "
                 jQuery(document).ready(
@@ -53,6 +60,16 @@ class Group_View_Helper_ManageGroup extends Zend_View_Helper_Abstract
                 ";
                 $html .= "</script>";
             } else {
+                if ($invitation && $invitation->senderIsOwnerOrAdmin()) {
+                    $html .= "<p class='groups-join-button groups-button' id='groups-id-{$group->id}'>Accept Invitation</p>";
+                    $html .= "<script type='text/javascript'>";
+                    $html .= "
+                    jQuery(document).ready(
+                    jQuery('p.groups-join-button').click(Omeka.Groups.join)
+                    );
+                    ";
+                    $html .= "</script>";
+                }
                 if($group->hasPendingMember($user)) {
                     $html .= "<p class='groups-pending'>Membership request is pending</p>";
         

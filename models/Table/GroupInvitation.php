@@ -9,6 +9,6 @@ class Table_GroupInvitation extends Omeka_Db_Table
             $params['sender_id'] = $sender_id;
         }
         $select = $this->getSelectForFindBy($params);
-        return $this->fetchObject($select);        
+        return $this->fetchObject($select);
     }
 }
